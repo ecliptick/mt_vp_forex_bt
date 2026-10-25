@@ -1,0 +1,56 @@
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ---- large / binary data (never commit) ----
+# Engine artifact caches: notebooks/.cache holds pickled artifacts
+# (~28 GB) rebuilt on demand by the sweep driver.
+notebooks/.cache/
+*.pkl
+*.npz
+*.npy
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.arrow
+*.bin
+*.idx
+
+# ---- sweep / diagnostic report artifacts (large JSON ledgers) ----
+runtime/sweeps/_results/
+runtime/diagnostics/_reports/
+runtime/diagnostics/_artifacts/
+runtime/parity/_artifacts/
+*_ledger*.json
+*.log
+
+# ---- local scratch ----
+nul
+0
+_chart_*.txt
+_chart_*.npy
+_*.bak
+*.bak_*
+AGENTS.md.bak_*
+
+# ---- editor / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- data files (keep local, not in git) ----
+*.csv
+*.xlsx
+*.xls
+*.zip
+*.7z
+*.tar.gz

@@ -1,0 +1,426 @@
+{
+  "recipe": {
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "sl_zone_mult": 6.0,
+    "max_same_dir_open": 20,
+    "conflict_policy": "drop",
+    "out": "runtime\\diagnostics\\_beta_sl6.json",
+    "sl_slots": ""
+  },
+  "results": [
+    {
+      "label": "2024-06 flat",
+      "start": "2024-06-01",
+      "end": "2024-07-01",
+      "n_bars": 1238636,
+      "wall_secs": 11.49595539999973,
+      "mkt": {
+        "mkt_ret_pct": -0.11171144075535766,
+        "mkt_start": 2327.425,
+        "mkt_end": 2324.825
+      },
+      "n_trades": 1951,
+      "gross": -933.2099450000517,
+      "net": -1780.6751508830894,
+      "fees": 847.4652058830378,
+      "long": {
+        "n": 1014,
+        "gross": -393.74693000002026,
+        "net": -833.7775595109129,
+        "fees": 440.0306295108926,
+        "hit": 0.14694280078895464,
+        "mean_hold": 13523.721893491123,
+        "median_hold": 1137.0
+      },
+      "short": {
+        "n": 937,
+        "gross": -539.4630150000314,
+        "net": -946.8975913721766,
+        "fees": 407.4345763721452,
+        "hit": 0.1472785485592316,
+        "mean_hold": 24188.7780149413,
+        "median_hold": 1436.0
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 2482,
+          "filled": 1802,
+          "cancelled": 679,
+          "cancelled_zone_death": 641,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 38,
+          "still_resting_at_eod": 1,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2024-11 down",
+      "start": "2024-11-01",
+      "end": "2024-12-01",
+      "n_bars": 1355766,
+      "wall_secs": 14.907299700000294,
+      "mkt": {
+        "mkt_ret_pct": -3.5234688583676843,
+        "mkt_start": 2746.725,
+        "mkt_end": 2649.945
+      },
+      "n_trades": 3701,
+      "gross": -412.9562949999538,
+      "net": -1961.958929797287,
+      "fees": 1549.0026347973333,
+      "long": {
+        "n": 493,
+        "gross": -605.0494500000625,
+        "net": -832.5045108193902,
+        "fees": 227.45506081932774,
+        "hit": 0.07910750507099391,
+        "mean_hold": 9235.995943204869,
+        "median_hold": 1707.0
+      },
+      "short": {
+        "n": 3208,
+        "gross": 192.0931550001087,
+        "net": -1129.4544189778967,
+        "fees": 1321.5475739780054,
+        "hit": 0.16614713216957605,
+        "mean_hold": 10453.1786159601,
+        "median_hold": 742.0
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 4806,
+          "filled": 3291,
+          "cancelled": 1510,
+          "cancelled_zone_death": 1420,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 90,
+          "still_resting_at_eod": 5,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2025-01 up",
+      "start": "2025-01-01",
+      "end": "2025-02-01",
+      "n_bars": 1377190,
+      "wall_secs": 13.51923700000043,
+      "mkt": {
+        "mkt_ret_pct": 6.581614734784402,
+        "mkt_start": 2625.298,
+        "mkt_end": 2798.085
+      },
+      "n_trades": 1876,
+      "gross": 1998.2703549999194,
+      "net": 1191.974955709157,
+      "fees": 806.2953992907624,
+      "long": {
+        "n": 1852,
+        "gross": 2058.69135499992,
+        "net": 1263.3422491940426,
+        "fees": 795.3491058058777,
+        "hit": 0.2548596112311015,
+        "mean_hold": 23873.55129589633,
+        "median_hold": 2349.5
+      },
+      "short": {
+        "n": 24,
+        "gross": -60.42100000000073,
+        "net": -71.36729348488544,
+        "fees": 10.946293484884713,
+        "hit": 0.0,
+        "mean_hold": 936.7916666666666,
+        "median_hold": 790.5
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 2385,
+          "filled": 1702,
+          "cancelled": 676,
+          "cancelled_zone_death": 630,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 46,
+          "still_resting_at_eod": 7,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2025-05 flat",
+      "start": "2025-05-01",
+      "end": "2025-06-01",
+      "n_bars": 1400954,
+      "wall_secs": 18.87304309999945,
+      "mkt": {
+        "mkt_ret_pct": 0.49808025203470496,
+        "mkt_start": 3272.565,
+        "mkt_end": 3288.865
+      },
+      "n_trades": 7639,
+      "gross": -1058.214910000641,
+      "net": -4205.347698549223,
+      "fees": 3147.1327885485825,
+      "long": {
+        "n": 4278,
+        "gross": -677.305810000508,
+        "net": -2467.7057299792104,
+        "fees": 1790.3999199787022,
+        "hit": 0.14492753623188406,
+        "mean_hold": 7315.0705937353905,
+        "median_hold": 412.0
+      },
+      "short": {
+        "n": 3361,
+        "gross": -380.9091000001331,
+        "net": -1737.6419685700132,
+        "fees": 1356.73286856988,
+        "hit": 0.14668253495983338,
+        "mean_hold": 5040.114846771794,
+        "median_hold": 412.0
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 12561,
+          "filled": 6734,
+          "cancelled": 5826,
+          "cancelled_zone_death": 5554,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 272,
+          "still_resting_at_eod": 1,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2025-09 up",
+      "start": "2025-09-01",
+      "end": "2025-10-01",
+      "n_bars": 1393582,
+      "wall_secs": 15.39123970000037,
+      "mkt": {
+        "mkt_ret_pct": 12.056609000755692,
+        "mkt_start": 3447.155,
+        "mkt_end": 3862.765
+      },
+      "n_trades": 6044,
+      "gross": 941.6119399998017,
+      "net": -1585.6439868538666,
+      "fees": 2527.2559268536684,
+      "long": {
+        "n": 3914,
+        "gross": 2458.4083399999345,
+        "net": 871.496983997613,
+        "fees": 1586.911356002321,
+        "hit": 0.2059274399591211,
+        "mean_hold": 9618.789984670413,
+        "median_hold": 571.5
+      },
+      "short": {
+        "n": 2130,
+        "gross": -1516.7964000001325,
+        "net": -2457.14097085148,
+        "fees": 940.3445708513473,
+        "hit": 0.12206572769953052,
+        "mean_hold": 2464.127230046948,
+        "median_hold": 516.5
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 8450,
+          "filled": 5287,
+          "cancelled": 3156,
+          "cancelled_zone_death": 2966,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 190,
+          "still_resting_at_eod": 7,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2026-03 down",
+      "start": "2026-03-01",
+      "end": "2026-04-01",
+      "n_bars": 1612278,
+      "wall_secs": 25.720660799999678,
+      "mkt": {
+        "mkt_ret_pct": -12.592287753522601,
+        "mkt_start": 5372.598,
+        "mkt_end": 4696.065
+      },
+      "n_trades": 23693,
+      "gross": -4492.758079999852,
+      "net": -13665.471273010466,
+      "fees": 9172.713193010613,
+      "long": {
+        "n": 8776,
+        "gross": -8493.886569999631,
+        "net": -11929.62098920107,
+        "fees": 3435.73441920144,
+        "hit": 0.10551504102096627,
+        "mean_hold": 1107.5521877848678,
+        "median_hold": 81.0
+      },
+      "short": {
+        "n": 14917,
+        "gross": 4001.128489999778,
+        "net": -1735.8502838093953,
+        "fees": 5736.978773809174,
+        "hit": 0.16430917744854864,
+        "mean_hold": 2571.494670510156,
+        "median_hold": 99.0
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 41218,
+          "filled": 20562,
+          "cancelled": 20652,
+          "cancelled_zone_death": 19539,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 1113,
+          "still_resting_at_eod": 4,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2026-04 down",
+      "start": "2026-04-01",
+      "end": "2026-05-01",
+      "n_bars": 1493753,
+      "wall_secs": 20.847564699999566,
+      "mkt": {
+        "mkt_ret_pct": -1.4758198733094696,
+        "mkt_start": 4695.695,
+        "mkt_end": 4626.395
+      },
+      "n_trades": 15363,
+      "gross": -11134.91861000079,
+      "net": -17458.31609075168,
+      "fees": 6323.397480750889,
+      "long": {
+        "n": 10095,
+        "gross": -9290.607990000304,
+        "net": -13472.240737349139,
+        "fees": 4181.6327473488345,
+        "hit": 0.12035661218424963,
+        "mean_hold": 2834.9637444279347,
+        "median_hold": 187.0
+      },
+      "short": {
+        "n": 5268,
+        "gross": -1844.3106200004845,
+        "net": -3986.07535340254,
+        "fees": 2141.7647334020553,
+        "hit": 0.13895216400911162,
+        "mean_hold": 3019.953113135915,
+        "median_hold": 166.5
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 25564,
+          "filled": 13504,
+          "cancelled": 12059,
+          "cancelled_zone_death": 11427,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 632,
+          "still_resting_at_eod": 1,
+          "unaccounted": 0
+        }
+      }
+    },
+    {
+      "label": "2026-01 up",
+      "start": "2026-01-01",
+      "end": "2026-02-01",
+      "n_bars": 1526198,
+      "wall_secs": 27.278305999999247,
+      "mkt": {
+        "mkt_ret_pct": 13.210764916286188,
+        "mkt_start": 4323.898,
+        "mkt_end": 4895.118
+      },
+      "n_trades": 16498,
+      "gross": 12761.81693000008,
+      "net": 5420.667277286732,
+      "fees": 7341.149652713349,
+      "long": {
+        "n": 11658,
+        "gross": 9252.311529999899,
+        "net": 4155.580758720036,
+        "fees": 5096.730771279863,
+        "hit": 0.17584491336421343,
+        "mean_hold": 3606.1902556184596,
+        "median_hold": 116.0
+      },
+      "short": {
+        "n": 4840,
+        "gross": 3509.505400000182,
+        "net": 1265.0865185666967,
+        "fees": 2244.4188814334852,
+        "hit": 0.13326446280991736,
+        "mean_hold": 644.7163223140495,
+        "median_hold": 59.0
+      },
+      "diag": {
+        "signals_unaccounted": 0,
+        "order_lifecycle": {
+          "placed": 26360,
+          "filled": 14488,
+          "cancelled": 11865,
+          "cancelled_zone_death": 10842,
+          "cancelled_expired": 0,
+          "cancelled_policy_at_fill": 1023,
+          "still_resting_at_eod": 7,
+          "unaccounted": 0
+        }
+      }
+    }
+  ],
+  "beta_analysis": {
+    "beta_usd_per_pct": 532.3527606099472,
+    "alpha_usd_per_slice": -1265.7519805446384,
+    "r2": 0.46101889321462675,
+    "corr": 0.6789837208760066,
+    "flat_slices": [
+      "2024-06 flat",
+      "2025-05 flat",
+      "2026-04 down"
+    ],
+    "flat_gross_total": -13126.343465001482,
+    "flat_gross_mean": -4375.4478216671605,
+    "flat_positive_count": 0,
+    "flat_n": 3,
+    "gross_total": -2330.358615001487,
+    "fees_total": 31714.412281848236,
+    "net_total": -34044.770896849725,
+    "slices_positive_gross": 3,
+    "n_slices": 8,
+    "gross_mean": -291.2948268751859,
+    "gross_stdev": 6691.117646533511
+  },
+  "side_analysis": {
+    "long": {
+      "n_slices": 8,
+      "beta_usd_per_pct": 585.1981479630558,
+      "alpha_usd_per_slice": -1782.587379055989,
+      "corr": 0.833549866367445,
+      "gross_total": -5691.185525000773
+    },
+    "short": {
+      "n_slices": 8,
+      "beta_usd_per_pct": -52.84538735310878,
+      "alpha_usd_per_slice": 516.8353985113512,
+      "corr": -0.20741937484297315,
+      "gross_total": 3360.8269099992867
+    }
+  }
+}
