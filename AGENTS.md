@@ -2404,6 +2404,8 @@ runtime/diagnostics/
  audit_config_surface.py The config audit (duplicate knobs, dead knobs)
  audit_constant_reachability.py STRICT constant-reachability audit
  verify_diag_scale.py Proves the diagnostics run at canonical size
+ _import_scan.py Per-module import scan (subprocess + timeout)
+ _import_scan_shared.py Shared-process import scan (the pytest semantics)
 ```
 
 > **The Files list is a MAP, not an inventory.** The evaluation
@@ -2426,6 +2428,77 @@ enforces that.
 | `runtime/sweeps/run_dual_sweep.py` | Hardcoded detector knobs that disagreed with the canonical recipe. |
 | `runtime/sweeps/diag_swing_cap.py` | One-off diagnostic, superseded by the regression test. |
 | `runtime/sweeps/diag_engine_memory.py` | One-off diagnostic, superseded by the memory note above. |
+
+---
+
+## A module must not do work at IMPORT time (2026-10-26)
+
+**The rule: importing a module must be CHEAP.** Anything that reads
+data, runs a backtest, or reaches outside the repo belongs **under a
+`if __name__ == "__main__":` guard**.
+
+### The defect this kills
+
+Six diagnostics (`runtime/diagnostics/_probe_old_*.py` and
+`_analyze_old_final.py`) did their work at **module scope**. They
+`sys.path.insert`ed the upstream repo
+(`C:\coding\ict_forex_research`), imported `src.*`, and ran a **FULL
+external backtest at import time**.
+
+Three things broke at once:
+
+1. **The upstream repo may not exist.** A fresh clone of this repo
+   cannot import them at all — and this repo is supposed to be
+   self-contained.
+2. **The upstream API drifts.** `generate_ict_pending_signals` changed
+   from `(zones, o, h, l, c, ts, params=p, structure=None)` to
+   `(close, open_, high, low, times_utc_ns, ict, p, src=..., precomputed_zones=...)`.
+   The stale call raised at **import**, not at use.
+3. **The shared-process guard became unrunnable.** Importing every
+   module in ONE process ran several multi-minute backtests back to
+   back; the third one OOMed.
+
+> **The failure was INVISIBLE to one tool and UNRUNNABLE in the
+> other.** The per-module subprocess scan reported **0 failures**
+> (each module imported fine alone, given the upstream repo and
+> enough time), while the shared-process pytest guard — the one that
+> actually reproduces the "import them all" semantics — could not
+> finish. Neither tool could see the defect alone.
+
+### The fix
+
+The heavy work moved under `main()`, and the upstream import moved
+**inside** the function body. The API drift was fixed at the same
+time (the canonical call is
+`generate_ict_pending_signals(close, open_, high, low, times_utc_ns, ict_series, p, src=src, precomputed_zones=cached_zones)`
+— see `src/backtest/ict_backtest.py`).
+
+### Measured
+
+| scan | before | after |
+|---|---|---|
+| `_import_scan.py` (per-module, 60 s subprocess) | 124 OK, 5 TIMEOUT | **129 OK, 0 FAIL, 0 TIMEOUT** |
+| `_import_scan_shared.py` (shared process) | 117 reached, **13 never reached** | **130 OK, 0 FAIL** |
+| `test_every_module_imports_cleanly` | **unrunnable** (OOM / hang) | **0.94 s** |
+
+The shared-process guard now finishes in **under a second** instead of
+running backtests — which is what makes it usable as a CI gate.
+
+### The guards (structural, not behavioural)
+
+Both are **AST** checks, so they are fast and cannot be fooled by a
+slow import:
+
+* `tests/test_no_dead_imports.py::test_no_module_does_work_at_import_time`
+  — no `read_parquet` / `read_csv` / `read_json` / `load` at module scope.
+* `tests/test_no_dead_imports.py::test_no_module_imports_from_an_upstream_repo_at_module_scope`
+  — no `from src... import ...` at module scope. This repo is
+  **self-contained**; a module-scope `src.*` import is that dependency
+  made visible, and it is fatal on a machine without the upstream repo.
+
+> **Rule: a guard that cannot run is not a guard.** The import-time
+> rule was documented in prose for months while the guard was
+> unrunnable. It is now both structural AND fast.
 
 ---
 

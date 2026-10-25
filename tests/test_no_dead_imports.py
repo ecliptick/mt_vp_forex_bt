@@ -409,6 +409,159 @@ def test_every_module_imports_cleanly():
     )
 
 
+def test_no_module_does_work_at_import_time():
+    """A module must not do heavy work when it is IMPORTED.
+
+    The old-repo probes (``runtime/diagnostics/_probe_old_*.py``) used
+    to import ``src.*`` from an upstream repo and run a FULL external
+    backtest AT MODULE SCOPE. Three things broke at once:
+
+    1. the upstream repo may not exist (a fresh clone of THIS repo),
+    2. the upstream API drifts, and a stale call raises on import,
+    3. importing them all in ONE process runs several multi-minute
+       backtests back to back -- the third one OOMed.
+
+    The per-module subprocess scan could not see #2 or #3 (each module
+    imported fine alone), and the shared-process pytest guard could not
+    finish in reasonable time. So the failure was INVISIBLE to one
+    tool and UNRUNNABLE in the other.
+
+    The rule: the import of a module must be cheap. Anything that
+    reads data, runs a backtest, or reaches outside the repo belongs
+    under a main guard.
+
+    The check is structural (AST), not behavioural, so it is fast and
+    cannot be fooled by a slow import.
+    """
+    import ast
+
+    offenders: list[str] = []
+    for path in _all_python_files():
+        rel = path.relative_to(_REPO_ROOT)
+        if rel.parts[0] == "tests":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+
+        # The module docstring and any `if __name__ == "__main__":`
+        # block are the two places heavy work is allowed to live.
+        allowed: set[int] = set()
+        for node in tree.body:
+            if (
+                isinstance(node, ast.Expr)
+                and isinstance(node.value, ast.Constant)
+                and isinstance(node.value.value, str)
+            ):
+                allowed.update(range(node.lineno, node.end_lineno + 1))
+            elif (
+                isinstance(node, ast.If)
+                and isinstance(node.test, ast.Compare)
+                and isinstance(node.test.left, ast.Name)
+                and node.test.left.id == "__name__"
+            ):
+                allowed.update(range(node.lineno, node.end_lineno + 1))
+
+        # ``df = pd.read_parquet(p)`` is an ``ast.Assign``, NOT an
+        # ``ast.Expr`` -- and assignment is the COMMON way module-scope
+        # I/O is written. Matching only bare ``ast.Expr`` calls misses
+        # exactly the case this guard exists to catch.
+        #
+        # But a naive ``ast.walk`` descends INTO function bodies, which
+        # is wrong: a call inside ``def main():`` is not module-scope
+        # work. So we walk each top-level statement and STOP at a
+        # function/class/lambda boundary -- descending into control
+        # flow (if/try/with/for/while) but not into a def.
+        # The I/O surface a module must not touch at import time.
+        #
+        # ``read_text``/``loads`` matter as much as ``read_parquet``:
+        # a module that reads a JSON report at module scope CRASHES on
+        # import when that report is absent -- and the reports live in a
+        # GITIGNORED directory (``runtime/diagnostics/_reports/``), so
+        # that is the default state of a fresh clone. That is exactly
+        # the "importing the module runs work" bug this guard exists
+        # to catch, and it is invisible on the machine that happens to
+        # have the artifact.
+        _IO_NAMES = (
+            "read_parquet", "read_csv", "read_json", "read_text",
+            "read_bytes", "read_excel", "read_html",
+            "load", "loads",
+        )
+        _BOUNDARY = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+        def _iter_calls(stmt: ast.AST):
+            """Yield the calls in ``stmt`` without entering nested defs.
+
+            The boundary check is on the node ITSELF as well as on its
+            children: a module-level ``def`` is a boundary, so its body
+            statements are never visited.
+            """
+            if isinstance(stmt, _BOUNDARY):
+                return
+            if isinstance(stmt, ast.Call):
+                yield stmt
+            for sub in ast.iter_child_nodes(stmt):
+                yield from _iter_calls(sub)
+
+        for node in tree.body:
+            if node.lineno in allowed:
+                continue
+            for sub in _iter_calls(node):
+                func = sub.func
+                name = getattr(func, "id", None) or getattr(func, "attr", None)
+                if name in _IO_NAMES:
+                    offenders.append(
+                        "%s:%d  %s() at module scope"
+                        % (rel, sub.lineno, name)
+                    )
+
+    assert not offenders, (
+        "modules that do I/O at import time (move it under a main guard):\n  "
+        + "\n  ".join(offenders)
+    )
+
+
+def test_no_module_imports_from_an_upstream_repo_at_module_scope():
+    """A module must not import ``src.*`` (the upstream repo) at module scope.
+
+    This repo is **self-contained**: the engine source from
+    ``ict_forex_research/src/`` and ``ict_crypto_research/src/`` is
+    duplicated into ``bt/_engine/``, and there is no runtime dependency
+    on either upstream repo (see AGENTS.md § "Architecture").
+
+    A module-level ``from src... import ...`` is that dependency, and
+    it is invisible on a machine that has the upstream repo checked out
+    and fatal on one that does not. The upstream API also drifts, and a
+    stale call then fails on import rather than on use.
+
+    The fix is to move the import (and the ``sys.path`` shim that
+    enables it) INSIDE a function body -- typically ``main()``.
+    """
+    import ast
+
+    offenders: list[str] = []
+    for path in _all_python_files():
+        rel = path.relative_to(_REPO_ROOT)
+        if rel.parts[0] == "tests":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+
+        for node in tree.body:
+            is_src = False
+            if isinstance(node, ast.ImportFrom):
+                is_src = bool(node.module and node.module.split(".")[0] == "src")
+            elif isinstance(node, ast.Import):
+                is_src = any(a.name.split(".")[0] == "src" for a in node.names)
+            if is_src:
+                offenders.append(
+                    "%s:%d  imports from the upstream repo at module scope"
+                    % (rel, node.lineno)
+                )
+
+    assert not offenders, (
+        "modules that import from the upstream repo at module scope "
+        "(move it inside a function):\n  " + "\n  ".join(offenders)
+    )
+
+
 def test_every_from_import_name_actually_exists():
     """A ``from X import Y`` must name a symbol that X really defines.
 
