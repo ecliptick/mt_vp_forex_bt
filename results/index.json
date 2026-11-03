@@ -1,6 +1,6 @@
 {
   "schema": "results-index/1",
-  "updated_utc": "2026-11-03T22:44:14Z",
+  "updated_utc": "2026-11-03T22:50:37Z",
   "runs": [
     {
       "run_id": "sweep_cell-a07a61116b961bd3__d558402__20261102T221448Z",
@@ -13034,6 +13034,40 @@
       },
       "path": "results/runs/sweep_cell-cb556909d638ca49__5b38b82__20261103T224414Z.json",
       "parent_fp": "cb556909d638ca49"
+    },
+    {
+      "run_id": "leg_ledger-7001e276e44d3370__9de2d94__20261103T225037Z",
+      "kind": "leg_ledger",
+      "config_fp": "7001e276e44d3370",
+      "ts_utc": "2026-11-03T22:50:37Z",
+      "commit": "9de2d94591f8439f0e53f0728f270144d732625d",
+      "commit_short": "9de2d94",
+      "dirty": false,
+      "branch": "main",
+      "src_fp": "f77c7a3064fa11cc",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {},
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": false
+      },
+      "summary": {
+        "legs": 6663,
+        "gross": 2583.182733,
+        "fees": 3324.343501,
+        "net": -741.160769,
+        "gross_per_leg": 0.387691,
+        "fee_per_leg": 0.498926,
+        "drift": 3092.192,
+        "excess": -509.009267,
+        "trades_per_day": 7.1877
+      },
+      "path": "results/runs/leg_ledger-7001e276e44d3370__9de2d94__20261103T225037Z.json",
+      "parent_fp": "7001e276e44d3370"
     }
   ]
 }
