@@ -919,12 +919,39 @@ python -m runtime.diagnostics.trail_mfe_mfa --expand-prev-day 0.0 \
    --start 2024-04-01 --end 2024-12-01 --scope trail_mfe_mfa_cont8
 ```
 
+The end-to-end A/B (§ 8.5) is reproduced with:
+
+```bash
+# the 8-month window (the pre-whitelist book)
+python -m runtime.diagnostics.trail_sides_corpus_ab \
+   --start 2024-04-01 --end 2024-12-01 \
+   --expand-prev-day 0.0 --split-at 2024-08-01
+
+# ⭐ the CANONICAL recipe (the verdict)
+python -m runtime.diagnostics.trail_sides_corpus_ab --quick \
+   --start 2024-01-01 --end 2026-07-16 \
+   --warmup-days 14 --split-at 2025-04-01
+```
+
+`--expand-prev-day` defaults to **the canonical constant**; pass
+`0.0` to reproduce the older gate-off book. The resolved value is
+recorded in the registry record, so two different books never share a
+fingerprint.
+
 The diagnostic records every run in the results registry
-(`kind="trail_mfe_mfa"`).
+(`kind="trail_mfe_mfa"` for the replay, `kind="trail_sides_ab"` for
+the end-to-end A/B).
 
 **Cost:** ~90 s for a 1-month window, ~22 min for the 8-month window
 (12 engine A/B candidates × ~60 s each over 10.9M bars, plus the
 detector and the ATR build).
+
+**The end-to-end A/B is far cheaper than that.** The artifacts (zones
+/ VP profile / swing cap / p95 cap / vol_state) are built **ONCE**
+per window and reused across every arm, so the cost is
+`1 × artifact + N × engine` instead of `N × (artifact + engine)`.
+The canonical 3-arm run over 41.2M bars took **~7 min** (artifact
+build from the on-disk cache + 3 engine passes).
 
 > **⚠️ The 8-month corpus numbers in this file are from the run AFTER
 > the `eod`-gross fix** (2026-11-04, reconciliation EXACT). The
@@ -944,3 +971,5 @@ detector and the ATR build).
 * [`docs/evaluation.md`](evaluation.md) — the leg-level methodology.
 * [`docs/engine_history.md`](engine_history.md) — the bug log.
 * `runtime/diagnostics/trail_mfe_mfa.py` — the diagnostic.
+* `runtime/diagnostics/trail_sides_corpus_ab.py` — the end-to-end
+  engine A/B driver (§ 8.5).

@@ -1,6 +1,6 @@
 {
   "schema": "results-index/1",
-  "updated_utc": "2026-11-03T22:25:30Z",
+  "updated_utc": "2026-11-03T22:44:14Z",
   "runs": [
     {
       "run_id": "sweep_cell-a07a61116b961bd3__d558402__20261102T221448Z",
@@ -12886,6 +12886,154 @@
       },
       "path": "results/runs/trail_sides_ab-1376b3d3e86aba52__9f29cc8__20261103T222530Z.json",
       "parent_fp": "1376b3d3e86aba52"
+    },
+    {
+      "run_id": "trail_sides_ab-512dd8f307962f26__5b38b82__20261103T224214Z",
+      "kind": "trail_sides_ab",
+      "config_fp": "512dd8f307962f26",
+      "ts_utc": "2026-11-03T22:42:14Z",
+      "commit": "5b38b82d487cff93cc472bb09a3931b692a95224",
+      "commit_short": "5b38b82",
+      "dirty": false,
+      "branch": "main",
+      "src_fp": "62acccc364395d39",
+      "params": {
+        "knob": "trail_sides",
+        "arms": [
+          "trail OFF (baseline)",
+          "combined k=2 act=1 | both",
+          "combined k=2 act=1 | short"
+        ],
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "expand_prev_day": 1.0,
+        "warmup_days": 14,
+        "split_at": "2025-04-01",
+        "criterion": "net"
+      },
+      "summary": {
+        "baseline_net": 1593.16,
+        "baseline_legs": 7284,
+        "best_arm": "combined k=2 act=1 | short",
+        "best_net": 2298.2,
+        "best_delta": 705.04,
+        "best_short_scoped_arm": "combined k=2 act=1 | short",
+        "best_short_scoped_delta": 705.04,
+        "per_arm": {
+          "trail OFF (baseline)": {
+            "legs": 7284,
+            "gross": 4917.66,
+            "net": 1593.16,
+            "delta_vs_base": 0.0,
+            "delta_long": 0.0,
+            "delta_short": 0.0,
+            "n_trail_stop": 0,
+            "h1_delta": 0.0,
+            "h2_delta": 0.0,
+            "wins_both_halves": false
+          },
+          "combined k=2 act=1 | both": {
+            "legs": 6663,
+            "gross": 2583.18,
+            "net": -741.16,
+            "delta_vs_base": -2334.32,
+            "delta_long": -2284.31,
+            "delta_short": -50.0,
+            "n_trail_stop": 5324,
+            "h1_delta": -959.69,
+            "h2_delta": -1374.62,
+            "wins_both_halves": false
+          },
+          "combined k=2 act=1 | short": {
+            "legs": 7122,
+            "gross": 5622.77,
+            "net": 2298.2,
+            "delta_vs_base": 705.04,
+            "delta_long": 782.13,
+            "delta_short": -77.09,
+            "n_trail_stop": 1640,
+            "h1_delta": 35.4,
+            "h2_delta": 669.64,
+            "wins_both_halves": true
+          }
+        }
+      },
+      "path": "results/runs/trail_sides_ab-512dd8f307962f26__5b38b82__20261103T224214Z.json",
+      "parent_fp": "512dd8f307962f26"
+    },
+    {
+      "run_id": "sweep_cell-3c9e9af1c744786d__5b38b82__20261103T224412Z",
+      "kind": "sweep_cell",
+      "config_fp": "3c9e9af1c744786d",
+      "ts_utc": "2026-11-03T22:44:12Z",
+      "commit": "5b38b82d487cff93cc472bb09a3931b692a95224",
+      "commit_short": "5b38b82",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "trail_sides",
+        "value": "both",
+        "overrides": {
+          "trail_sides": "both"
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.664,
+        "gross": 48.21831864745354,
+        "net": -10.826992794835455,
+        "fees": 59.045311442289,
+        "gross_per_leg": 0.385747,
+        "profit_factor": 0.8686840617559285,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 68.0122011590549,
+        "wall_secs": 2.01
+      },
+      "path": "results/runs/sweep_cell-3c9e9af1c744786d__5b38b82__20261103T224412Z.json",
+      "parent_fp": "3c9e9af1c744786d"
+    },
+    {
+      "run_id": "sweep_cell-cb556909d638ca49__5b38b82__20261103T224414Z",
+      "kind": "sweep_cell",
+      "config_fp": "cb556909d638ca49",
+      "ts_utc": "2026-11-03T22:44:14Z",
+      "commit": "5b38b82d487cff93cc472bb09a3931b692a95224",
+      "commit_short": "5b38b82",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "trail_sides",
+        "value": "short",
+        "overrides": {
+          "trail_sides": "short"
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 127,
+        "hit_rate": 0.7007874015748031,
+        "gross": 233.72356638902215,
+        "net": 174.66198893510506,
+        "fees": 59.061577453917096,
+        "gross_per_leg": 1.840343,
+        "profit_factor": 1.9027735771640542,
+        "trades_per_day": 4.30655135223389,
+        "max_drawdown_usd": 102.70093840174174,
+        "wall_secs": 2.38
+      },
+      "path": "results/runs/sweep_cell-cb556909d638ca49__5b38b82__20261103T224414Z.json",
+      "parent_fp": "cb556909d638ca49"
     }
   ]
 }

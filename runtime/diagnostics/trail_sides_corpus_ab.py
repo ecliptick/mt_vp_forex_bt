@@ -300,8 +300,10 @@ def main() -> None:
             structure=art.get("structure"), vol_state=art.get("vol_state"),
             **over,
         )
-        if resolved_expand != VOL_STATE_MIN_EXPAND_PREV_DAY or args.expand_prev_day is not None:
-            ek["vol_state_min_expand_prev_day"] = float(resolved_expand)
+        # Always set it explicitly: the RESOLVED number is the input
+        # that produced this measurement, and the registry must name
+        # it (AGENTS.md § 2.3).
+        ek["vol_state_min_expand_prev_day"] = float(resolved_expand)
         t = time.perf_counter()
         res, _ = run_vp_sniper_backtest_forex(
             bars=bars, zones=art["zones"], vp_set=art["vp_set"],
