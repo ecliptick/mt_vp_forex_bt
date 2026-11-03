@@ -1,0 +1,72 @@
+{
+  "schema": "results-run/1",
+  "run_id": "leg_ledger-0917c22610bc2f63__9f29cc8__20261103T191418Z",
+  "kind": "leg_ledger",
+  "config_fp": "0917c22610bc2f63",
+  "ts_utc": "2026-11-03T19:14:18Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "ae66d8316c16bbbb",
+  "params": {
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "warmup_days": 14,
+    "engine_overrides": {
+      "structure_seq_drop_set": "None",
+      "structure_seq_whitelist": "frozenset({'short|CBBcC', 'short|BBcbC', 'long|cbCcC', 'long|Ccbbb', 'long|bCcbb', 'long|bbbbC', 'long|CcbCc', 'long|cCcCB', 'short|cCBBB', 'short|BcCcC', 'long|BcCcC', 'long|CcCcb', 'long|bbCcb', 'long|cCcCc', 'long|CBBcb', 'long|bbCBB', 'short|BBcbb', 'long|cCcbb', 'short|BBBcC', 'long|CcbbC', 'short|cbbCB', 'long|CcbCB', 'long|cCBcC', 'long|CBcbC', 'long|bCcCc'})"
+    },
+    "lots": 0.01,
+    "contract_size": 100.0,
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "variant": true
+  },
+  "summary": {
+    "legs": 7926,
+    "gross": 2599.160774,
+    "fees": 3966.283788,
+    "net": -1367.123014,
+    "gross_per_leg": 0.327928,
+    "fee_per_leg": 0.500414,
+    "drift": 3132.114333,
+    "excess": -532.95356,
+    "trades_per_day": 8.5502
+  },
+  "path": "results/runs/leg_ledger-0917c22610bc2f63__9f29cc8__20261103T191418Z.json",
+  "parent_fp": "0917c22610bc2f63",
+  "payload": {
+    "n_legs": 7926,
+    "meta": {
+      "scope": "XAUUSD_S1_1y__20240101_20260716",
+      "exec_start": "2023-12-18",
+      "exec_end": "2026-07-16",
+      "score_start": "2024-01-01",
+      "score_end": "2026-07-16",
+      "bars": 41233730,
+      "n_zones": 114479,
+      "cache_hit": true,
+      "engine_secs": 157.0292663999935,
+      "legs_total": 7926,
+      "legs_kept": 7926,
+      "legs_skipped_warmup": 0,
+      "n_dropped_vol_state": 90620,
+      "n_signals_emitted": 118260
+    },
+    "exit_reasons": [
+      "tp",
+      "tp1",
+      "tp2",
+      "sl",
+      "inv",
+      "eod",
+      "soft_sl",
+      "contra_close",
+      "replaced_by_new_signal",
+      "other",
+      "trail_stop"
+    ],
+    "ledger_path": "runtime\\diagnostics\\_reports\\leg_ledger_seqwl2_old.json",
+    "ledger_fingerprint": "c77f1df590fc1334"
+  }
+}

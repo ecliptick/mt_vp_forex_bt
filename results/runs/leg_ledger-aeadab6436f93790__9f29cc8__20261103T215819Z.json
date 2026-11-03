@@ -1,0 +1,71 @@
+{
+  "schema": "results-run/1",
+  "run_id": "leg_ledger-aeadab6436f93790__9f29cc8__20261103T215819Z",
+  "kind": "leg_ledger",
+  "config_fp": "aeadab6436f93790",
+  "ts_utc": "2026-11-03T21:58:19Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "77f5cc86c7f6ccc7",
+  "params": {
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "warmup_days": 14,
+    "engine_overrides": {
+      "structure_seq_whitelist": "{'short|BBBBc', 'short|cbbCB', 'short|bbbCB', 'long|cCBcC', 'short|cCcbb', 'short|cbCBc', 'short|cCcCc', 'long|cCcbb', 'long|CBBcb', 'short|BcCcb', 'long|CcCBc', 'long|bbbCB', 'short|cCBBc', 'short|bbCBc', 'short|bCBcb', 'short|cbCcC', 'long|BcCBc', 'long|CcbCc', 'short|CBcbb', 'long|BBcCB', 'short|cCBcb', 'long|bCcCc', 'long|bbCBB', 'long|bbbbb', 'short|CBcCc', 'long|CcCcC', 'long|BBBBB', 'long|CBcbb', 'long|CBBBc', 'long|BcCcb', 'short|CcCcb', 'long|cbbbC', 'short|BcCcC', 'long|cbCcC', 'long|cCcCB', 'short|CcCcC', 'long|BBBBc', 'long|cbbCB', 'long|bbCcC', 'short|BBBBB', 'long|bCcbC', 'short|BBcbb', 'short|bCBBB', 'long|BcbCB', 'short|BcCBB', 'long|bCcCB', 'short|BBBcb', 'short|cCBBB', 'short|BBcCB', 'long|cCcCc', 'long|BcCcC', 'long|Ccbbb', 'long|CBcbC', 'short|CcCBc', 'long|BBBcb', 'short|cCcbC', 'long|BBcbC', 'short|cCBcC', 'long|bCBcC', 'short|BBBcC', 'long|CBcCc', 'short|CcbCc', 'long|bbbbC', 'short|cbCBB', 'long|CcbbC', 'long|CcCcb', 'long|cbbCc', 'short|bbbbC', 'long|BBcbb', 'long|bCBcb', 'short|CBBBB', 'short|CBBcC', 'short|CBcCB', 'short|bCcCc', 'short|bCcbb', 'short|CcbbC', 'long|bbbCc', 'long|cbCcb', 'short|BBcbC', 'long|cbCBB', 'short|bCBBc', 'short|CcbCB', 'long|CcbCB', 'short|BcbCc', 'short|bCBcC', 'long|BcbbC', 'long|bCcbb', 'long|cCBBB', 'short|bbbCc', 'short|Bcbbb', 'short|cbbbb', 'short|CcCBB', 'long|bCBBB', 'short|CBBBc', 'long|bbCcb', 'short|Ccbbb'}"
+    },
+    "lots": 0.01,
+    "contract_size": 100.0,
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "variant": true
+  },
+  "summary": {
+    "legs": 27926,
+    "gross": 1278.762958,
+    "fees": 13839.686767,
+    "net": -12560.923809,
+    "gross_per_leg": 0.045791,
+    "fee_per_leg": 0.495584,
+    "drift": 3843.271417,
+    "excess": -2564.508459,
+    "trades_per_day": 30.1251
+  },
+  "path": "results/runs/leg_ledger-aeadab6436f93790__9f29cc8__20261103T215819Z.json",
+  "parent_fp": "aeadab6436f93790",
+  "payload": {
+    "n_legs": 27926,
+    "meta": {
+      "scope": "XAUUSD_S1_1y__20240101_20260716",
+      "exec_start": "2023-12-18",
+      "exec_end": "2026-07-16",
+      "score_start": "2024-01-01",
+      "score_end": "2026-07-16",
+      "bars": 41233730,
+      "n_zones": 114479,
+      "cache_hit": true,
+      "engine_secs": 240.756541499999,
+      "legs_total": 27926,
+      "legs_kept": 27926,
+      "legs_skipped_warmup": 0,
+      "n_dropped_vol_state": 90620,
+      "n_signals_emitted": 118260
+    },
+    "exit_reasons": [
+      "tp",
+      "tp1",
+      "tp2",
+      "sl",
+      "inv",
+      "eod",
+      "soft_sl",
+      "contra_close",
+      "replaced_by_new_signal",
+      "other",
+      "trail_stop"
+    ],
+    "ledger_path": "runtime\\diagnostics\\_reports\\leg_ledger_seqwlf_ranked_top48.json",
+    "ledger_fingerprint": "08ffe7575464bcb0"
+  }
+}

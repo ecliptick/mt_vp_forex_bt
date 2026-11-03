@@ -8,6 +8,8 @@
 ## Contents
 
 - [The 5-event per-side sequence whitelist](#the-5-event-per-side-sequence-whitelist--2026-11-04)
+- [The engine-level walk-forward](#the-engine-level-walk-forward--the-decisive-test-2026-11-04)
+- [`trail_sides` — the per-side trailing scope](#trail_sides--the-per-side-trailing-scope-measured-not-promoted-2026-11-04)
 - [The per-side sequence filter](#the-per-side-sequence-filter--filter-each-side-on-its-own-sequences)
 - [Contra close / hedge netting](#contra-close--hedge-netting--measured-ships-on-at-500-2026-10-25)
 - [`tp_mode='hvn_single'` — the single-target exit](#tp_modehvn_single--the-single-target-exit-2026-11-03)
@@ -84,42 +86,72 @@ after a **bearish** reversal. The same asymmetry holds on both sides:
 **fade the structure, don't join it.** That symmetry is why the
 filter has to be per-side.
 
-##### PROMOTED — `structure_seq_drop_set = {"short|c", "short|C"}`
+##### REMOVED — `structure_seq_drop_set = {"short|c", "short|C"}` (2026-11-04)
 
-Pooled over all slices: gross **+$276 → +$379** (+$103), net **+$9 →
-+$197**, short-side gross/leg **−$0.081 → +$0.996** (12× better), and
-the **long side is completely untouched** (same legs, same gross,
-same correlation). Both sides still trade — **this is not a
-directional bet**.
+**REMOVED 2026-11-04.** The knob, the constant, the engine gate (both
+the immediate and the sniper path), the `n_dropped_seq_side` counter
+and five diagnostics are **deleted**. It was not measured wrong — it
+was **REDUNDANT with, and CONTRADICTORY to, the 5-event whitelist**
+that replaced it.
 
-**Honest weakness.** Walk-forward re-fitting is **2/7**
-out-of-sample slices positive, so this ships as a **fixed,
-pre-registered pair of buckets** chosen on the fit/held-out
-consistency check, NOT as a general sequence-learning feature.
+**The original promotion (2026-10-24), for the record.** Pooled over
+all slices: gross **+$276 → +$379** (+$103), net **+$9 → +$197**,
+short-side gross/leg **−$0.081 → +$0.996** (12× better), and the
+**long side is completely untouched** (same legs, same gross, same
+correlation). Both sides still trade — **this is not a directional
+bet**. Its own recorded weakness: walk-forward re-fitting was **2/7**
+out-of-sample slices positive, so it shipped as a **fixed,
+pre-registered pair of buckets**, NOT as a general
+sequence-learning feature.
 
-**Implementation.** `structure_seq_drop_set` is an engine kwarg. It
-is applied **AFTER** the sequence-direction flip (so it sees the
-FINAL side), **AFTER** the side gate, and **BEFORE** the
-conflict-policy check.
+**Why it was removed.** The 5-event whitelist answers the same
+question at a strictly finer granularity, and the two gates
+**contradicted each other**:
 
-**Equivalence to the post-hoc measurement is proven, not assumed.**
-`runtime/diagnostics/seq_drop_set_equivalence.py` runs the engine with
-the drop set and compares it against the post-hoc filter on the same
-run, on all slices. `runtime/diagnostics/side_gate_equivalence.py`
-does the same for the `trade_sides` gate. Both print
-`ALL SLICES EQUIVALENT: True`.
+* The drop set said *"never short after a structure reversal
+  ('c'/'C')"*.
+* The whitelist said *"short after THIS specific 5-event history is
+  good"* — and **3 of the 8 whitelisted short shapes end in a
+  reversal**, including the single best one (`short|BcCcC`,
+  +0.532 gross/leg).
+
+So the drop set **vetoed the whitelist's best short shape**. The two
+rules could never both be satisfied.
+
+**The end-to-end proof.** 7-arm corpus A/B
+(`runtime/diagnostics/seq_whitelist_corpus_ab2.py`), each arm a full
+corpus continuous re-run. The drop set's isolated effect on the SAME
+21-key whitelist:
+
+| | gross | net | legs |
+|---|---|---|---|
+| drop set OFF | +$2,583 | −$741 | 6,663 |
+| drop set ON | +$2,357 | −$467 | 5,664 |
+| **Δ (ON − OFF)** | **−$226** | **+$274** | **−999** |
+
+It costs **999 legs** and **$226 of GROSS** to save **$274 of NET**.
+A net-only win that *loses* gross is a **fee artefact, not a signal**
+(AGENTS.md § 5.2). The whitelist alone is the better book.
+
+Locked by `tests/test_regressions.py::test_per_side_sequence_drop_set_is_removed`.
 
 ---
 
 ## The 5-event per-side sequence whitelist — 2026-11-04
 
-**PROMOTED** as `structure_seq_whitelist` — a set of **25
-`<side>|<5-char signature>` keys** (18 long, 7 short).
+**PROMOTED** as `structure_seq_whitelist` — a set of **21
+`<side>|<5-char signature>` keys** (13 long, 8 short).
 
 > **The user asked (2026-11-03):** *"tabulate bos/choch 5-event
 > sequence and the subsequent entries. split between longs and shorts.
 > then, we know which 5-seq events to whitelist before each
 > long/short"*.
+
+> **⚠️ THE SET WAS RE-FITTED ON 2026-11-04** (25 keys → 21 keys).
+> The first version was fitted on a **64,978-leg** ledger that was
+> built BEFORE the recipe changed. The current book is **37,159
+> legs** and **only 14 of the 25 keys survived** — so the set was
+> re-fitted from scratch. See the cache-fingerprint bug note below.
 
 ### What it is
 
@@ -128,52 +160,46 @@ A **whitelist**: a key PRESENT means **TAKE** that trade, ABSENT means
 the **signal** bar, oldest first (`b`=BoS bull, `B`=BoS bear,
 `c`=CHoCH bull, `C`=CHoCH bear) — e.g. `long|Ccbbb`.
 
-It is a **separate knob** from `structure_seq_drop_set`: the drop set
-is 1-event granularity (*"what is the last break?"*), the whitelist is
-5-event (*"what are the last FIVE breaks?"*). Different questions,
-different evidence, so they move independently.
+It **REPLACED** `structure_seq_drop_set` (removed 2026-11-04 — see
+the entry above).
 
 ### The measurement — corpus-wide, one continuous execution
 
 `runtime/diagnostics/seq5_table.py`, full corpus 2024-01-01 →
-2026-07-16 (14d warmup prefix executed and discarded), 64,978 legs on
-the unfiltered book. A signature qualifies when gross/leg is positive
-on **both halves** of the corpus.
+2026-07-16 (14d warmup prefix executed and discarded), **37,159 legs**
+on the unfiltered book. A signature qualifies when gross/leg is
+positive on **both halves** of the corpus.
 
-**LONG — 18 of 64 qualify:**
-
-| signature | n | gross/leg | H1 | H2 |
-|---|---|---|---|---|
-| `Ccbbb` | 586 | +0.565 | +0.199 | +0.952 |
-| `cCBcC` | 517 | +0.440 | +0.118 | +0.762 |
-| `cCcCc` | 590 | +0.366 | +0.061 | +0.617 |
-| `cbCcC` | 479 | +0.305 | +0.365 | +0.239 |
-| `bCcbb` | 658 | +0.305 | +0.222 | +0.382 |
-| `CcbCc` | 619 | +0.266 | +0.257 | +0.277 |
-| `cCcCB` | 530 | +0.252 | +0.486 | +0.038 |
-| `CBcbC` | 529 | +0.237 | +0.090 | +0.388 |
-| `cCcbb` | 568 | +0.232 | +0.049 | +0.418 |
-| `BcCcC` | 533 | +0.225 | +0.187 | +0.253 |
-| `CcbbC` | 561 | +0.221 | +0.267 | +0.173 |
-| `bbbbC` | 615 | +0.161 | +0.034 | +0.290 |
-| `CcbCB` | 495 | +0.140 | +0.144 | +0.137 |
-| `bCcCc` | 582 | +0.117 | +0.264 | +0.003 |
-| `bbCBB` | 475 | +0.099 | +0.057 | +0.131 |
-| `CcCcb` | 547 | +0.078 | +0.135 | +0.019 |
-| `bbCcb` | 631 | +0.059 | +0.098 | +0.015 |
-| `CBBcb` | 570 | +0.049 | +0.001 | +0.094 |
-
-**SHORT — 7 of 64 qualify:**
+**LONG — 13 of 64 qualify:**
 
 | signature | n | gross/leg | H1 | H2 |
 |---|---|---|---|---|
-| `BcCcC` | 592 | +0.480 | +0.390 | +0.570 |
-| `CBBcC` | 435 | +0.415 | +0.633 | +0.153 |
-| `cbbCB` | 487 | +0.364 | +0.167 | +0.539 |
-| `BBcbC` | 442 | +0.364 | +0.028 | +0.735 |
-| `cCBBB` | 430 | +0.221 | +0.019 | +0.417 |
-| `BBcbb` | 529 | +0.164 | +0.078 | +0.271 |
-| `BBBcC` | 440 | +0.149 | +0.012 | +0.301 |
+| `Ccbbb` | 345 | +0.776 | +0.473 | +1.035 |
+| `bCcbb` | 385 | +0.561 | +0.584 | +0.542 |
+| `cCcCB` | 313 | +0.558 | +1.055 | +0.161 |
+| `CcbCc` | 384 | +0.529 | +0.621 | +0.441 |
+| `cbCcC` | 298 | +0.525 | +0.669 | +0.363 |
+| `BcCcC` | 330 | +0.396 | +0.342 | +0.433 |
+| `bbCcb` | 362 | +0.390 | +0.060 | +0.873 |
+| `cCcCc` | 318 | +0.386 | +0.095 | +0.636 |
+| `bbbbC` | 365 | +0.370 | +0.249 | +0.481 |
+| `cCcbb` | 327 | +0.273 | +0.113 | +0.473 |
+| `CcCBc` | 359 | +0.220 | +0.358 | +0.072 |
+| `CcbbC` | 356 | +0.154 | +0.111 | +0.199 |
+| `CcbCB` | 291 | +0.081 | +0.169 | +0.011 |
+
+**SHORT — 8 of 64 qualify:**
+
+| signature | n | gross/leg | H1 | H2 |
+|---|---|---|---|---|
+| `BBcbb` | 271 | +0.716 | +0.624 | +0.824 |
+| `BcCcC` | 378 | +0.532 | +0.229 | +0.819 |
+| `cCcbb` | 294 | +0.397 | +0.244 | +0.539 |
+| `BBBcb` | 253 | +0.349 | +0.372 | +0.325 |
+| `Bcbbb` | 283 | +0.325 | +0.175 | +0.487 |
+| `CBBBB` | 202 | +0.272 | +0.231 | +0.315 |
+| `cCcbC` | 340 | +0.195 | +0.155 | +0.239 |
+| `CBcCc` | 291 | +0.119 | +0.107 | +0.129 |
 
 ### The walk-forward — the test that separates mining from signal
 
@@ -185,34 +211,173 @@ by saving fees.
 
 | side | fold | real Δgross | null p95 | percentile |
 |---|---|---|---|---|
-| long | H1 → H2 | +$1,159 | +$1,725 | 69.3% |
-| long | H2 → H1 | +$1,069 | +$973 | **97.9%** |
-| short | H1 → H2 | +$3,504 | +$3,506 | **95.0%** |
-| short | H2 → H1 | +$2,258 | +$2,386 | **87.0%** |
+| long | H1 → H2 | +$593 | +$888 | 77.0% |
+| long | H2 → H1 | +$449 | +$381 | **97.9%** |
+| short | H1 → H2 | +$1,605 | +$2,121 | 56.3% |
+| short | H2 → H1 | +$1,495 | +$1,550 | **91.7%** |
 
-**The short side is the one that earns the slot** — both of its folds
-beat the random-whitelist null. The long side's folds disagree
-(69% vs 98%), so the long set is the weaker half.
+**The H2→H1 fold is the one that earns the slot on each side** (98%
+and 92%). The other two folds (77% and 56.3%) are barely better than
+chance — recorded rather than smoothed over.
 
-Pooled out-of-sample: long gross −$2,863 → −$634 (Δ +$2,229), short
-gross −$6,611 → −$848 (Δ +$5,762). The dropped trades carry a
-decisively negative t (long −2.16 / −2.95, short −5.07 / −6.01).
+### The END-TO-END A/B — the verdict
+
+`runtime/diagnostics/seq_whitelist_corpus_ab2.py`: **7 arms**, each a
+full corpus continuous re-run (not a post-hoc filter).
+
+| arm | wl | drop set | legs | legs/day | gross | net | gross/leg |
+|---|---|---|---|---|---|---|---|
+| unfiltered | 0 | 0 | 37,159 | 40.09 | −$4,742 | −$23,091 | −0.1276 |
+| old (25 keys) | 25 | 0 | 7,926 | 8.55 | +$2,599 | −$1,367 | +0.3279 |
+| old + drop set | 25 | 2 | 6,753 | 7.28 | +$2,319 | −$1,074 | +0.3434 |
+| **split (21 keys) — SHIPPED** | **21** | **0** | **6,663** | **7.19** | **+$2,583** | **−$741** | **+0.3877** |
+| split + drop set | 21 | 2 | 5,664 | 6.11 | +$2,357 | −$467 | +0.4161 |
+| ranked-21/side | 42 | 0 | 12,655 | 13.65 | +$3,917 | −$2,395 | +0.3095 |
+| ranked-21/side + drop set | 42 | 2 | 9,377 | 10.12 | +$3,414 | −$1,281 | +0.3640 |
+
+The shipped set beats the old set on **both** gross per leg (+0.3877
+vs +0.3279) and net (−$741 vs −$1,367).
+
+### The ENGINE-LEVEL walk-forward — the decisive test (2026-11-04)
+
+`runtime/diagnostics/seq5_engine_walkforward.py` — the test that was
+OPEN when the set was promoted, and the one that decides whether the
+**specific 21 keys** or only the **shape** of the rule generalise.
+
+Each half is a **separate continuous execution** with its own warmup
+prefix, so the rolling caps are warm. The whitelist is **fixed before
+the run starts** — which is exactly what the post-hoc walk-forward
+cannot do, because the post-hoc filter never re-evaluates the
+`contra_close` netting or the same-direction cap.
+
+| arm | legs | gross | net | gross/leg | long g/leg | short g/leg |
+|---|---|---|---|---|---|---|
+| unfiltered H1 | 18,640 | −$1,792 | −$10,805 | −0.0961 | +0.0065 | −0.2000 |
+| unfiltered H2 | 18,350 | −$1,982 | −$10,505 | −0.1080 | +0.0141 | −0.2405 |
+| **fit H1 → score H2** | 3,024 | −$351 | −$1,783 | −0.1159 | **+0.0635** | **−0.4664** |
+| **fit H2 → score H1** | 2,645 | +$936 | −$350 | **+0.3540** | **+0.3721** | **+0.2945** |
+| *in-sample (fit H1 → H1)* | 3,329 | +$1,085 | −$531 | +0.3260 | +0.3616 | +0.2605 |
+| *in-sample (fit H2 → H2)* | 2,412 | −$69 | −$1,214 | −0.0287 | +0.0620 | −0.3260 |
+| shipped set on H1 | 3,329 | +$1,085 | −$531 | +0.3260 | +0.3616 | +0.2605 |
+| shipped set on H2 | 3,024 | −$351 | −$1,783 | −0.1159 | +0.0635 | −0.4664 |
+| **long-only on H1** | 2,157 | +$770 | −$281 | **+0.3569** | +0.3569 | — |
+| **long-only on H2** | 1,997 | +$110 | −$843 | **+0.0553** | +0.0553 | — |
+
+> **`fit H1` produced EXACTLY the shipped 21-key set** — the H1 fit
+> and the whole-corpus fit agree key-for-key. So `fit H1 → score H2`
+> IS the shipped set scored out of sample, and the shipped set's H2
+> number is an **out-of-sample** number.
+
+**Pooled verdict:**
+
+| book | legs | gross | net | gross/leg | fee/leg | gross/fee |
+|---|---|---|---|---|---|---|
+| control (unfiltered) | 36,990 | −$3,774 | −$21,310 | −0.1020 | — | — |
+| **OUT-OF-SAMPLE** (each half scored by the OTHER's fit) | 5,669 | **+$586** | −$2,133 | **+0.1033** | 0.4796 | 0.215× |
+| *in-sample* (each half scored by its OWN fit) | 5,741 | +$1,016 | −$1,745 | +0.1770 | 0.4810 | 0.368× |
+| shipped (whole-corpus fit) | 6,353 | +$735 | −$2,314 | +0.1156 | 0.4799 | 0.241× |
+| **long-only** | 4,154 | **+$880** | −$1,124 | **+0.2119** | 0.4825 | 0.439× |
+
+**The OOS gross/leg (+0.1033) is 58% of the in-sample gross/leg
+(+0.1770).** The rule generalises, with real decay.
+
+#### ⚠️ THE SHORT SIDE DOES NOT GENERALISE — a SIGN FLIP
+
+| side | in-sample g/leg | **out-of-sample g/leg** | verdict |
+|---|---|---|---|
+| **long** | +0.2233 | **+0.2189** | **generalises** (no decay) |
+| **short** | +0.0700 | **−0.1803** | **sign flip — fit noise** |
+
+The short side's whole-corpus fit says +0.0700; scored on the half it
+never saw, it is **−0.1803**.
+
+#### ⚠️ BUT THE LONG-ONLY BOOK IS A DIRECTIONAL PROXY
+
+`runtime/diagnostics/seq5_beta_regression.py` — regress each month's
+gross on that month's market return:
+
+| arm | months | beta $/pct | **alpha $/mo** | r² | corr | verdict |
+|---|---|---|---|---|---|---|
+| unfiltered H1 | 19 | −11.4 | −65.5 | 0.051 | −0.227 | proxy |
+| unfiltered H2 | 13 | +6.4 | −164.6 | 0.045 | +0.211 | proxy |
+| shipped on H1 | 19 | +6.2 | +41.4 | 0.078 | +0.279 | timing |
+| shipped on H2 | 13 | −4.2 | −19.0 | 0.139 | −0.373 | proxy |
+| long-only H1 | 19 | +5.3 | +27.0 | 0.119 | +0.344 | timing |
+| **long-only H2** | 13 | +3.0 | **+2.9** | 0.211 | **+0.459** | timing |
+
+The per-leg decomposition says the same thing more bluntly:
+
+| arm | side | gross/leg | drift/leg | drift t | excess/leg | excess t |
+|---|---|---|---|---|---|---|
+| long-only H1 | long | +0.3569 | +0.3884 | +5.32 | **−0.0315** | **−2.87** |
+| long-only H2 | long | +0.0553 | +0.1569 | +1.00 | **−0.1016** | **−3.47** |
+
+**The long-only book's gross is DRIFT, and its timing component
+(`excess`) is significantly NEGATIVE in both halves.** The whitelist
+has found a better place to stand long — it has **not** found timing
+skill. And its market correlation on H2 (**+0.459**) is the same
+number that got `trade_sides="long"` **REJECTED**.
+
+> **⚠️ THIS IS WHY ALL 21 KEYS SHIP.** The long-only variant has the
+> better gross/leg (+0.2119 vs +0.1156) and the better net (−$1,124
+> vs −$2,314) — and it is **not** shipped, because it is a directional
+> bet on gold wearing a sequence filter as a hat. Dropping the short
+> side does not remove the beta; it **concentrates** it.
 
 ### ⚠️ What this promotion does NOT claim
 
-1. **The kept book is still gross-NEGATIVE** and its per-leg edge is
-   **fee-limited**. This is a **QUALITY** knob, not an **EDGE** knob —
-   the same shape of verdict as the promoted
-   `vol_state_min_expand_prev_day` gate (AGENTS.md § 3.7.2): it makes
-   the surviving trades much better; it does not make them profitable.
-2. **The shipped set is a whole-corpus fit.** The walk-forward
-   validates the *shape* of the rule, not the specific 25 keys. The
-   **engine-level** walk-forward (fit the set on H1, rebuild the H2
-   ledger with it) is still open.
-3. **Post-hoc is not the book.** The table above is a leg filter. The
+1. **The book is still NET-negative** (−$741 over 927 days). Its
+   gross is **positive** (+$2,583) but the per-leg edge (+$0.3877) is
+   still **below the measured round trip** ($0.4989). This is a
+   **QUALITY** knob, not an **EDGE** knob — the same shape of verdict
+   as the promoted `vol_state_min_expand_prev_day` gate (AGENTS.md
+   § 3.7.2): it makes the surviving trades much better; it does not
+   make them profitable.
+2. **The trade count is far below the 30–70/day band** — 7.19
+   legs/calendar-day, 93.6% of days under 30 legs. The user
+   explicitly waived the band for this knob (*"dont need to be too
+   strict on trade count for this"*). To stay inside the band the
+   whitelist would have to keep **48 of 64** signatures per side —
+   i.e. barely filter at all (`runtime/diagnostics/seq5_ksweep.py`).
+   The full-strength set is the one that carries the signal.
+3. **The shipped set is a whole-corpus fit, and the engine-level
+   walk-forward now says exactly how much that costs.** The OOS
+   gross/leg is **+0.1033** against the in-sample **+0.1770** — a 58%
+   retention. The **long** half generalises cleanly; the **short**
+   half **sign-flips** and is fit noise. And the long-only variant
+   that the short half would have enabled is a **directional proxy**
+   (excess significantly negative, market correlation +0.459) — the
+   same beta that got `trade_sides="long"` rejected. So all 21 keys
+   ship: the short keys are the honest cost of keeping the book
+   two-sided, and removing them would not remove the beta, it would
+   concentrate it.
+4. **Post-hoc is not the book.** The table above is a leg filter. The
    engine-side whitelist re-runs the book, so the conflict policy, the
    same-direction cap and the `contra_close` netting are all
-   re-evaluated.
+   re-evaluated — and the engine-level walk-forward above is that
+   re-run.
+
+### The TRADE-COUNT BAND is unreachable — measured (2026-11-04)
+
+The "48 of 64 signatures per side to stay in the band" claim was
+POST-HOC. It is now **measured END TO END**
+(`runtime/diagnostics/seq5_ksweep_engine_check.py`):
+
+| book | keys | legs | legs/day | gross | net | gross/leg | gross/fee | excess t |
+|---|---|---|---|---|---|---|---|---|
+| **shipped (21 keys)** | 21 | 6,663 | 7.19 | +$2,583 | **−$741** | **+0.3877** | **0.777×** | −8.45 |
+| **ranked top-48** | 96 | 27,926 | **30.13** | +$1,279 | −$12,561 | **+0.0458** | **0.092×** | **−17.37** |
+
+The K=48 variant **does** land in the band (30.13/day), but gross/leg
+collapses to **12%** of the shipped set, net worsens by **−$11,820**,
+gross/fee falls from 0.777× to 0.092×, its timing component is
+**strongly negative** (t = −17.37), and its short side turns
+negative (−0.0477 g/leg over 13,524 legs).
+
+**The trade-count band and the edge are in DIRECT conflict.** The band
+is reachable only by admitting signatures that destroy the per-leg
+edge — so the user's waiver of the band is not a compromise, it is
+the only admissible choice.
 
 ### The methodological rule this promotion exposed
 
@@ -226,7 +391,7 @@ post-hoc table said the `short|B` drop set was best (positive on both
 halves); the engine-side re-run said it was the **worst** of the
 three tested, because it destroyed the netting's counterparties.
 
-Driver: `runtime/diagnostics/seq_whitelist_corpus_ab.py`.
+Driver: `runtime/diagnostics/seq_whitelist_corpus_ab2.py`.
 
 ### How this SUPERSEDES the 2026-10-24 "whitelist is DEAD" finding
 
@@ -235,7 +400,7 @@ whitelist as **empty**. That emptiness was a **sample-size artefact,
 not an EV verdict**: after the vol gate the mean was 5.5 legs per
 signature against the report's own `min_n` floor of 15, so *no*
 signature could ever qualify. On the full corpus each signature has
-~500 legs and 25 of the 64 clear both halves.
+~300 legs and 21 of the 64 clear both halves.
 
 The `test_structure_whitelist_monthly_report_is_empty_and_superseded`
 guard now locks that historical report as-is, and the live promotion is
@@ -246,6 +411,108 @@ still dead (`test_structure_whitelist_powered_heldout_is_not_significantly_profi
 **A coarse polarity bucket does not carry the signal — the specific
 5-event shape does.** That is precisely why the promotion is
 per-signature and not per-polarity.
+
+### The cache-fingerprint bug behind the re-fit
+
+The reason the first fit was stale is worth recording, because it is
+a **general** trap:
+
+> `bt/_engine/vol_state.py` produced the `vol_state` artifact, which
+> IS pickled into the artifact cache — but the module was in **neither**
+> `runtime/sweeps/cached_sweep.py::_ARTIFACT_SOURCES` **nor**
+> `runtime/diagnostics/leg_ledger.py::_source_hash()`'s file list.
+> So editing it never invalidated the cache, and a stale `vol_state`
+> kept being served. One nominal config then produced **two different
+> books** (64,978 legs vs 37,159 legs).
+
+**FIXED 2026-11-04** in both places. The rule, now written into the
+code: *if a module's output is pickled into the artifact, that module
+belongs in the fingerprint tuple.*
+
+---
+
+## `trail_sides` — the per-side trailing scope (MEASURED, NOT PROMOTED 2026-11-04)
+
+**IMPLEMENTED and MEASURED END TO END. The canonical value is
+UNCHANGED (`'both'`).**
+
+### What it is
+
+`trail_sides` scopes the **trailing stop** to one side of the book:
+`'both'` | `'long'` | `'short'`.
+
+> **⚠️ IT IS NOT THE ENTRY GATE.** `trade_sides` decides which trades
+> may **OPEN**; `trail_sides` decides which **POSITIONS** get a
+> trailing **EXIT**. Under `trail_sides='short'` both sides still
+> trade. Wiring it into the entry path would silently re-create the
+> `trade_sides='long'` bet that this file already records as rejected.
+
+### Why it was built
+
+The trail's MFE/MFA analysis (`docs/trail_stop.md` § 8.4) measured the
+trail's effect **per side** and found it **helps the losing side and
+hurts the winning side**: longs −$906.77 (753 TPs cut), shorts
++$533.38 (290 SLs rescued). The short side's MFA p50 ($3.716) sits
+close to its MFE p50 ($4.380) — shorts go against the trade *first*,
+which is the population a trailing stop is the right tool for.
+
+### The END-TO-END A/B (the verdict)
+
+`runtime/diagnostics/trail_sides_corpus_ab.py`. Corpus 2024-04-01 →
+2024-12-01, ONE continuous execution.
+
+| arm | legs | net | vs base | long net | short net |
+|---|---|---|---|---|---|
+| trail OFF (baseline) | 2,539 | −$316.48 | — | +$317.86 | −$634.34 |
+| combined k=2 act=1 \| both | 2,390 | −$1,162.44 | −$845.96 | −$803.87 | −$358.57 |
+| combined k=2 act=1 \| long | 2,466 | −$1,452.24 | −$1,135.76 | −$787.88 | −$664.36 |
+| **combined k=2 act=1 \| short** | 2,480 | **+$16.12** | **+$332.60** | +$374.68 | −$358.55 |
+
+**Every short-scoped arm beat the baseline. Every both-scoped and
+long-scoped arm lost to it.** The scope-gate invariant held in every
+arm (zero long legs exited on the trail under `'short'`).
+
+### ⚠️ THE OUT-OF-SAMPLE SPLIT — it does NOT generalise
+
+ONE continuous execution, bucketed by **signal time** into two halves
+(AGENTS.md § 1.1 — the half is a REPORTING dimension, never an
+execution boundary):
+
+| arm | H1 net | H1 Δ | H2 net | H2 Δ | wins BOTH? |
+|---|---|---|---|---|---|
+| trail OFF (baseline) | −$227.62 | — | +$140.94 | — | — |
+| combined k=2 act=1 \| both | −$573.94 | −$346.33 | −$500.34 | −$641.27 | no |
+| **combined k=2 act=1 \| short** | −$140.53 | **+$87.09** | −$37.30 | **−$178.24** | **NO** |
+
+**The short scope wins H1 and LOSES H2.** The whole-corpus +$332.60
+is a **fit to H1**.
+
+> The gross-per-leg does NOT sign-flip (H1 +0.3464, H2 +0.4203) but
+> the NET delta does — because the trail changes the book's SIZE and
+> therefore the fee bill, and H2's baseline was already profitable.
+> **A net that depends on the fee bill is not an edge** (§ 5.2's
+> fee-artefact test).
+
+### Why it is NOT promoted
+
+1. **It does not generalise** (the split above).
+2. **The book is barely positive** (+$16.12 over 245 days) and the
+   per-leg edge is far below the round trip. It is a wash, not an edge.
+3. **The short side's own edge was never established** — § 3.10.0
+   found the sequence whitelist's short half **sign-flips** out of
+   sample.
+
+### What DID ship
+
+The **knob** ships as infrastructure: engine branch → config value →
+builder → allowlist → test, in that order (AGENTS.md § 1.5). It is
+real, sweepable, and the engine genuinely reads it (four regression
+tests lock that). The **canonical value is unchanged**.
+
+> **⚠️ And the finding that matters more: the trail should be OFF.**
+> The canonical `combined k=2 act=1` geometry costs **−$845.96** on
+> the corpus under the `'both'` scope — the worst cell in the entire
+> grid. **No scope is better than turning the trail off.**
 
 ---
 
@@ -464,16 +731,34 @@ One continuous run over the **full corpus** (2024-01-01 → 2026-07-16,
 canonical recipe otherwise, via
 `runtime/diagnostics/expand_prev_day_corpus_ab.py`:
 
-| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | fee/leg | excess/leg |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0.0 (off) | 11,361 | 12.26 | $2,842.28 | $5,763.29 | −$2,921.01 | 0.2502 | 0.5073 | −0.0617 |
-| 0.7 | 9,158 | 9.88 | $2,909.64 | $4,606.76 | −$1,697.13 | 0.3177 | 0.5030 | −0.0654 |
-| 0.85 | 7,951 | 8.58 | $2,535.63 | $4,000.24 | −$1,464.61 | 0.3189 | 0.5031 | −0.0565 |
-| **1.0 (SHIPPED)** | 6,753 | 7.28 | $2,318.84 | $3,393.04 | **−$1,074.20** | **0.3434** | 0.5024 | −0.0589 |
+| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | drift/leg | excess/leg | fee/leg |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0.0 (off) | 11,305 | 12.20 | $1,944.53 | $5,690.49 | −$3,745.96 | 0.1720 | +0.2704 | −0.0984 | 0.5034 |
+| 0.7 | 9,117 | 9.83 | $2,430.97 | $4,556.08 | −$2,125.11 | 0.2666 | +0.3512 | −0.0846 | 0.4997 |
+| 0.85 | 7,822 | 8.44 | $2,329.55 | $3,910.68 | −$1,581.14 | 0.2978 | +0.3740 | −0.0762 | 0.5000 |
+| **1.0 (SHIPPED)** | 6,663 | 7.19 | $2,583.18 | $3,324.34 | **−$741.16** | **0.3877** | **+0.4641** | −0.0764 | 0.4989 |
+| 1.1 | 5,677 | 6.12 | $1,808.74 | $2,838.53 | −$1,029.78 | 0.3186 | +0.3866 | −0.0680 | 0.5000 |
+| 1.2 | 5,088 | 5.49 | $1,541.59 | $2,560.87 | −$1,019.29 | 0.3030 | +0.3740 | −0.0710 | 0.5033 |
+| 1.3 | 4,610 | 4.97 | $1,410.23 | $2,327.22 | −$916.99 | 0.3059 | +0.3798 | −0.0739 | 0.5048 |
 
-**EV rises monotonically with the threshold and peaks at `1.0`**:
-**+0.2502 → +0.3434 (+37%)**. The net improves in step (−$2,921 →
-−$1,074) because the fee bill falls faster than the gross.
+**EV rises to a peak at `1.0` and then FALLS AWAY.** The full
+7-point curve was measured (2026-11-04); `1.1`, `1.2` and `1.3` were
+run specifically to confirm `1.0` is a **peak** and not a point on a
+still-rising slope:
+
+* `1.0` beats every higher threshold — dEV = **+0.0691** (vs 1.1),
+  **+0.0847** (vs 1.2), **+0.0818** (vs 1.3).
+* The gain over gate-off is dEV = **+0.2157**, **t = +2.60** — the
+  lift is **statistically significant**. The net improves in step
+  (−$3,746 → −$741) because the fee bill falls faster than the gross.
+
+> **The peak is a DRIFT peak, not a timing peak.** At `1.0` the drift
+> component peaks too (+0.4641) while `excess` (timing) is flat at
+> −0.07 to −0.10 across the whole range. The higher thresholds have a
+> *slightly better* timing component (−0.0680 at 1.1) but a **worse**
+> drift component (+0.3866), and EV is the sum. **The gate selects on
+> directional drift, not on timing skill** — consistent with the
+> repo-wide finding that the gross is drift-dominated.
 
 ### Why it promotes
 
@@ -484,19 +769,20 @@ canonical recipe otherwise, via
 
 ### The honest limits (recorded, not hidden)
 
-* **The EV lift is NOT statistically separable** from its
-  neighbours: 1.0 vs gate-off is t = **+1.18**; 1.0 vs 0.85 is
-  t = **+0.29**. The EV curve is **flat across 0.85–1.0** — 1.0 is
-  the argmax of a flat region, not a sharp optimum.
-* **The book is still NEGATIVE** (−$1,074). The gate **reduces a
-  loss**; it does not make the book profitable. EV/leg ($0.3434)
-  stays **below** the measured round trip ($0.5024) — the strategy
+* The EV lift over gate-off **is statistically significant**
+  (dEV = **+0.2157**, **t = +2.60**), but the lift over the NEAR
+  neighbours is not: 1.0 vs 0.85 is t = **+1.00**, 1.0 vs 1.1 is
+  t = **+0.71**. The peak is real and sits at `1.0`, but the plateau
+  0.85–1.0 is not sharply separated from it.
+* **The book is still NEGATIVE** (−$741). The gate **reduces a
+  loss**; it does not make the book profitable. EV/leg ($0.3877)
+  stays **below** the measured round trip ($0.4989) — the strategy
   remains **fee-limited** by the `AGENTS.md` § 5.2 test.
 * **`excess` (the timing component, as opposed to drift) stays
-  NEGATIVE** at every threshold (t = −6.41 at 1.0). The gross is
+  NEGATIVE** at every threshold (t = −8.45 at 1.0). The gross is
   still dominated by drift.
-* **Trade count is far below the target band**: 7.28
-  legs/calendar-day, and **94.6% of days trade fewer than 30 legs**.
+* **Trade count is far below the target band**: 7.19
+  legs/calendar-day, and **93.6% of days trade fewer than 30 legs**.
   The 30–70/day band (`AGENTS.md` § 1.1 rule 6) is **not** met.
   The instruction to promote on EV **overrides** the trade-count
   preference — a deliberate trade-off, not an oversight.

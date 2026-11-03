@@ -50,9 +50,10 @@ The engine surface. Grouped by what it actually controls:
 | **TP caps** | `tp_p95_mult`, `p95_cap`, `swing_cap`, `tp2_swing_cap` |
 | **Entry** | `entry_mode`, `entry_fill_model`, `fill_model` |
 | **Book / conflict** | `conflict_policy`, `max_same_dir_open`, `trade_sides` |
+| **Trailing stop** | `trail_mode`, `trail_atr_mult`, `trail_activation_mult`, `trail_giveback_frac`, `trail_sides` |
 | **Hedge netting** | `contra_close`, `contra_close_spread_usd` |
 | **Vol gate** | `vol_state`, `vol_state_min_range_norm`, `vol_state_min_vel_5m`, `vol_state_min_vel_15m`, `vol_state_min_rv_ratio_30s`, `vol_state_max_rv_ratio_30s`, `vol_state_max_wick_ratio`, `vol_state_min_expand_prev_day`, `vol_state_max_expand_prev_day` |
-| **Structure** | `structure`, `structure_gate`, `structure_seq_drop_set`, `structure_seq_whitelist`, `structure_seq_flip_map`, `structure_seq_len`, `structure_max_age_bars`, `structure_score_lookback`, `structure_score_half_life`, `structure_score_min_abs` |
+| **Structure** | `structure`, `structure_gate`, `structure_seq_whitelist`, `structure_seq_flip_map`, `structure_seq_len`, `structure_max_age_bars`, `structure_score_lookback`, `structure_score_half_life`, `structure_score_min_abs` |
 | **LVN** | `lvn_mode`, `lvn_skip_usd` |
 | **Fees** | `taker_fee_bps` |
 
@@ -193,13 +194,14 @@ full cost model.
 | **HIGH** | `sl_mode` / `sl_nth_hvn_n` / `hvn_buffer_usd` | engine | med | **Newly live** since the SL ceiling was raised to $8.00 — the HVN anchor has 8,445 distinct stop distances instead of 1. |
 | **HIGH** | `contra_close_spread_usd` | engine | med | Fires on 34% of the wide book. A $5.00 threshold was set **by instruction**, not re-picked. Worth a ladder. |
 | MED | `tp_mode` | engine | med | Three modes now: `multi_target`, `hvn_single`, `fvg_mult`. `hvn_single` is canonical (2026-11-03) but **not yet ledger-judged**. |
+| MED | `trail_sides` | engine | med | **NEW 2026-11-04.** Scopes the trailing stop to one side: `'both'` \| `'long'` \| `'short'`. The corpus MFE/MFA analysis measured the trail's effect PER SIDE and found it **helps the losing side and hurts the winning side** (longs −$906.77, shorts +$533.38 on the replay). `'short'` is the candidate. **NOT the entry gate** — `trade_sides` decides which trades may open, `trail_sides` only changes their exit. |
 | MED | `sl_min_usd` | engine | low | The floor is live now (it can only loosen a too-tight stop). |
 | MED | `nth_hvn_n` | engine | med | **Re-measure under `hvn_single`** — the value `3` was tuned for the old multi-target geometry and is a different quantity now. |
 | MED | `tp2_mode` / `tp2_nth_hvn_n` | engine | med | The runner leg. **INACTIVE under `hvn_single`** — only matters for the `multi_target` A/B. |
 | MED | `partial_close_pct` | engine | med | Canonical 0.50. **INACTIVE under `hvn_single`** — the mode returns `0.0`. |
 | MED | `vol_state_min_vel_5m` / `_vel_15m` / `_min_rv_ratio_30s` / `_max_rv_ratio_30s` / `_max_wick_ratio` | engine | low | Dormant measures that have **never been swept**. Now sweepable without `KeyError` (the driver builds every measure). |
-| MED | `structure_seq_drop_set` | engine | med | The promoted per-side drop set (1-event). **SUPERSEDED IN PART** by the 5-event whitelist below — a wider set is the obvious untested extension. |
-| MED | `structure_seq_whitelist` | engine | med | **PROMOTED 2026-11-04.** 25 keys (18 long / 7 short). A **QUALITY** knob, not an EDGE knob — the kept book is still gross-negative and fee-limited. The untested extension: the **engine-level** walk-forward (fit the set on H1, rebuild the H2 ledger with it). |
+| DEAD | `structure_seq_drop_set` | engine | — | **REMOVED 2026-11-04.** The knob no longer exists. It was redundant with, and contradicted, the 5-event whitelist — it vetoed 3 of the 8 whitelisted short shapes including the best one. See AGENTS.md § 3.10.1. |
+| MED | `structure_seq_whitelist` | engine | med | **PROMOTED 2026-11-04.** **21 keys** (13 long / 8 short), re-fitted on the current 37,159-leg book. A **QUALITY** knob, not an EDGE knob — the kept book's gross is positive (+$2,583) but its per-leg edge (+$0.3877) is still below the measured round trip ($0.4989). The untested extension: the **engine-level** walk-forward (fit the set on H1, rebuild the H2 ledger with it). |
 | MED | `structure_pivot_len` | structure | low | Canonical 9. Only value with any measurement behind it. |
 | LOW | `resample_to_n_secs` (detector) | detector | **high** | Rebuilds the artifact cache — the most expensive knob class. |
 | LOW | `fvg_min_zone_usd` (detector) | detector | **high** | Same — detector knobs invalidate the artifact cache. |

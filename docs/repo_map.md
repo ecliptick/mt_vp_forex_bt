@@ -54,6 +54,13 @@ diagnostics/
  volgate_trade_count.py THE TRADE-COUNT LADDER (30-70/day target)
  expand_prev_day_corpus_ab.py Corpus A/B for vol_state_min_expand_prev_day
                           (2026-11-04 — the promoting measurement)
+ trail_sides_corpus_ab.py  Corpus A/B for the PER-SIDE trailing scope
+                          (trail_sides) — the END-TO-END measurement that
+                          AGENTS.md § 3.11 demands. Builds the artifacts
+                          ONCE and runs the engine per arm.
+ trail_mfe_mfa.py          The trail's MFE/MFA excursion analysis — the
+                          oracle bound, the ATR cadence, the geometry
+                          ladders. -> docs/trail_stop.md
  config_iso_2026_10_25.py Isolation A/B for the 2026-10-25 promotions
  chunk_vs_continuous.py Chunked vs continuous on the same window
  chunked_vs_continuous_months.py Per-month chunked vs continuous
@@ -81,8 +88,19 @@ diagnostics/
  per_side_sequence_pooled.py The pooled control
  per_side_sequence_hypotheses.py Hypothesis table
  seq_signal_vs_fill_bar.py SIGNAL bar vs FILL bar (the trap)
- seq_drop_set_validate.py Walk-forward validation of the drop set
- seq_drop_set_equivalence.py PROVES the engine drop set == post-hoc filter
+ ── THE 5-EVENT SEQUENCE WHITELIST (promoted 2026-11-04) ──────
+ seq5_table.py The per-signature table (post-hoc, a SCREEN)
+ seq5_walkforward.py POST-HOC walk-forward (also a screen — no engine re-run)
+ seq5_engine_walkforward.py THE ENGINE-LEVEL walk-forward — the verdict
+                          (fits on one half, re-runs the ENGINE on the other)
+ seq5_beta_regression.py Is the whitelisted book a DIRECTIONAL PROXY?
+                          (monthly gross ~ market return, + drift/excess)
+ seq5_ksweep.py How many signatures keep the trade count in band?
+                          (POST-HOC — a screen for picking K)
+ seq5_ksweep_engine_check.py The K=48 band variant, ENGINE-level
+                          — the verdict that the band is unreachable
+ seq_whitelist_corpus_ab2.py The 7-arm end-to-end corpus A/B
+ seq_whitelist_equivalence.py PROVES the engine whitelist == post-hoc filter
  contra_close_ab.py Hedge netting A/B
  contra_close_why.py WHY the netting helps (leg-level decomposition)
  contra_close_broad.py Multi-month broad sweep

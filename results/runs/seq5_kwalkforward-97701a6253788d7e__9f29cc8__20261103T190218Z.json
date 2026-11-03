@@ -1,0 +1,5126 @@
+{
+  "schema": "results-run/1",
+  "run_id": "seq5_kwalkforward-97701a6253788d7e__9f29cc8__20261103T190218Z",
+  "kind": "seq5_kwalkforward",
+  "config_fp": "97701a6253788d7e",
+  "ts_utc": "2026-11-03T19:02:18Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "ledger": "runtime\\diagnostics\\_reports\\leg_ledger_seqwl_unfiltered.json",
+    "score_start": "2024-01-01",
+    "score_end": "2026-07-16",
+    "engine_overrides": {
+      "structure_seq_drop_set": "None",
+      "structure_seq_whitelist": "None"
+    },
+    "min_n": 50
+  },
+  "summary": {
+    "n_legs": 37159,
+    "long_best_k": null,
+    "short_best_k": null
+  },
+  "path": "results/runs/seq5_kwalkforward-97701a6253788d7e__9f29cc8__20261103T190218Z.json",
+  "parent_fp": "97701a6253788d7e",
+  "payload": {
+    "ts_utc": "2026-11-03T19:02:17Z",
+    "ledger": "runtime\\diagnostics\\_reports\\leg_ledger_seqwl_unfiltered.json",
+    "n_legs": 37159,
+    "calendar_days": 927,
+    "min_n": 50,
+    "sides": {
+      "long": {
+        "rankings": {
+          "H1->H2": [
+            "cCcCB",
+            "bCcCc",
+            "cbCcC",
+            "CcbCc",
+            "CcCcb",
+            "bCcbb",
+            "Ccbbb",
+            "BBBBc",
+            "bCBcC",
+            "CcCBc",
+            "BcbCB",
+            "BcCcC",
+            "cbbbC",
+            "bbbbC",
+            "Bcbbb",
+            "bCBcb",
+            "bCcCB",
+            "bbCcC",
+            "cCBcC",
+            "CcbCB",
+            "BcCcb",
+            "bCcbC",
+            "cbCcb",
+            "cCcbb",
+            "CcbbC",
+            "cCBBB",
+            "CBcbb",
+            "cCcCc",
+            "cbCBB",
+            "cCBcb",
+            "bbCcb",
+            "CBBcb",
+            "BBcCB",
+            "cbCBc",
+            "BBcbb",
+            "cbbCc",
+            "BBcbC",
+            "BBBcC",
+            "bCBBB",
+            "BBBBB",
+            "CBcbC",
+            "CBcCc",
+            "CBBBc",
+            "cbbbb",
+            "cCcbC",
+            "BcbbC",
+            "bbCBB",
+            "BBBcb",
+            "CBcCB",
+            "bbbCB",
+            "cbbCB",
+            "bbbCc",
+            "BcbCc",
+            "bbbbb",
+            "CcCcC",
+            "BcCBB",
+            "bbCBc",
+            "BcCBc",
+            "CBBcC",
+            "bCBBc",
+            "BBcCc",
+            "CBBBB",
+            "cCBBc",
+            "CcCBB"
+          ],
+          "H2->H1": [
+            "CBcbC",
+            "bCBBB",
+            "Ccbbb",
+            "bbCcb",
+            "CcCcC",
+            "cCcCc",
+            "BBcbC",
+            "bCcbb",
+            "bbbbC",
+            "cCcbb",
+            "CcbCc",
+            "BcCcC",
+            "CBcCc",
+            "cbCcC",
+            "bbbCc",
+            "bbCBB",
+            "CcbbC",
+            "CBBBc",
+            "cCcCB",
+            "BBBBB",
+            "CcCBc",
+            "BcCBc",
+            "CcbCB",
+            "BcbbC",
+            "bbbbb",
+            "BBcCB",
+            "bbbCB",
+            "cCBcC",
+            "BcbCB",
+            "cbCBB",
+            "bCBcC",
+            "CBBcb",
+            "cbCcb",
+            "cbbCB",
+            "cbbCc",
+            "bCBBc",
+            "BBBcb",
+            "BcbCc",
+            "cCBBB",
+            "bCcCB",
+            "CcCcb",
+            "BBcbb",
+            "bCcCc",
+            "CcCBB",
+            "BBcCc",
+            "cbbbC",
+            "bbCcC",
+            "CBcCB",
+            "cCBBc",
+            "bCcbC",
+            "CBBBB",
+            "BcCcb",
+            "cCcbC",
+            "bbCBc",
+            "CBcbb",
+            "BBBBc",
+            "bCBcb",
+            "cCBcb",
+            "Bcbbb",
+            "BBBcC",
+            "cbCBc",
+            "BcCBB",
+            "cbbbb",
+            "CBBcC"
+          ]
+        },
+        "rows": [
+          {
+            "k": 0,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 0,
+                "base_gross": -582.064073519022,
+                "kept_gross": 0.0,
+                "d_gross": 582.064073519022,
+                "base_net": -6433.015282530447,
+                "kept_net": 0.0,
+                "d_net": 6433.015282530447,
+                "dropped_n": 9722,
+                "dropped_gross": -582.064073519022,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 0,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 0.0,
+                "d_gross": -60.06199853253929,
+                "base_net": -3554.6753722957474,
+                "kept_net": 0.0,
+                "d_net": 3554.6753722957474,
+                "dropped_n": 9342,
+                "dropped_gross": 60.06199853253929,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 522.0020749864827,
+            "pooled_d_net": 9987.690654826194,
+            "pooled_kept_legs": 0,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 0.0,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 1,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 174,
+                "base_gross": -582.064073519022,
+                "kept_gross": 27.936832295023578,
+                "d_gross": 610.0009058140456,
+                "base_net": -6433.015282530447,
+                "kept_net": -78.82408007764371,
+                "d_net": 6354.191202452803,
+                "dropped_n": 9548,
+                "dropped_gross": -610.0009058140456,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 184,
+                "base_gross": 60.06199853253929,
+                "kept_gross": -16.107963418604186,
+                "d_gross": -76.16996195114348,
+                "base_net": -3554.6753722957474,
+                "kept_net": -87.57144625487943,
+                "d_net": 3467.103926040868,
+                "dropped_n": 9158,
+                "dropped_gross": 76.16996195114348,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 533.8309438629021,
+            "pooled_d_net": 9821.295128493672,
+            "pooled_kept_legs": 358,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 0.3861920172599784,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 2,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 376,
+                "base_gross": -582.064073519022,
+                "kept_gross": -30.885789243484396,
+                "d_gross": 551.1782842755376,
+                "base_net": -6433.015282530447,
+                "kept_net": -258.8178843062824,
+                "d_net": 6174.197398224164,
+                "dropped_n": 9346,
+                "dropped_gross": -551.1782842755376,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 307,
+                "base_gross": 60.06199853253929,
+                "kept_gross": -21.650778837125927,
+                "d_gross": -81.71277736966522,
+                "base_net": -3554.6753722957474,
+                "kept_net": -138.32722835167354,
+                "d_net": 3416.348143944074,
+                "dropped_n": 9035,
+                "dropped_gross": 81.71277736966522,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 469.4655069058724,
+            "pooled_d_net": 9590.545542168238,
+            "pooled_kept_legs": 683,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 0.7367853290183387,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 3,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 516,
+                "base_gross": -582.064073519022,
+                "kept_gross": 19.917351692420652,
+                "d_gross": 601.9814252114427,
+                "base_net": -6433.015282530447,
+                "kept_net": -291.73438822476527,
+                "d_net": 6141.280894305682,
+                "dropped_n": 9206,
+                "dropped_gross": -601.9814252114427,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 466,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 53.55846428579298,
+                "d_gross": -6.503534246746312,
+                "base_net": -3554.6753722957474,
+                "kept_net": -123.67572453679611,
+                "d_net": 3430.999647758951,
+                "dropped_n": 8876,
+                "dropped_gross": 6.503534246746312,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 595.4778909646964,
+            "pooled_d_net": 9572.280542064633,
+            "pooled_kept_legs": 982,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 1.0593311758360302,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 4,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 712,
+                "base_gross": -582.064073519022,
+                "kept_gross": 106.28012720846155,
+                "d_gross": 688.3442007274836,
+                "base_net": -6433.015282530447,
+                "kept_net": -319.73313447884453,
+                "d_net": 6113.282148051602,
+                "dropped_n": 9010,
+                "dropped_gross": -688.3442007274836,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 681,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 66.40013669924588,
+                "d_gross": 6.338138166706585,
+                "base_net": -3554.6753722957474,
+                "kept_net": -194.87523654752027,
+                "d_net": 3359.800135748227,
+                "dropped_n": 8661,
+                "dropped_gross": -6.338138166706585,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 694.6823388941901,
+            "pooled_d_net": 9473.08228379983,
+            "pooled_kept_legs": 1393,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 1.5026968716289104,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 5,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 882,
+                "base_gross": -582.064073519022,
+                "kept_gross": 58.54700741324277,
+                "d_gross": 640.6110809322648,
+                "base_net": -6433.015282530447,
+                "kept_net": -469.2149349125894,
+                "d_net": 5963.800347617857,
+                "dropped_n": 8840,
+                "dropped_gross": -640.6110809322648,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 797,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 19.032207570378205,
+                "d_gross": -41.02979096216109,
+                "base_net": -3554.6753722957474,
+                "kept_net": -288.29302719352984,
+                "d_net": 3266.3823451022176,
+                "dropped_n": 8545,
+                "dropped_gross": 41.02979096216109,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 599.5812899701037,
+            "pooled_d_net": 9230.182692720075,
+            "pooled_kept_legs": 1679,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 1.8112189859762675,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 6,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1093,
+                "base_gross": -582.064073519022,
+                "kept_gross": 172.9721700232654,
+                "d_gross": 755.0362435422874,
+                "base_net": -6433.015282530447,
+                "kept_net": -482.2815972672085,
+                "d_net": 5950.733685263238,
+                "dropped_n": 8629,
+                "dropped_gross": -755.0362435422874,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 944,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 32.930799774837695,
+                "d_gross": -27.131198757701597,
+                "base_net": -3554.6753722957474,
+                "kept_net": -330.2027848822827,
+                "d_net": 3224.4725874134647,
+                "dropped_n": 8398,
+                "dropped_gross": 27.131198757701597,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 727.9050447845858,
+            "pooled_d_net": 9175.206272676704,
+            "pooled_kept_legs": 2037,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 2.197411003236246,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 7,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1279,
+                "base_gross": -582.064073519022,
+                "kept_gross": 365.56118306431523,
+                "d_gross": 947.6252565833372,
+                "base_net": -6433.015282530447,
+                "kept_net": -401.20385600298175,
+                "d_net": 6031.811426527465,
+                "dropped_n": 8443,
+                "dropped_gross": -947.6252565833372,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1069,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 28.734158919518066,
+                "d_gross": -31.327839613021226,
+                "base_net": -3554.6753722957474,
+                "kept_net": -382.11191228424275,
+                "d_net": 3172.5634600115045,
+                "dropped_n": 8273,
+                "dropped_gross": 31.327839613021226,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 916.297416970316,
+            "pooled_d_net": 9204.37488653897,
+            "pooled_kept_legs": 2348,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 2.5329018338727076,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 8,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1379,
+                "base_gross": -582.064073519022,
+                "kept_gross": 302.612717360285,
+                "d_gross": 884.676790879307,
+                "base_net": -6433.015282530447,
+                "kept_net": -527.2235179578787,
+                "d_net": 5905.791764572568,
+                "dropped_n": 8343,
+                "dropped_gross": -884.676790879307,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1243,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 130.31532755732573,
+                "d_gross": 70.25332902478644,
+                "base_net": -3554.6753722957474,
+                "kept_net": -347.5058358784551,
+                "d_net": 3207.1695364172924,
+                "dropped_n": 8099,
+                "dropped_gross": -70.25332902478644,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 954.9301199040934,
+            "pooled_d_net": 9112.96130098986,
+            "pooled_kept_legs": 2622,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 2.8284789644012944,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 9,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1581,
+                "base_gross": -582.064073519022,
+                "kept_gross": 273.02674992796494,
+                "d_gross": 855.090823446987,
+                "base_net": -6433.015282530447,
+                "kept_net": -676.5634689726159,
+                "d_net": 5756.451813557831,
+                "dropped_n": 8141,
+                "dropped_gross": -855.090823446987,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1418,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 173.813820258529,
+                "d_gross": 113.75182172598971,
+                "base_net": -3554.6753722957474,
+                "kept_net": -372.07892310760076,
+                "d_net": 3182.596449188147,
+                "dropped_n": 7924,
+                "dropped_gross": -113.75182172598971,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 968.8426451729767,
+            "pooled_d_net": 8939.048262745979,
+            "pooled_kept_legs": 2999,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 3.2351672060409924,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 10,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1754,
+                "base_gross": -582.064073519022,
+                "kept_gross": 285.52196180815145,
+                "d_gross": 867.5860353271735,
+                "base_net": -6433.015282530447,
+                "kept_net": -766.9236901848883,
+                "d_net": 5666.091592345559,
+                "dropped_n": 7968,
+                "dropped_gross": -867.5860353271735,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1599,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 194.18372181337082,
+                "d_gross": 134.12172328083153,
+                "base_net": -3554.6753722957474,
+                "kept_net": -420.0132300597245,
+                "d_net": 3134.662142236023,
+                "dropped_n": 7743,
+                "dropped_gross": -134.12172328083153,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1001.707758608005,
+            "pooled_d_net": 8800.753734581582,
+            "pooled_kept_legs": 3353,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 3.617044228694714,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 11,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 1876,
+                "base_gross": -582.064073519022,
+                "kept_gross": 271.99834180814696,
+                "d_gross": 854.062415327169,
+                "base_net": -6433.015282530447,
+                "kept_net": -857.2492147147341,
+                "d_net": 5575.766067815713,
+                "dropped_n": 7846,
+                "dropped_gross": -854.062415327169,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1787,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 310.8617765391533,
+                "d_gross": 250.79977800661402,
+                "base_net": -3554.6753722957474,
+                "kept_net": -377.93767307426407,
+                "d_net": 3176.737699221483,
+                "dropped_n": 7555,
+                "dropped_gross": -250.79977800661402,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1104.8621933337831,
+            "pooled_d_net": 8752.503767037197,
+            "pooled_kept_legs": 3663,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 3.9514563106796117,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 12,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2071,
+                "base_gross": -582.064073519022,
+                "kept_gross": 356.356870936909,
+                "d_gross": 938.420944455931,
+                "base_net": -6433.015282530447,
+                "kept_net": -889.3368349155062,
+                "d_net": 5543.6784476149405,
+                "dropped_n": 7651,
+                "dropped_gross": -938.420944455931,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 1922,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 357.06265368073025,
+                "d_gross": 297.00065514819096,
+                "base_net": -3554.6753722957474,
+                "kept_net": -384.89880478234545,
+                "d_net": 3169.776567513402,
+                "dropped_n": 7420,
+                "dropped_gross": -297.00065514819096,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1235.421599604122,
+            "pooled_d_net": 8713.455015128342,
+            "pooled_kept_legs": 3993,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 4.307443365695793,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 13,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2230,
+                "base_gross": -582.064073519022,
+                "kept_gross": 291.9032652975104,
+                "d_gross": 873.9673388165324,
+                "base_net": -6433.015282530447,
+                "kept_net": -1050.3828309583025,
+                "d_net": 5382.632451572144,
+                "dropped_n": 7492,
+                "dropped_gross": -873.9673388165324,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2058,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 344.4068824106286,
+                "d_gross": 284.3448838780893,
+                "base_net": -3554.6753722957474,
+                "kept_net": -449.36783477039785,
+                "d_net": 3105.3075375253493,
+                "dropped_n": 7284,
+                "dropped_gross": -284.3448838780893,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1158.3122226946218,
+            "pooled_d_net": 8487.939989097493,
+            "pooled_kept_legs": 4288,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 4.625674217907227,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 14,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2420,
+                "base_gross": -582.064073519022,
+                "kept_gross": 383.38031370239037,
+                "d_gross": 965.4443872214124,
+                "base_net": -6433.015282530447,
+                "kept_net": -1064.7685094232907,
+                "d_net": 5368.246773107156,
+                "dropped_n": 7302,
+                "dropped_gross": -965.4443872214124,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2216,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 450.1062530037585,
+                "d_gross": 390.04425447121923,
+                "base_net": -3554.6753722957474,
+                "kept_net": -407.3067489293486,
+                "d_net": 3147.368623366399,
+                "dropped_n": 7126,
+                "dropped_gross": -390.04425447121923,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1355.4886416926315,
+            "pooled_d_net": 8515.615396473555,
+            "pooled_kept_legs": 4636,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 5.001078748651564,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 15,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2565,
+                "base_gross": -582.064073519022,
+                "kept_gross": 278.71057163679075,
+                "d_gross": 860.7746451558128,
+                "base_net": -6433.015282530447,
+                "kept_net": -1255.8081325677606,
+                "d_net": 5177.207149962686,
+                "dropped_n": 7157,
+                "dropped_gross": -860.7746451558128,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2414,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 390.02912333186777,
+                "d_gross": 329.9671247993285,
+                "base_net": -3554.6753722957474,
+                "kept_net": -545.7911330701747,
+                "d_net": 3008.884239225573,
+                "dropped_n": 6928,
+                "dropped_gross": -329.9671247993285,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1190.7417699551413,
+            "pooled_d_net": 8186.091389188259,
+            "pooled_kept_legs": 4979,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 5.37108953613808,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 16,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2698,
+                "base_gross": -582.064073519022,
+                "kept_gross": 193.22933934299328,
+                "d_gross": 775.2934128620153,
+                "base_net": -6433.015282530447,
+                "kept_net": -1422.5663921325188,
+                "d_net": 5010.448890397928,
+                "dropped_n": 7024,
+                "dropped_gross": -775.2934128620153,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2548,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 360.8065773667774,
+                "d_gross": 300.7445788342381,
+                "base_net": -3554.6753722957474,
+                "kept_net": -624.939163810311,
+                "d_net": 2929.7362084854362,
+                "dropped_n": 6794,
+                "dropped_gross": -300.7445788342381,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1076.0379916962534,
+            "pooled_d_net": 7940.185098883365,
+            "pooled_kept_legs": 5246,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 5.659115426105718,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 17,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 2837,
+                "base_gross": -582.064073519022,
+                "kept_gross": 157.08898753295676,
+                "d_gross": 739.1530610519787,
+                "base_net": -6433.015282530447,
+                "kept_net": -1543.049109122184,
+                "d_net": 4889.966173408263,
+                "dropped_n": 6885,
+                "dropped_gross": -739.1530610519787,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2732,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 381.2618205157194,
+                "d_gross": 321.19982198318013,
+                "base_net": -3554.6753722957474,
+                "kept_net": -673.290543731594,
+                "d_net": 2881.3848285641534,
+                "dropped_n": 6610,
+                "dropped_gross": -321.19982198318013,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1060.3528830351588,
+            "pooled_d_net": 7771.351001972416,
+            "pooled_kept_legs": 5569,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 6.007551240560949,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 18,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3032,
+                "base_gross": -582.064073519022,
+                "kept_gross": 72.05577191145045,
+                "d_gross": 654.1198454304724,
+                "base_net": -6433.015282530447,
+                "kept_net": -1747.3513063584146,
+                "d_net": 4685.663976172033,
+                "dropped_n": 6690,
+                "dropped_gross": -654.1198454304724,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 2882,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 362.3631701651623,
+                "d_gross": 302.301171632623,
+                "base_net": -3554.6753722957474,
+                "kept_net": -749.4535904947894,
+                "d_net": 2805.221781800958,
+                "dropped_n": 6460,
+                "dropped_gross": -302.301171632623,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 956.4210170630954,
+            "pooled_d_net": 7490.88575797299,
+            "pooled_kept_legs": 5914,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 6.379719525350593,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 19,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3143,
+                "base_gross": -582.064073519022,
+                "kept_gross": 60.87013477451876,
+                "d_gross": 642.9342082935408,
+                "base_net": -6433.015282530447,
+                "kept_net": -1825.2963542573634,
+                "d_net": 4607.718928273083,
+                "dropped_n": 6579,
+                "dropped_gross": -642.9342082935408,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3021,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 509.05151953157224,
+                "d_gross": 448.98952099903295,
+                "base_net": -3554.6753722957474,
+                "kept_net": -657.2619641729269,
+                "d_net": 2897.4134081228203,
+                "dropped_n": 6321,
+                "dropped_gross": -448.98952099903295,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1091.9237292925736,
+            "pooled_d_net": 7505.132336395904,
+            "pooled_kept_legs": 6164,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 6.64940668824164,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 20,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3305,
+                "base_gross": -582.064073519022,
+                "kept_gross": 62.60694271546271,
+                "d_gross": 644.6710162344848,
+                "base_net": -6433.015282530447,
+                "kept_net": -1922.214132029601,
+                "d_net": 4510.801150500845,
+                "dropped_n": 6417,
+                "dropped_gross": -644.6710162344848,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3095,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 505.37445020892443,
+                "d_gross": 445.31245167638514,
+                "base_net": -3554.6753722957474,
+                "kept_net": -689.0434082918703,
+                "d_net": 2865.6319640038773,
+                "dropped_n": 6247,
+                "dropped_gross": -445.31245167638514,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1089.9834679108699,
+            "pooled_d_net": 7376.433114504723,
+            "pooled_kept_legs": 6400,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 6.903991370010788,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 21,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3434,
+                "base_gross": -582.064073519022,
+                "kept_gross": -11.026318787864625,
+                "d_gross": 571.0377547311574,
+                "base_net": -6433.015282530447,
+                "kept_net": -2074.8692583476873,
+                "d_net": 4358.146024182759,
+                "dropped_n": 6288,
+                "dropped_gross": -571.0377547311574,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3281,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 571.9938901138812,
+                "d_gross": 511.9318915813419,
+                "base_net": -3554.6753722957474,
+                "kept_net": -692.3847588199869,
+                "d_net": 2862.2906134757604,
+                "dropped_n": 6061,
+                "dropped_gross": -511.9318915813419,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1082.9696463124992,
+            "pooled_d_net": 7220.436637658519,
+            "pooled_kept_legs": 6715,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 7.243797195253506,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 22,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3547,
+                "base_gross": -582.064073519022,
+                "kept_gross": -69.81131850329496,
+                "d_gross": 512.2527550157271,
+                "base_net": -6433.015282530447,
+                "kept_net": -2198.4199406465245,
+                "d_net": 4234.595341883922,
+                "dropped_n": 6175,
+                "dropped_gross": -512.2527550157271,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3410,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 508.60941017347363,
+                "d_gross": 448.54741164093434,
+                "base_net": -3554.6753722957474,
+                "kept_net": -806.3818701939819,
+                "d_net": 2748.2935021017656,
+                "dropped_n": 5932,
+                "dropped_gross": -448.54741164093434,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 960.8001666566614,
+            "pooled_d_net": 6982.888843985687,
+            "pooled_kept_legs": 6957,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 7.504854368932039,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 23,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3739,
+                "base_gross": -582.064073519022,
+                "kept_gross": -99.98069513332848,
+                "d_gross": 482.08337838569355,
+                "base_net": -6433.015282530447,
+                "kept_net": -2339.0282410729683,
+                "d_net": 4093.9870414574784,
+                "dropped_n": 5983,
+                "dropped_gross": -482.08337838569355,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3539,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 530.4416019240082,
+                "d_gross": 470.3796033914689,
+                "base_net": -3554.6753722957474,
+                "kept_net": -834.9251459673737,
+                "d_net": 2719.7502263283736,
+                "dropped_n": 5803,
+                "dropped_gross": -470.3796033914689,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 952.4629817771624,
+            "pooled_d_net": 6813.737267785852,
+            "pooled_kept_legs": 7278,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 7.851132686084142,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 24,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 3885,
+                "base_gross": -582.064073519022,
+                "kept_gross": -30.933459215298967,
+                "d_gross": 551.1306143037231,
+                "base_net": -6433.015282530447,
+                "kept_net": -2356.366034649248,
+                "d_net": 4076.649247881199,
+                "dropped_n": 5837,
+                "dropped_gross": -551.1306143037231,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3676,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 505.0770345976468,
+                "d_gross": 445.0150360651075,
+                "base_net": -3554.6753722957474,
+                "kept_net": -914.2802158038542,
+                "d_net": 2640.3951564918934,
+                "dropped_n": 5666,
+                "dropped_gross": -445.0150360651075,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 996.1456503688305,
+            "pooled_d_net": 6717.044404373092,
+            "pooled_kept_legs": 7561,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 8.156418554476806,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 25,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4057,
+                "base_gross": -582.064073519022,
+                "kept_gross": 3.354585383743597,
+                "d_gross": 585.4186589027656,
+                "base_net": -6433.015282530447,
+                "kept_net": -2425.2770495626437,
+                "d_net": 4007.738232967803,
+                "dropped_n": 5665,
+                "dropped_gross": -585.4186589027656,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3766,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 470.7620272848801,
+                "d_gross": 410.7000287523408,
+                "base_net": -3554.6753722957474,
+                "kept_net": -982.4720763483696,
+                "d_net": 2572.2032959473777,
+                "dropped_n": 5576,
+                "dropped_gross": -410.7000287523408,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 996.1186876551064,
+            "pooled_d_net": 6579.94152891518,
+            "pooled_kept_legs": 7823,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 8.439050701186623,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 26,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4186,
+                "base_gross": -582.064073519022,
+                "kept_gross": -29.64633678952623,
+                "d_gross": 552.4177367294958,
+                "base_net": -6433.015282530447,
+                "kept_net": -2536.361779333018,
+                "d_net": 3896.6535031974286,
+                "dropped_n": 5536,
+                "dropped_gross": -552.4177367294958,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 3885,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 470.74947354101573,
+                "d_gross": 410.68747500847644,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1027.110087688528,
+                "d_net": 2527.5652846072194,
+                "dropped_n": 5457,
+                "dropped_gross": -410.68747500847644,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 963.1052117379722,
+            "pooled_d_net": 6424.218787804648,
+            "pooled_kept_legs": 8071,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 8.706580366774542,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 27,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4340,
+                "base_gross": -582.064073519022,
+                "kept_gross": -121.95105216976015,
+                "d_gross": 460.1130213492619,
+                "base_net": -6433.015282530447,
+                "kept_net": -2724.1492869212034,
+                "d_net": 3708.8659956092433,
+                "dropped_n": 5382,
+                "dropped_gross": -460.1130213492619,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4040,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 428.5570455927282,
+                "d_gross": 368.4950470601889,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1126.8965639578244,
+                "d_net": 2427.778808337923,
+                "dropped_n": 5302,
+                "dropped_gross": -368.4950470601889,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 828.6080684094508,
+            "pooled_d_net": 6136.644803947166,
+            "pooled_kept_legs": 8380,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 9.039913700107874,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 28,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4511,
+                "base_gross": -582.064073519022,
+                "kept_gross": -13.14639906663649,
+                "d_gross": 568.9176744523855,
+                "base_net": -6433.015282530447,
+                "kept_net": -2719.1228334397715,
+                "d_net": 3713.892449090675,
+                "dropped_n": 5211,
+                "dropped_gross": -568.9176744523855,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4224,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 463.0026334274411,
+                "d_gross": 402.9406348949018,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1165.2509588871117,
+                "d_net": 2389.4244134086357,
+                "dropped_n": 5118,
+                "dropped_gross": -402.9406348949018,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 971.8583093472873,
+            "pooled_d_net": 6103.31686249931,
+            "pooled_kept_legs": 8735,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 9.422869471413161,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 29,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4655,
+                "base_gross": -582.064073519022,
+                "kept_gross": -30.96479473883585,
+                "d_gross": 551.0992787801862,
+                "base_net": -6433.015282530447,
+                "kept_net": -2822.664504165775,
+                "d_net": 3610.350778364672,
+                "dropped_n": 5067,
+                "dropped_gross": -551.0992787801862,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4374,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 515.2746190156493,
+                "d_gross": 455.21262048310996,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1171.1419431415575,
+                "d_net": 2383.53342915419,
+                "dropped_n": 4968,
+                "dropped_gross": -455.21262048310996,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1006.3118992632961,
+            "pooled_d_net": 5993.884207518862,
+            "pooled_kept_legs": 9029,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 9.740021574973031,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 30,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 4864,
+                "base_gross": -582.064073519022,
+                "kept_gross": -181.13337962705293,
+                "d_gross": 400.9306938919691,
+                "base_net": -6433.015282530447,
+                "kept_net": -3101.864988324133,
+                "d_net": 3331.150294206314,
+                "dropped_n": 4858,
+                "dropped_gross": -400.9306938919691,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4514,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 527.0173360919493,
+                "d_gross": 466.95533755941005,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1213.1890641224818,
+                "d_net": 2341.4863081732656,
+                "dropped_n": 4828,
+                "dropped_gross": -466.95533755941005,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 867.8860314513792,
+            "pooled_d_net": 5672.63660237958,
+            "pooled_kept_legs": 9378,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 10.116504854368932,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 31,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5011,
+                "base_gross": -582.064073519022,
+                "kept_gross": -52.87120015650021,
+                "d_gross": 529.1928733625218,
+                "base_net": -6433.015282530447,
+                "kept_net": -3059.88753747776,
+                "d_net": 3373.127745052687,
+                "dropped_n": 4711,
+                "dropped_gross": -529.1928733625218,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4663,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 586.952817424037,
+                "d_gross": 526.8908188914977,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1211.5105347526317,
+                "d_net": 2343.164837543116,
+                "dropped_n": 4679,
+                "dropped_gross": -526.8908188914977,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1056.0836922540195,
+            "pooled_d_net": 5716.292582595803,
+            "pooled_kept_legs": 9674,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 10.435814455231931,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 32,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5220,
+                "base_gross": -582.064073519022,
+                "kept_gross": -85.45406814173498,
+                "d_gross": 496.61000537728705,
+                "base_net": -6433.015282530447,
+                "kept_net": -3219.960122927605,
+                "d_net": 3213.0551596028417,
+                "dropped_n": 4502,
+                "dropped_gross": -496.61000537728705,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4812,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 589.9807250644383,
+                "d_gross": 529.918726531899,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1267.7394871187898,
+                "d_net": 2286.9358851769575,
+                "dropped_n": 4530,
+                "dropped_gross": -529.918726531899,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1026.528731909186,
+            "pooled_d_net": 5499.991044779799,
+            "pooled_kept_legs": 10032,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 10.822006472491909,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 33,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5327,
+                "base_gross": -582.064073519022,
+                "kept_gross": -95.36537869501319,
+                "d_gross": 486.69869482400884,
+                "base_net": -6433.015282530447,
+                "kept_net": -3295.0658738666934,
+                "d_net": 3137.9494086637533,
+                "dropped_n": 4395,
+                "dropped_gross": -486.69869482400884,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 4949,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 606.4981192185792,
+                "d_gross": 546.4361206860399,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1303.569967138718,
+                "d_net": 2251.105405157029,
+                "dropped_n": 4393,
+                "dropped_gross": -546.4361206860399,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1033.1348155100486,
+            "pooled_d_net": 5389.054813820782,
+            "pooled_kept_legs": 10276,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 11.085221143473571,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 34,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5473,
+                "base_gross": -582.064073519022,
+                "kept_gross": -211.01540418922013,
+                "d_gross": 371.0486693298019,
+                "base_net": -6433.015282530447,
+                "kept_net": -3501.3064105266526,
+                "d_net": 2931.708872003794,
+                "dropped_n": 4249,
+                "dropped_gross": -371.0486693298019,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5088,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 568.2982014862093,
+                "d_gross": 508.23620295367004,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1394.9797749644208,
+                "d_net": 2159.6955973313266,
+                "dropped_n": 4254,
+                "dropped_gross": -508.23620295367004,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 879.2848722834719,
+            "pooled_d_net": 5091.404469335121,
+            "pooled_kept_legs": 10561,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 11.392664509169364,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 35,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5587,
+                "base_gross": -582.064073519022,
+                "kept_gross": -243.04341140901465,
+                "d_gross": 339.0206621100074,
+                "base_net": -6433.015282530447,
+                "kept_net": -3604.0073581941533,
+                "d_net": 2829.0079243362934,
+                "dropped_n": 4135,
+                "dropped_gross": -339.0206621100074,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5250,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 563.2980234668801,
+                "d_gross": 503.2360249343408,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1464.3424532861682,
+                "d_net": 2090.332919009579,
+                "dropped_n": 4092,
+                "dropped_gross": -503.2360249343408,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 842.2566870443482,
+            "pooled_d_net": 4919.340843345873,
+            "pooled_kept_legs": 10837,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 11.690399137001078,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 36,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5756,
+                "base_gross": -582.064073519022,
+                "kept_gross": -275.34980294548575,
+                "d_gross": 306.7142705735363,
+                "base_net": -6433.015282530447,
+                "kept_net": -3742.0502551782583,
+                "d_net": 2690.9650273521884,
+                "dropped_n": 3966,
+                "dropped_gross": -306.7142705735363,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5402,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 466.22047270799106,
+                "d_gross": 406.1584741754518,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1620.3636173618788,
+                "d_net": 1934.3117549338685,
+                "dropped_n": 3940,
+                "dropped_gross": -406.1584741754518,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 712.872744748988,
+            "pooled_d_net": 4625.276782286057,
+            "pooled_kept_legs": 11158,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 12.036677454153182,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 37,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 5925,
+                "base_gross": -582.064073519022,
+                "kept_gross": -182.63023219211573,
+                "d_gross": 399.4338413269063,
+                "base_net": -6433.015282530447,
+                "kept_net": -3749.233796713888,
+                "d_net": 2683.781485816559,
+                "dropped_n": 3797,
+                "dropped_gross": -399.4338413269063,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5486,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 445.8119002448125,
+                "d_gross": 385.7499017122732,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1672.1155590119047,
+                "d_net": 1882.5598132838427,
+                "dropped_n": 3856,
+                "dropped_gross": -385.7499017122732,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 785.1837430391795,
+            "pooled_d_net": 4566.341299100402,
+            "pooled_kept_legs": 11411,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 12.309600862998922,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 38,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6007,
+                "base_gross": -582.064073519022,
+                "kept_gross": -245.68922489665374,
+                "d_gross": 336.3748486223683,
+                "base_net": -6433.015282530447,
+                "kept_net": -3861.6612965848117,
+                "d_net": 2571.353985945635,
+                "dropped_n": 3715,
+                "dropped_gross": -336.3748486223683,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5635,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 395.8015923276364,
+                "d_gross": 335.7395937950971,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1777.010811073039,
+                "d_net": 1777.6645612227085,
+                "dropped_n": 3707,
+                "dropped_gross": -335.7395937950971,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 672.1144424174654,
+            "pooled_d_net": 4349.0185471683435,
+            "pooled_kept_legs": 11642,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 12.558791801510248,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 39,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6121,
+                "base_gross": -582.064073519022,
+                "kept_gross": -102.17624489665127,
+                "d_gross": 479.88782862237076,
+                "base_net": -6433.015282530447,
+                "kept_net": -3789.570364164969,
+                "d_net": 2643.444918365478,
+                "dropped_n": 3601,
+                "dropped_gross": -479.88782862237076,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5725,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 405.73179301615596,
+                "d_gross": 345.66979448361667,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1802.9368919762608,
+                "d_net": 1751.7384803194866,
+                "dropped_n": 3617,
+                "dropped_gross": -345.66979448361667,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 825.5576231059874,
+            "pooled_d_net": 4395.183398684964,
+            "pooled_kept_legs": 11846,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 12.778856526429342,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 40,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6176,
+                "base_gross": -582.064073519022,
+                "kept_gross": -95.26082822999297,
+                "d_gross": 486.80324528902906,
+                "base_net": -6433.015282530447,
+                "kept_net": -3816.4283649144427,
+                "d_net": 2616.586917616004,
+                "dropped_n": 3546,
+                "dropped_gross": -486.80324528902906,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 5873,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 435.8578164527258,
+                "d_gross": 375.7958179201865,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1828.521508036921,
+                "d_net": 1726.1538642588264,
+                "dropped_n": 3469,
+                "dropped_gross": -375.7958179201865,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 862.5990632092155,
+            "pooled_d_net": 4342.740781874831,
+            "pooled_kept_legs": 12049,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 12.997842502696871,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 41,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6331,
+                "base_gross": -582.064073519022,
+                "kept_gross": 108.48554614721183,
+                "d_gross": 690.5496196662339,
+                "base_net": -6433.015282530447,
+                "kept_net": -3705.840643247686,
+                "d_net": 2727.174639282761,
+                "dropped_n": 3391,
+                "dropped_gross": -690.5496196662339,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6033,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 533.6517718672644,
+                "d_gross": 473.5897733347251,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1792.158398517792,
+                "d_net": 1762.5169737779554,
+                "dropped_n": 3309,
+                "dropped_gross": -473.5897733347251,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1164.139393000959,
+            "pooled_d_net": 4489.691613060716,
+            "pooled_kept_legs": 12364,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 13.33764832793959,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 42,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6506,
+                "base_gross": -582.064073519022,
+                "kept_gross": 182.9299560596951,
+                "d_gross": 764.9940295787171,
+                "base_net": -6433.015282530447,
+                "kept_net": -3739.08722974546,
+                "d_net": 2693.928052784987,
+                "dropped_n": 3216,
+                "dropped_gross": -764.9940295787171,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6151,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 531.5798924240664,
+                "d_gross": 471.51789389152714,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1839.897349178718,
+                "d_net": 1714.7780231170293,
+                "dropped_n": 3191,
+                "dropped_gross": -471.51789389152714,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1236.5119234702443,
+            "pooled_d_net": 4408.706075902016,
+            "pooled_kept_legs": 12657,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 13.653721682847896,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 43,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6646,
+                "base_gross": -582.064073519022,
+                "kept_gross": 208.29690428644994,
+                "d_gross": 790.360977805472,
+                "base_net": -6433.015282530447,
+                "kept_net": -3797.7673949508735,
+                "d_net": 2635.247887579573,
+                "dropped_n": 3076,
+                "dropped_gross": -790.360977805472,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6288,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 635.4201071965463,
+                "d_gross": 575.358108664007,
+                "base_net": -3554.6753722957474,
+                "kept_net": -1788.8019261581571,
+                "d_net": 1765.8734461375902,
+                "dropped_n": 3054,
+                "dropped_gross": -575.358108664007,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1365.719086469479,
+            "pooled_d_net": 4401.121333717163,
+            "pooled_kept_legs": 12934,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 13.952535059331176,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 44,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6807,
+                "base_gross": -582.064073519022,
+                "kept_gross": 36.84007955015841,
+                "d_gross": 618.9041530691804,
+                "base_net": -6433.015282530447,
+                "kept_net": -4063.6754602850333,
+                "d_net": 2369.3398222454134,
+                "dropped_n": 2915,
+                "dropped_gross": -618.9041530691804,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6434,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 474.66079072687745,
+                "d_gross": 414.59879219433816,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2006.413300322457,
+                "d_net": 1548.2620719732904,
+                "dropped_n": 2908,
+                "dropped_gross": -414.59879219433816,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1033.5029452635185,
+            "pooled_d_net": 3917.601894218704,
+            "pooled_kept_legs": 13241,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 14.28371089536138,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 45,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 6973,
+                "base_gross": -582.064073519022,
+                "kept_gross": -61.12996076836998,
+                "d_gross": 520.934112750652,
+                "base_net": -6433.015282530447,
+                "kept_net": -4259.135757007592,
+                "d_net": 2173.879525522855,
+                "dropped_n": 2749,
+                "dropped_gross": -520.934112750652,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6569,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 375.07572706111915,
+                "d_gross": 315.01372852857986,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2156.927318201713,
+                "d_net": 1397.7480540940342,
+                "dropped_n": 2773,
+                "dropped_gross": -315.01372852857986,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 835.9478412792319,
+            "pooled_d_net": 3571.6275796168893,
+            "pooled_kept_legs": 13542,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 14.608414239482201,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 46,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7112,
+                "base_gross": -582.064073519022,
+                "kept_gross": -60.67893635708879,
+                "d_gross": 521.3851371619332,
+                "base_net": -6433.015282530447,
+                "kept_net": -4343.753586058124,
+                "d_net": 2089.261696472323,
+                "dropped_n": 2610,
+                "dropped_gross": -521.3851371619332,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6736,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 419.61366646080273,
+                "d_gross": 359.55166792826344,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2176.1115757849575,
+                "d_net": 1378.5637965107899,
+                "dropped_n": 2606,
+                "dropped_gross": -359.55166792826344,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 880.9368050901967,
+            "pooled_d_net": 3467.825492983113,
+            "pooled_kept_legs": 13848,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 14.93851132686084,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 47,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7280,
+                "base_gross": -582.064073519022,
+                "kept_gross": -26.870067733806536,
+                "d_gross": 555.1940057852155,
+                "base_net": -6433.015282530447,
+                "kept_net": -4412.210981870715,
+                "d_net": 2020.8043006597318,
+                "dropped_n": 2442,
+                "dropped_gross": -555.1940057852155,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 6891,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 449.5297879334714,
+                "d_gross": 389.46778940093213,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2208.0665462842862,
+                "d_net": 1346.6088260114611,
+                "dropped_n": 2451,
+                "dropped_gross": -389.46778940093213,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 944.6617951861476,
+            "pooled_d_net": 3367.413126671193,
+            "pooled_kept_legs": 14171,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 15.286947141316073,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 48,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7411,
+                "base_gross": -582.064073519022,
+                "kept_gross": -55.11248282548195,
+                "d_gross": 526.9515906935401,
+                "base_net": -6433.015282530447,
+                "kept_net": -4519.915065931607,
+                "d_net": 1913.1002165988393,
+                "dropped_n": 2311,
+                "dropped_gross": -526.9515906935401,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7054,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 405.31426219565856,
+                "d_gross": 345.25226366311927,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2319.0950003608523,
+                "d_net": 1235.580371934895,
+                "dropped_n": 2288,
+                "dropped_gross": -345.25226366311927,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 872.2038543566593,
+            "pooled_d_net": 3148.6805885337344,
+            "pooled_kept_legs": 14465,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 15.604099244875943,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 49,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7519,
+                "base_gross": -582.064073519022,
+                "kept_gross": -109.79044851943718,
+                "d_gross": 472.27362499958485,
+                "base_net": -6433.015282530447,
+                "kept_net": -4639.498555751394,
+                "d_net": 1793.516726779053,
+                "dropped_n": 2203,
+                "dropped_gross": -472.27362499958485,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7202,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 247.3512898458785,
+                "d_gross": 187.28929131333922,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2534.6084811693445,
+                "d_net": 1020.0668911264029,
+                "dropped_n": 2140,
+                "dropped_gross": -187.28929131333922,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 659.562916312924,
+            "pooled_d_net": 2813.583617905456,
+            "pooled_kept_legs": 14721,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 15.880258899676376,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 50,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7652,
+                "base_gross": -582.064073519022,
+                "kept_gross": -122.87929597082348,
+                "d_gross": 459.18477754819855,
+                "base_net": -6433.015282530447,
+                "kept_net": -4732.219915369898,
+                "d_net": 1700.7953671605483,
+                "dropped_n": 2070,
+                "dropped_gross": -459.18477754819855,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7359,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 266.5248836784711,
+                "d_gross": 206.4628851459318,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2578.291187191278,
+                "d_net": 976.3841851044695,
+                "dropped_n": 1983,
+                "dropped_gross": -206.4628851459318,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 665.6476626941303,
+            "pooled_d_net": 2677.1795522650177,
+            "pooled_kept_legs": 15011,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 16.19309600862999,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 51,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 7821,
+                "base_gross": -582.064073519022,
+                "kept_gross": -154.29967799516885,
+                "d_gross": 427.7643955238532,
+                "base_net": -6433.015282530447,
+                "kept_net": -4869.944295781479,
+                "d_net": 1563.0709867489677,
+                "dropped_n": 1901,
+                "dropped_gross": -427.7643955238532,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7445,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 191.25669081298614,
+                "d_gross": 131.19469228044684,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2686.0973358100864,
+                "d_net": 868.578036485661,
+                "dropped_n": 1897,
+                "dropped_gross": -131.19469228044684,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 558.9590878043,
+            "pooled_d_net": 2431.6490232346287,
+            "pooled_kept_legs": 15266,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 16.468176914778855,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 52,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8038,
+                "base_gross": -582.064073519022,
+                "kept_gross": -81.74796226869307,
+                "d_gross": 500.31611125032896,
+                "base_net": -6433.015282530447,
+                "kept_net": -4920.750473584751,
+                "d_net": 1512.2648089456961,
+                "dropped_n": 1684,
+                "dropped_gross": -500.31611125032896,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7603,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 217.60097511031998,
+                "d_gross": 157.5389765777807,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2721.810140352716,
+                "d_net": 832.8652319430312,
+                "dropped_n": 1739,
+                "dropped_gross": -157.5389765777807,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 657.8550878281096,
+            "pooled_d_net": 2345.1300408887273,
+            "pooled_kept_legs": 15641,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 16.872707659115427,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 53,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8185,
+                "base_gross": -582.064073519022,
+                "kept_gross": -116.14561047748998,
+                "d_gross": 465.91846304153205,
+                "base_net": -6433.015282530447,
+                "kept_net": -5043.124840722661,
+                "d_net": 1389.8904418077855,
+                "dropped_n": 1537,
+                "dropped_gross": -465.91846304153205,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7805,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 182.3839179391478,
+                "d_gross": 122.32191940660852,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2834.960971764305,
+                "d_net": 719.7144005314422,
+                "dropped_n": 1537,
+                "dropped_gross": -122.32191940660852,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 588.2403824481405,
+            "pooled_d_net": 2109.6048423392276,
+            "pooled_kept_legs": 15990,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 17.249190938511326,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 54,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8329,
+                "base_gross": -582.064073519022,
+                "kept_gross": -120.12304432408064,
+                "d_gross": 461.9410291949414,
+                "base_net": -6433.015282530447,
+                "kept_net": -5132.498108080941,
+                "d_net": 1300.5171744495055,
+                "dropped_n": 1393,
+                "dropped_gross": -461.9410291949414,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 7973,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 102.0268042718221,
+                "d_gross": 41.96480573928281,
+                "base_net": -3554.6753722957474,
+                "kept_net": -2978.5809163312747,
+                "d_net": 576.0944559644727,
+                "dropped_n": 1369,
+                "dropped_gross": -41.96480573928281,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 503.90583493422423,
+            "pooled_d_net": 1876.6116304139782,
+            "pooled_kept_legs": 16302,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 17.585760517799354,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 55,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8461,
+                "base_gross": -582.064073519022,
+                "kept_gross": -11.126864324086227,
+                "d_gross": 570.9372091949358,
+                "base_net": -6433.015282530447,
+                "kept_net": -5104.350617043465,
+                "d_net": 1328.664665486982,
+                "dropped_n": 1261,
+                "dropped_gross": -570.9372091949358,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8122,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 116.76277337503097,
+                "d_gross": 56.70077484249168,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3021.814888939138,
+                "d_net": 532.8604833566092,
+                "dropped_n": 1220,
+                "dropped_gross": -56.70077484249168,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 627.6379840374275,
+            "pooled_d_net": 1861.525148843591,
+            "pooled_kept_legs": 16583,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 17.88888888888889,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 56,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8528,
+                "base_gross": -582.064073519022,
+                "kept_gross": -76.3820470531657,
+                "d_gross": 505.6820264658563,
+                "base_net": -6433.015282530447,
+                "kept_net": -5209.099381007822,
+                "d_net": 1223.915901522625,
+                "dropped_n": 1194,
+                "dropped_gross": -505.6820264658563,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8211,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 157.38578355281356,
+                "d_gross": 97.32378502027427,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3014.2676672517446,
+                "d_net": 540.4077050440028,
+                "dropped_n": 1131,
+                "dropped_gross": -97.32378502027427,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 603.0058114861306,
+            "pooled_d_net": 1764.3236065666279,
+            "pooled_kept_legs": 16739,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 18.0571736785329,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 57,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8716,
+                "base_gross": -582.064073519022,
+                "kept_gross": -188.69214001213618,
+                "d_gross": 393.37193350688585,
+                "base_net": -6433.015282530447,
+                "kept_net": -5432.055853416137,
+                "d_net": 1000.9594291143094,
+                "dropped_n": 1006,
+                "dropped_gross": -393.37193350688585,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8348,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 188.20845166737828,
+                "d_gross": 128.146453134839,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3036.0455067622943,
+                "d_net": 518.6298655334531,
+                "dropped_n": 994,
+                "dropped_gross": -128.146453134839,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 521.5183866417249,
+            "pooled_d_net": 1519.5892946477625,
+            "pooled_kept_legs": 17064,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 18.40776699029126,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 58,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 8884,
+                "base_gross": -582.064073519022,
+                "kept_gross": -176.7174380856511,
+                "d_gross": 405.3466354333709,
+                "base_net": -6433.015282530447,
+                "kept_net": -5518.239287476298,
+                "d_net": 914.7759950541486,
+                "dropped_n": 838,
+                "dropped_gross": -405.3466354333709,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8518,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 199.66412213239093,
+                "d_gross": 139.60212359985164,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3090.7245915287535,
+                "d_net": 463.95078076699383,
+                "dropped_n": 824,
+                "dropped_gross": -139.60212359985164,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 544.9487590332226,
+            "pooled_d_net": 1378.7267758211424,
+            "pooled_kept_legs": 17402,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 18.772384034519956,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 59,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9005,
+                "base_gross": -582.064073519022,
+                "kept_gross": -326.97231475234275,
+                "d_gross": 255.09175876667928,
+                "base_net": -6433.015282530447,
+                "kept_net": -5743.305592326848,
+                "d_net": 689.7096902035992,
+                "dropped_n": 717,
+                "dropped_gross": -255.09175876667928,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8642,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 228.48038908369992,
+                "d_gross": 168.41839055116063,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3111.6343196000603,
+                "d_net": 443.0410526956871,
+                "dropped_n": 700,
+                "dropped_gross": -168.41839055116063,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 423.51014931783993,
+            "pooled_d_net": 1132.7507428992863,
+            "pooled_kept_legs": 17647,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 19.036677454153182,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 60,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9185,
+                "base_gross": -582.064073519022,
+                "kept_gross": -363.2154131477014,
+                "d_gross": 218.84866037132065,
+                "base_net": -6433.015282530447,
+                "kept_net": -5883.593510324003,
+                "d_net": 549.4217722064441,
+                "dropped_n": 537,
+                "dropped_gross": -218.84866037132065,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8755,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 224.46502106971298,
+                "d_gross": 164.40302253717368,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3160.7002515794024,
+                "d_net": 393.9751207163449,
+                "dropped_n": 587,
+                "dropped_gross": -164.40302253717368,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 383.25168290849433,
+            "pooled_d_net": 943.396892922789,
+            "pooled_kept_legs": 17940,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 19.35275080906149,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 61,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9331,
+                "base_gross": -582.064073519022,
+                "kept_gross": -412.00344539359776,
+                "d_gross": 170.06062812542427,
+                "base_net": -6433.015282530447,
+                "kept_net": -6022.183516920224,
+                "d_net": 410.83176561022265,
+                "dropped_n": 391,
+                "dropped_gross": -170.06062812542427,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 8898,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 224.14451897753935,
+                "d_gross": 164.08252044500006,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3218.716019271629,
+                "d_net": 335.9593530241182,
+                "dropped_n": 444,
+                "dropped_gross": -164.08252044500006,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 334.14314857042433,
+            "pooled_d_net": 746.7911186343408,
+            "pooled_kept_legs": 18229,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 19.664509169363537,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 62,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9427,
+                "base_gross": -582.064073519022,
+                "kept_gross": -463.7066885216709,
+                "d_gross": 118.35738499735112,
+                "base_net": -6433.015282530447,
+                "kept_net": -6131.212972215572,
+                "d_net": 301.8023103148744,
+                "dropped_n": 295,
+                "dropped_gross": -118.35738499735112,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 9017,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 173.42334472438512,
+                "d_gross": 113.36134619184583,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3315.54537238637,
+                "d_net": 239.12999990937715,
+                "dropped_n": 325,
+                "dropped_gross": -113.36134619184583,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 231.71873118919694,
+            "pooled_d_net": 540.9323102242515,
+            "pooled_kept_legs": 18444,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 19.89644012944984,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 63,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9569,
+                "base_gross": -582.064073519022,
+                "kept_gross": -537.4912062711312,
+                "d_gross": 44.57286724789083,
+                "base_net": -6433.015282530447,
+                "kept_net": -6292.809251836381,
+                "d_net": 140.2060306940657,
+                "dropped_n": 153,
+                "dropped_gross": -44.57286724789083,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 9183,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 148.0098113023816,
+                "d_gross": 87.9478127698423,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3404.951998600789,
+                "d_net": 149.72337369495835,
+                "dropped_n": 159,
+                "dropped_gross": -87.9478127698423,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 132.52068001773313,
+            "pooled_d_net": 289.92940438902406,
+            "pooled_kept_legs": 18752,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 20.228694714131606,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 64,
+            "folds": [
+              {
+                "base_legs": 9722,
+                "kept_legs": 9722,
+                "base_gross": -582.064073519022,
+                "kept_gross": -582.064073519022,
+                "d_gross": 0.0,
+                "base_net": -6433.015282530447,
+                "kept_net": -6433.015282530447,
+                "d_net": 0.0,
+                "dropped_n": 0,
+                "dropped_gross": 0.0,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9342,
+                "kept_legs": 9342,
+                "base_gross": 60.06199853253929,
+                "kept_gross": 60.06199853253929,
+                "d_gross": 0.0,
+                "base_net": -3554.6753722957474,
+                "kept_net": -3554.6753722957474,
+                "d_net": 0.0,
+                "dropped_n": 0,
+                "dropped_gross": 0.0,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 0.0,
+            "pooled_d_net": 0.0,
+            "pooled_kept_legs": 19064,
+            "pooled_base_legs": 19064,
+            "pooled_legs_per_day": 20.565264293419634,
+            "in_trade_count_band": false
+          }
+        ],
+        "best_in_band": null
+      },
+      "short": {
+        "rankings": {
+          "H1->H2": [
+            "CBBcC",
+            "cCcCc",
+            "BBcbb",
+            "cbCBc",
+            "cCBBc",
+            "bCBcb",
+            "BBBcb",
+            "BBBBc",
+            "cCcbb",
+            "CBBBB",
+            "BcCcC",
+            "BcCcb",
+            "Bcbbb",
+            "bbbbb",
+            "cCcbC",
+            "bCBBB",
+            "CBcCc",
+            "bCcCB",
+            "BcCBB",
+            "Ccbbb",
+            "bCcbb",
+            "BBcCc",
+            "cbbCB",
+            "bbbCc",
+            "cCBBB",
+            "CcbCB",
+            "BBcbC",
+            "cbCBB",
+            "CBBBc",
+            "BBcCB",
+            "bbbbC",
+            "BcbCc",
+            "BcbCB",
+            "cbbbb",
+            "CcbCc",
+            "CcCcC",
+            "BBBcC",
+            "bCBcC",
+            "cCBcC",
+            "CcCcb",
+            "cbCcC",
+            "BcCBc",
+            "cbbCc",
+            "bbCcC",
+            "bbbCB",
+            "CBcbb",
+            "bbCBB",
+            "CBcCB",
+            "CcbbC",
+            "bCBBc",
+            "CBcbC",
+            "cbCcb",
+            "bbCBc",
+            "cbbbC",
+            "CcCBc",
+            "bCcbC",
+            "BcbbC",
+            "BBBBB",
+            "cCcCB",
+            "CcCBB",
+            "cCBcb",
+            "CBBcb",
+            "bbCcb",
+            "bCcCc"
+          ],
+          "H2->H1": [
+            "CBBBc",
+            "CcCBB",
+            "BBcbb",
+            "BcCcC",
+            "BBcbC",
+            "cCcbb",
+            "cbbbb",
+            "cCBBB",
+            "Bcbbb",
+            "CcbCB",
+            "cCBcC",
+            "BBBcC",
+            "BBBcb",
+            "CBBBB",
+            "cCcbC",
+            "CBcCB",
+            "bbCBc",
+            "bbbCc",
+            "CBcbb",
+            "CcbbC",
+            "CBcCc",
+            "BBcCB",
+            "CcCcb",
+            "cbCBc",
+            "bCcCc",
+            "cCBcb",
+            "cbbCB",
+            "bbbbC",
+            "BcCcb",
+            "bCBBc",
+            "cbCcC",
+            "CcCBc",
+            "BBBBB",
+            "bbCcb",
+            "CBBcC",
+            "CcbCc",
+            "CcCcC",
+            "bCcbC",
+            "BcbCc",
+            "cCcCB",
+            "bCBcC",
+            "cCBBc",
+            "bbbCB",
+            "BBBBc",
+            "cbCBB",
+            "bCBcb",
+            "cCcCc",
+            "cbCcb",
+            "cbbbC",
+            "Ccbbb",
+            "CBcbC",
+            "bCcbb",
+            "cbbCc",
+            "bbCcC",
+            "bbCBB",
+            "BBcCc",
+            "BcbbC",
+            "BcCBB",
+            "bbbbb",
+            "bCBBB",
+            "CBBcb",
+            "bCcCB",
+            "BcCBc",
+            "BcbCB"
+          ]
+        },
+        "rows": [
+          {
+            "k": 0,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 0,
+                "base_gross": -2367.227223487787,
+                "kept_gross": 0.0,
+                "d_gross": 2367.227223487787,
+                "base_net": -7698.973012254613,
+                "kept_net": 0.0,
+                "d_net": 7698.973012254613,
+                "dropped_n": 8856,
+                "dropped_gross": -2367.227223487787,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 0,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 0.0,
+                "d_gross": 1848.30960047337,
+                "base_net": -5396.8678429315905,
+                "kept_net": 0.0,
+                "d_net": 5396.8678429315905,
+                "dropped_n": 9229,
+                "dropped_gross": -1848.30960047337,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4215.536823961157,
+            "pooled_d_net": 13095.840855186205,
+            "pooled_kept_legs": 0,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 0.0,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 1,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 99,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -31.98781954901915,
+                "d_gross": 2335.2394039387677,
+                "base_net": -7698.973012254613,
+                "kept_net": -91.6085060832657,
+                "d_net": 7607.364506171348,
+                "dropped_n": 8757,
+                "dropped_gross": -2335.2394039387677,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 119,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -22.244848326976808,
+                "d_gross": 1826.0647521463932,
+                "base_net": -5396.8678429315905,
+                "kept_net": -68.73900422174384,
+                "d_net": 5328.128838709847,
+                "dropped_n": 9110,
+                "dropped_gross": -1826.0647521463932,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4161.304156085161,
+            "pooled_d_net": 12935.493344881193,
+            "pooled_kept_legs": 218,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 0.23516720604099245,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 2,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 239,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -122.84910983390137,
+                "d_gross": 2244.3781136538855,
+                "base_net": -7698.973012254613,
+                "kept_net": -265.8756972877711,
+                "d_net": 7433.0973149668425,
+                "dropped_n": 8617,
+                "dropped_gross": -2244.3781136538855,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 238,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -105.59524406170772,
+                "d_gross": 1742.7143564116623,
+                "base_net": -5396.8678429315905,
+                "kept_net": -195.83597534362212,
+                "d_net": 5201.031867587968,
+                "dropped_n": 8991,
+                "dropped_gross": -1742.7143564116623,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3987.092470065548,
+            "pooled_d_net": 12634.12918255481,
+            "pooled_kept_legs": 477,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 0.5145631067961165,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 3,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 364,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -19.809139259389212,
+                "d_gross": 2347.4180842283977,
+                "base_net": -7698.973012254613,
+                "kept_net": -240.4393677675577,
+                "d_net": 7458.533644487055,
+                "dropped_n": 8492,
+                "dropped_gross": -2347.4180842283977,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 384,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -14.510926373671055,
+                "d_gross": 1833.798674099699,
+                "base_net": -5396.8678429315905,
+                "kept_net": -160.49250987956054,
+                "d_net": 5236.37533305203,
+                "dropped_n": 8845,
+                "dropped_gross": -1833.798674099699,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4181.216758328097,
+            "pooled_d_net": 12694.908977539086,
+            "pooled_kept_legs": 748,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 0.8069039913700108,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 4,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 480,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -20.891504470897416,
+                "d_gross": 2346.3357190168895,
+                "base_net": -7698.973012254613,
+                "kept_net": -314.0273994343811,
+                "d_net": 7384.945612820233,
+                "dropped_n": 8376,
+                "dropped_gross": -2346.3357190168895,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 568,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 27.58279859807999,
+                "d_gross": 1875.89239907145,
+                "base_net": -5396.8678429315905,
+                "kept_net": -191.24066657107136,
+                "d_net": 5205.627176360519,
+                "dropped_n": 8661,
+                "dropped_gross": -1875.89239907145,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4222.228118088339,
+            "pooled_d_net": 12590.572789180751,
+            "pooled_kept_legs": 1048,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 1.1305285868392665,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 5,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 612,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -75.52645522523426,
+                "d_gross": 2291.7007682625526,
+                "base_net": -7698.973012254613,
+                "kept_net": -450.9173496931523,
+                "d_net": 7248.055662561461,
+                "dropped_n": 8244,
+                "dropped_gross": -2291.7007682625526,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 711,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 5.434820949314599,
+                "d_gross": 1853.7444214226846,
+                "base_net": -5396.8678429315905,
+                "kept_net": -268.62355194206737,
+                "d_net": 5128.2442909895235,
+                "dropped_n": 8518,
+                "dropped_gross": -1853.7444214226846,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4145.445189685237,
+            "pooled_d_net": 12376.299953550984,
+            "pooled_kept_legs": 1323,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 1.4271844660194175,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 6,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 761,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -169.31262830384048,
+                "d_gross": 2197.9145951839464,
+                "base_net": -7698.973012254613,
+                "kept_net": -634.7876012054201,
+                "d_net": 7064.185411049193,
+                "dropped_n": 8095,
+                "dropped_gross": -2197.9145951839464,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 853,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 40.13945527376109,
+                "d_gross": 1888.449055747131,
+                "base_net": -5396.8678429315905,
+                "kept_net": -285.6536936422883,
+                "d_net": 5111.214149289302,
+                "dropped_n": 8376,
+                "dropped_gross": -1888.449055747131,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4086.3636509310772,
+            "pooled_d_net": 12175.399560338496,
+            "pooled_kept_legs": 1614,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 1.7411003236245954,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 7,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 883,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -129.6978233031955,
+                "d_gross": 2237.5294001845914,
+                "base_net": -7698.973012254613,
+                "kept_net": -671.400289213808,
+                "d_net": 7027.572723040806,
+                "dropped_n": 7973,
+                "dropped_gross": -2237.5294001845914,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1009,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 1.175436401494153,
+                "d_gross": 1849.4850368748641,
+                "base_net": -5396.8678429315905,
+                "kept_net": -384.76011391672756,
+                "d_net": 5012.107729014863,
+                "dropped_n": 8220,
+                "dropped_gross": -1849.4850368748641,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4087.0144370594553,
+            "pooled_d_net": 12039.680452055669,
+            "pooled_kept_legs": 1892,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 2.040992448759439,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 8,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 969,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -179.54731724842287,
+                "d_gross": 2187.679906239364,
+                "base_net": -7698.973012254613,
+                "kept_net": -774.1298765639117,
+                "d_net": 6924.843135690702,
+                "dropped_n": 7887,
+                "dropped_gross": -2187.679906239364,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1125,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -13.514238384374039,
+                "d_gross": 1834.795362088996,
+                "base_net": -5396.8678429315905,
+                "kept_net": -445.2173962296242,
+                "d_net": 4951.650446701966,
+                "dropped_n": 8104,
+                "dropped_gross": -1834.795362088996,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4022.4752683283596,
+            "pooled_d_net": 11876.493582392668,
+            "pooled_kept_legs": 2094,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 2.2588996763754046,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 9,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1121,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -97.59660062610067,
+                "d_gross": 2269.6306228616863,
+                "base_net": -7698.973012254613,
+                "kept_net": -781.8056827275047,
+                "d_net": 6917.167329527108,
+                "dropped_n": 7735,
+                "dropped_gross": -2269.6306228616863,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1272,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 12.258410759913886,
+                "d_gross": 1860.5680112332839,
+                "base_net": -5396.8678429315905,
+                "kept_net": -477.02105003883935,
+                "d_net": 4919.846792892751,
+                "dropped_n": 7957,
+                "dropped_gross": -1860.5680112332839,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4130.19863409497,
+            "pooled_d_net": 11837.01412241986,
+            "pooled_kept_legs": 2393,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 2.581445523193096,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 10,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1219,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -66.73042562610237,
+                "d_gross": 2300.4967978616846,
+                "base_net": -7698.973012254613,
+                "kept_net": -811.3543796224247,
+                "d_net": 6887.618632632189,
+                "dropped_n": 7637,
+                "dropped_gross": -2300.4967978616846,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1392,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -5.821350512214622,
+                "d_gross": 1842.4882499611554,
+                "base_net": -5396.8678429315905,
+                "kept_net": -542.2570192399361,
+                "d_net": 4854.610823691654,
+                "dropped_n": 7837,
+                "dropped_gross": -1842.4882499611554,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4142.98504782284,
+            "pooled_d_net": 11742.229456323843,
+            "pooled_kept_legs": 2611,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 2.8166127292340883,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 11,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1413,
+                "base_gross": -2367.227223487787,
+                "kept_gross": 92.11001272890061,
+                "d_gross": 2459.3372362166874,
+                "base_net": -7698.973012254613,
+                "kept_net": -770.2771079455756,
+                "d_net": 6928.695904309037,
+                "dropped_n": 7443,
+                "dropped_gross": -2459.3372362166874,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1537,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -51.45170804837812,
+                "d_gross": 1796.8578924249919,
+                "base_net": -5396.8678429315905,
+                "kept_net": -644.492238640218,
+                "d_net": 4752.375604291373,
+                "dropped_n": 7692,
+                "dropped_gross": -1796.8578924249919,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4256.195128641679,
+            "pooled_d_net": 11681.07150860041,
+            "pooled_kept_legs": 2950,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 3.1823085221143472,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 12,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1526,
+                "base_gross": -2367.227223487787,
+                "kept_gross": 76.45663458416504,
+                "d_gross": 2443.683858071952,
+                "base_net": -7698.973012254613,
+                "kept_net": -854.1981607428352,
+                "d_net": 6844.774851511778,
+                "dropped_n": 7330,
+                "dropped_gross": -2443.683858071952,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1687,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -92.4770293992301,
+                "d_gross": 1755.8325710741399,
+                "base_net": -5396.8678429315905,
+                "kept_net": -741.6283098245526,
+                "d_net": 4655.239533107038,
+                "dropped_n": 7542,
+                "dropped_gross": -1755.8325710741399,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4199.5164291460915,
+            "pooled_d_net": 11500.014384618817,
+            "pooled_kept_legs": 3213,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 3.466019417475728,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 13,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1662,
+                "base_gross": -2367.227223487787,
+                "kept_gross": 142.6651258877165,
+                "d_gross": 2509.8923493755033,
+                "base_net": -7698.973012254613,
+                "kept_net": -868.1302827603492,
+                "d_net": 6830.842729494264,
+                "dropped_n": 7194,
+                "dropped_gross": -2509.8923493755033,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1818,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -43.79160336916516,
+                "d_gross": 1804.5179971042048,
+                "base_net": -5396.8678429315905,
+                "kept_net": -741.8582813196203,
+                "d_net": 4655.009561611971,
+                "dropped_n": 7411,
+                "dropped_gross": -1804.5179971042048,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4314.410346479708,
+            "pooled_d_net": 11485.852291106235,
+            "pooled_kept_legs": 3480,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 3.7540453074433655,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 14,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1777,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -7.091371620346621,
+                "d_gross": 2360.13585186744,
+                "base_net": -7698.973012254613,
+                "kept_net": -1085.7510335459137,
+                "d_net": 6613.2219787087,
+                "dropped_n": 7079,
+                "dropped_gross": -2360.13585186744,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 1922,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -19.77310530681393,
+                "d_gross": 1828.536495166556,
+                "base_net": -5396.8678429315905,
+                "kept_net": -757.571574896042,
+                "d_net": 4639.296268035549,
+                "dropped_n": 7307,
+                "dropped_gross": -1828.536495166556,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4188.672347033997,
+            "pooled_d_net": 11252.518246744248,
+            "pooled_kept_legs": 3699,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 3.9902912621359223,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 15,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 1937,
+                "base_gross": -2367.227223487787,
+                "kept_gross": 31.212547400309816,
+                "d_gross": 2398.4397708880965,
+                "base_net": -7698.973012254613,
+                "kept_net": -1142.3999686547695,
+                "d_net": 6556.573043599844,
+                "dropped_n": 6919,
+                "dropped_gross": -2398.4397708880965,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2102,
+                "base_gross": -1848.30960047337,
+                "kept_gross": 8.169477365574494,
+                "d_gross": 1856.4790778389445,
+                "base_net": -5396.8678429315905,
+                "kept_net": -798.7253610711077,
+                "d_net": 4598.142481860483,
+                "dropped_n": 7127,
+                "dropped_gross": -1856.4790778389445,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4254.918848727041,
+            "pooled_d_net": 11154.715525460328,
+            "pooled_kept_legs": 4039,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 4.357065803667745,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 16,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2028,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -88.66973386122282,
+                "d_gross": 2278.557489626564,
+                "base_net": -7698.973012254613,
+                "kept_net": -1316.2426075447088,
+                "d_net": 6382.730404709904,
+                "dropped_n": 6828,
+                "dropped_gross": -2278.557489626564,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2294,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -93.48327202908581,
+                "d_gross": 1754.8263284442842,
+                "base_net": -5396.8678429315905,
+                "kept_net": -977.8595045621062,
+                "d_net": 4419.008338369485,
+                "dropped_n": 6935,
+                "dropped_gross": -1754.8263284442842,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 4033.383818070848,
+            "pooled_d_net": 10801.73874307939,
+            "pooled_kept_legs": 4322,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 4.66235167206041,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 17,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2179,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -69.21037023628844,
+                "d_gross": 2298.0168532514986,
+                "base_net": -7698.973012254613,
+                "kept_net": -1387.980741493555,
+                "d_net": 6310.9922707610585,
+                "dropped_n": 6677,
+                "dropped_gross": -2298.0168532514986,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2449,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -183.57593844115337,
+                "d_gross": 1664.7336620322167,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1128.1723815343084,
+                "d_net": 4268.695461397282,
+                "dropped_n": 6780,
+                "dropped_gross": -1664.7336620322167,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3962.7505152837152,
+            "pooled_d_net": 10579.687732158342,
+            "pooled_kept_legs": 4628,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 4.992448759439051,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 18,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2316,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -320.4343363291315,
+                "d_gross": 2046.7928871586555,
+                "base_net": -7698.973012254613,
+                "kept_net": -1722.6034632186393,
+                "d_net": 5976.369549035974,
+                "dropped_n": 6540,
+                "dropped_gross": -2046.7928871586555,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2654,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -197.81202450706775,
+                "d_gross": 1650.4975759663023,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1222.8850362193152,
+                "d_net": 4173.982806712275,
+                "dropped_n": 6575,
+                "dropped_gross": -1650.4975759663023,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3697.2904631249576,
+            "pooled_d_net": 10150.35235574825,
+            "pooled_kept_legs": 4970,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 5.361380798274002,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 19,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2375,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -388.68739132913436,
+                "d_gross": 1978.5398321586526,
+                "base_net": -7698.973012254613,
+                "kept_net": -1827.1360169309355,
+                "d_net": 5871.836995323678,
+                "dropped_n": 6481,
+                "dropped_gross": -1978.5398321586526,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2805,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -275.001894582312,
+                "d_gross": 1573.307705891058,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1357.5124988674725,
+                "d_net": 4039.355344064118,
+                "dropped_n": 6424,
+                "dropped_gross": -1573.307705891058,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3551.8475380497107,
+            "pooled_d_net": 9911.192339387795,
+            "pooled_kept_legs": 5180,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 5.587918015102481,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 20,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2530,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -494.51362428545156,
+                "d_gross": 1872.7135992023354,
+                "base_net": -7698.973012254613,
+                "kept_net": -2023.70598557253,
+                "d_net": 5675.267026682083,
+                "dropped_n": 6326,
+                "dropped_gross": -1872.7135992023354,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 2977,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -369.0788402045703,
+                "d_gross": 1479.2307602687997,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1516.9523058491027,
+                "d_net": 3879.915537082488,
+                "dropped_n": 6252,
+                "dropped_gross": -1479.2307602687997,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3351.944359471135,
+            "pooled_d_net": 9555.18256376457,
+            "pooled_kept_legs": 5507,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 5.94066882416397,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 21,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2695,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -632.7740026132872,
+                "d_gross": 1734.4532208744997,
+                "base_net": -7698.973012254613,
+                "kept_net": -2259.697338330113,
+                "d_net": 5439.275673924501,
+                "dropped_n": 6161,
+                "dropped_gross": -1734.4532208744997,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3117,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -354.04269688712185,
+                "d_gross": 1494.2669035862482,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1556.5797197701331,
+                "d_net": 3840.2881231614574,
+                "dropped_n": 6112,
+                "dropped_gross": -1494.2669035862482,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3228.7201244607477,
+            "pooled_d_net": 9279.563797085957,
+            "pooled_kept_legs": 5812,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 6.269687162891047,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 22,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2830,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -762.0933315787257,
+                "d_gross": 1605.1338919090613,
+                "base_net": -7698.973012254613,
+                "kept_net": -2471.880085024346,
+                "d_net": 5227.092927230267,
+                "dropped_n": 6026,
+                "dropped_gross": -1605.1338919090613,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3233,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -379.65549126826033,
+                "d_gross": 1468.6541092051098,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1627.1935989667086,
+                "d_net": 3769.674243964882,
+                "dropped_n": 5996,
+                "dropped_gross": -1468.6541092051098,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3073.788001114171,
+            "pooled_d_net": 8996.76717119515,
+            "pooled_kept_legs": 6063,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 6.540453074433657,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 23,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 2984,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -771.6569727976073,
+                "d_gross": 1595.5702506901796,
+                "base_net": -7698.973012254613,
+                "kept_net": -2578.140257935892,
+                "d_net": 5120.8327543187215,
+                "dropped_n": 5872,
+                "dropped_gross": -1595.5702506901796,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3395,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -441.94389730514774,
+                "d_gross": 1406.3657031682224,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1751.165400922134,
+                "d_net": 3645.7024420094567,
+                "dropped_n": 5834,
+                "dropped_gross": -1406.3657031682224,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3001.935953858402,
+            "pooled_d_net": 8766.53519632818,
+            "pooled_kept_legs": 6379,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 6.881337648327939,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 24,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3177,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -739.0638647713762,
+                "d_gross": 1628.1633587164106,
+                "base_net": -7698.973012254613,
+                "kept_net": -2660.2968535766868,
+                "d_net": 5038.676158677927,
+                "dropped_n": 5679,
+                "dropped_gross": -1628.1633587164106,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3530,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -373.52822440779016,
+                "d_gross": 1474.78137606558,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1735.9148870184022,
+                "d_net": 3660.9529559131884,
+                "dropped_n": 5699,
+                "dropped_gross": -1474.78137606558,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3102.9447347819905,
+            "pooled_d_net": 8699.629114591115,
+            "pooled_kept_legs": 6707,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 7.235167206040993,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 25,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3297,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -679.6591474057761,
+                "d_gross": 1687.5680760820107,
+                "base_net": -7698.973012254613,
+                "kept_net": -2672.0928831198767,
+                "d_net": 5026.880129134737,
+                "dropped_n": 5559,
+                "dropped_gross": -1687.5680760820107,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3684,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -510.7953989768826,
+                "d_gross": 1337.5142014964874,
+                "base_net": -5396.8678429315905,
+                "kept_net": -1933.1306462182133,
+                "d_net": 3463.737196713377,
+                "dropped_n": 5545,
+                "dropped_gross": -1337.5142014964874,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3025.082277578498,
+            "pooled_d_net": 8490.617325848114,
+            "pooled_kept_legs": 6981,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 7.53074433656958,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 26,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3469,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -596.3864476237497,
+                "d_gross": 1770.8407758640371,
+                "base_net": -7698.973012254613,
+                "kept_net": -2692.67168561527,
+                "d_net": 5006.301326639344,
+                "dropped_n": 5387,
+                "dropped_gross": -1770.8407758640371,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3824,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -612.6445420809696,
+                "d_gross": 1235.6650583924004,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2089.607925042776,
+                "d_net": 3307.2599178888145,
+                "dropped_n": 5405,
+                "dropped_gross": -1235.6650583924004,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3006.5058342564375,
+            "pooled_d_net": 8313.561244528159,
+            "pooled_kept_legs": 7293,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 7.867313915857605,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 27,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3638,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -488.2195961347491,
+                "d_gross": 1879.0076273530378,
+                "base_net": -7698.973012254613,
+                "kept_net": -2683.50824994384,
+                "d_net": 5015.464762310774,
+                "dropped_n": 5218,
+                "dropped_gross": -1879.0076273530378,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 3964,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -616.3015795694755,
+                "d_gross": 1232.0080209038945,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2145.7884255261415,
+                "d_net": 3251.079417405449,
+                "dropped_n": 5265,
+                "dropped_gross": -1232.0080209038945,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3111.0156482569323,
+            "pooled_d_net": 8266.544179716224,
+            "pooled_kept_legs": 7602,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 8.200647249190938,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 28,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3767,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -566.1113392003713,
+                "d_gross": 1801.1158842874156,
+                "base_net": -7698.973012254613,
+                "kept_net": -2839.7023250401635,
+                "d_net": 4859.27068721445,
+                "dropped_n": 5089,
+                "dropped_gross": -1801.1158842874156,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4098,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -647.7644803132955,
+                "d_gross": 1200.5451201600745,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2227.745556623,
+                "d_net": 3169.1222863085904,
+                "dropped_n": 5131,
+                "dropped_gross": -1200.5451201600745,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3001.66100444749,
+            "pooled_d_net": 8028.39297352304,
+            "pooled_kept_legs": 7865,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 8.484358144552319,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 29,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3898,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -432.4183338112003,
+                "d_gross": 1934.8088896765867,
+                "base_net": -7698.973012254613,
+                "kept_net": -2786.966020969881,
+                "d_net": 4912.006991284732,
+                "dropped_n": 4958,
+                "dropped_gross": -1934.8088896765867,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4223,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -625.2408057143813,
+                "d_gross": 1223.0687947589886,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2251.571746299084,
+                "d_net": 3145.2960966325063,
+                "dropped_n": 5006,
+                "dropped_gross": -1223.0687947589886,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3157.8776844355752,
+            "pooled_d_net": 8057.303087917238,
+            "pooled_kept_legs": 8121,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 8.760517799352751,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 30,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 3986,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -422.92704563191865,
+                "d_gross": 1944.3001778558682,
+                "base_net": -7698.973012254613,
+                "kept_net": -2830.630662961124,
+                "d_net": 4868.342349293489,
+                "dropped_n": 4870,
+                "dropped_gross": -1944.3001778558682,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4380,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -712.4540149534362,
+                "d_gross": 1135.8555855199338,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2399.4813845618805,
+                "d_net": 2997.38645836971,
+                "dropped_n": 4849,
+                "dropped_gross": -1135.8555855199338,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 3080.155763375802,
+            "pooled_d_net": 7865.728807663199,
+            "pooled_kept_legs": 8366,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 9.024811218985976,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 31,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4136,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -433.69159185377947,
+                "d_gross": 1933.5356316340074,
+                "base_net": -7698.973012254613,
+                "kept_net": -2926.4834133895192,
+                "d_net": 4772.489598865094,
+                "dropped_n": 4720,
+                "dropped_gross": -1933.5356316340074,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4550,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -785.1140029834926,
+                "d_gross": 1063.1955974898774,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2537.017126647841,
+                "d_net": 2859.8507162837495,
+                "dropped_n": 4679,
+                "dropped_gross": -1063.1955974898774,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2996.731229123885,
+            "pooled_d_net": 7632.340315148844,
+            "pooled_kept_legs": 8686,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 9.370010787486516,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 32,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4261,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -476.12178041716624,
+                "d_gross": 1891.1054430706206,
+                "base_net": -7698.973012254613,
+                "kept_net": -3041.633129105836,
+                "d_net": 4657.3398831487775,
+                "dropped_n": 4595,
+                "dropped_gross": -1891.1054430706206,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4695,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -874.1570987266269,
+                "d_gross": 974.152501746743,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2682.7385969105053,
+                "d_net": 2714.1292460210852,
+                "dropped_n": 4534,
+                "dropped_gross": -974.152501746743,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2865.2579448173638,
+            "pooled_d_net": 7371.469129169863,
+            "pooled_kept_legs": 8956,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 9.661272923408847,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 33,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4376,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -822.6885304720872,
+                "d_gross": 1544.5386930156997,
+                "base_net": -7698.973012254613,
+                "kept_net": -3459.346953430392,
+                "d_net": 4239.626058824221,
+                "dropped_n": 4480,
+                "dropped_gross": -1544.5386930156997,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4762,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -918.9807460844573,
+                "d_gross": 929.3288543889126,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2753.726218881303,
+                "d_net": 2643.1416240502876,
+                "dropped_n": 4467,
+                "dropped_gross": -929.3288543889126,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2473.867547404612,
+            "pooled_d_net": 6882.767682874509,
+            "pooled_kept_legs": 9138,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 9.857605177993527,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 34,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4516,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -753.3220504720782,
+                "d_gross": 1613.9051730157087,
+                "base_net": -7698.973012254613,
+                "kept_net": -3469.7774523974113,
+                "d_net": 4229.195559857202,
+                "dropped_n": 4340,
+                "dropped_gross": -1613.9051730157087,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 4949,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1081.2732870073608,
+                "d_gross": 767.0363134660092,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2989.7741643584422,
+                "d_net": 2407.0936785731483,
+                "dropped_n": 4280,
+                "dropped_gross": -767.0363134660092,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2380.941486481718,
+            "pooled_d_net": 6636.28923843035,
+            "pooled_kept_legs": 9465,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 10.210355987055015,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 35,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4709,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -817.118734185608,
+                "d_gross": 1550.108489302179,
+                "base_net": -7698.973012254613,
+                "kept_net": -3648.9552437198563,
+                "d_net": 4050.017768534757,
+                "dropped_n": 4147,
+                "dropped_gross": -1550.108489302179,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5097,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -986.4334247379635,
+                "d_gross": 861.8761757354065,
+                "base_net": -5396.8678429315905,
+                "kept_net": -2949.6662199082184,
+                "d_net": 2447.201623023372,
+                "dropped_n": 4132,
+                "dropped_gross": -861.8761757354065,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2411.9846650375853,
+            "pooled_d_net": 6497.219391558129,
+            "pooled_kept_legs": 9806,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 10.578209277238404,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 36,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4824,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -855.6283708915571,
+                "d_gross": 1511.5988525962298,
+                "base_net": -7698.973012254613,
+                "kept_net": -3758.0267133274674,
+                "d_net": 3940.946298927146,
+                "dropped_n": 4032,
+                "dropped_gross": -1511.5988525962298,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5310,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1041.8426324511393,
+                "d_gross": 806.4669680222307,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3086.4844124403644,
+                "d_net": 2310.383430491226,
+                "dropped_n": 3919,
+                "dropped_gross": -806.4669680222307,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2318.0658206184607,
+            "pooled_d_net": 6251.329729418372,
+            "pooled_kept_legs": 10134,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 10.932038834951456,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 37,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 4914,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -817.6956471985395,
+                "d_gross": 1549.5315762892474,
+                "base_net": -7698.973012254613,
+                "kept_net": -3778.0300667193037,
+                "d_net": 3920.9429455353097,
+                "dropped_n": 3942,
+                "dropped_gross": -1549.5315762892474,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5436,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1075.6588628134318,
+                "d_gross": 772.6507376599382,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3169.793264306216,
+                "d_net": 2227.0745786253747,
+                "dropped_n": 3793,
+                "dropped_gross": -772.6507376599382,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2322.1823139491853,
+            "pooled_d_net": 6148.017524160685,
+            "pooled_kept_legs": 10350,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 11.16504854368932,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 38,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5072,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -873.0001750409865,
+                "d_gross": 1494.2270484468004,
+                "base_net": -7698.973012254613,
+                "kept_net": -3926.729666343124,
+                "d_net": 3772.2433459114895,
+                "dropped_n": 3784,
+                "dropped_gross": -1494.2270484468004,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5570,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1159.8737090917848,
+                "d_gross": 688.4358913815852,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3306.210096703544,
+                "d_net": 2090.6577462280466,
+                "dropped_n": 3659,
+                "dropped_gross": -688.4358913815852,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2182.662939828386,
+            "pooled_d_net": 5862.901092139537,
+            "pooled_kept_legs": 10642,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 11.480043149946063,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 39,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5154,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -834.7804835646066,
+                "d_gross": 1532.4467399231803,
+                "base_net": -7698.973012254613,
+                "kept_net": -3937.9542050104565,
+                "d_net": 3761.018807244157,
+                "dropped_n": 3702,
+                "dropped_gross": -1532.4467399231803,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5725,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1197.6956012661376,
+                "d_gross": 650.6139992072324,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3403.2464288332058,
+                "d_net": 1993.6214140983848,
+                "dropped_n": 3504,
+                "dropped_gross": -650.6139992072324,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2183.060739130413,
+            "pooled_d_net": 5754.640221342542,
+            "pooled_kept_legs": 10879,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 11.735706580366774,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 40,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5320,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -824.4995645954297,
+                "d_gross": 1542.7276588923573,
+                "base_net": -7698.973012254613,
+                "kept_net": -4026.4663139542245,
+                "d_net": 3672.506698300389,
+                "dropped_n": 3536,
+                "dropped_gross": -1542.7276588923573,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5833,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1271.7266272892443,
+                "d_gross": 576.5829731841256,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3519.5822989054977,
+                "d_net": 1877.2855440260928,
+                "dropped_n": 3396,
+                "dropped_gross": -576.5829731841256,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2119.3106320764828,
+            "pooled_d_net": 5549.792242326482,
+            "pooled_kept_legs": 11153,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 12.03128371089536,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 41,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5471,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -855.206485052281,
+                "d_gross": 1512.0207384355058,
+                "base_net": -7698.973012254613,
+                "kept_net": -4143.161759497695,
+                "d_net": 3555.8112527569183,
+                "dropped_n": 3385,
+                "dropped_gross": -1512.0207384355058,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 5965,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1309.7952377998668,
+                "d_gross": 538.5143626735032,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3610.749331711921,
+                "d_net": 1786.1185112196695,
+                "dropped_n": 3264,
+                "dropped_gross": -538.5143626735032,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 2050.535101109009,
+            "pooled_d_net": 5341.929763976588,
+            "pooled_kept_legs": 11436,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 12.336569579288026,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 42,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5571,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1132.3674983934386,
+                "d_gross": 1234.8597250943483,
+                "base_net": -7698.973012254613,
+                "kept_net": -4481.8624887823935,
+                "d_net": 3217.11052347222,
+                "dropped_n": 3285,
+                "dropped_gross": -1234.8597250943483,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6120,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1245.1533021898745,
+                "d_gross": 603.1562982834955,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3605.6976052340615,
+                "d_net": 1791.170237697529,
+                "dropped_n": 3109,
+                "dropped_gross": -603.1562982834955,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1838.0160233778438,
+            "pooled_d_net": 5008.280761169749,
+            "pooled_kept_legs": 11691,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 12.611650485436893,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 43,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5759,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1295.7139593823176,
+                "d_gross": 1071.5132641054693,
+                "base_net": -7698.973012254613,
+                "kept_net": -4759.242943112897,
+                "d_net": 2939.7300691417167,
+                "dropped_n": 3097,
+                "dropped_gross": -1071.5132641054693,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6302,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1332.591334205431,
+                "d_gross": 515.718266267939,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3760.8701294117473,
+                "d_net": 1635.9977135198433,
+                "dropped_n": 2927,
+                "dropped_gross": -515.718266267939,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1587.2315303734083,
+            "pooled_d_net": 4575.72778266156,
+            "pooled_kept_legs": 12061,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 13.010787486515643,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 44,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 5929,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1446.0252226239213,
+                "d_gross": 921.2020008638656,
+                "base_net": -7698.973012254613,
+                "kept_net": -5014.0769439099095,
+                "d_net": 2684.896068344704,
+                "dropped_n": 2927,
+                "dropped_gross": -921.2020008638656,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6407,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1303.6842465529603,
+                "d_gross": 544.6253539204097,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3770.624783336906,
+                "d_net": 1626.2430595946844,
+                "dropped_n": 2822,
+                "dropped_gross": -544.6253539204097,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1465.8273547842753,
+            "pooled_d_net": 4311.139127939388,
+            "pooled_kept_legs": 12336,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 13.307443365695793,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 45,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6048,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1496.0408402800424,
+                "d_gross": 871.1863832077445,
+                "base_net": -7698.973012254613,
+                "kept_net": -5134.140121451203,
+                "d_net": 2564.83289080341,
+                "dropped_n": 2808,
+                "dropped_gross": -871.1863832077445,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6525,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1324.0548724586488,
+                "d_gross": 524.2547280147212,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3836.583652111154,
+                "d_net": 1560.2841908204364,
+                "dropped_n": 2704,
+                "dropped_gross": -524.2547280147212,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1395.4411112224657,
+            "pooled_d_net": 4125.117081623846,
+            "pooled_kept_legs": 12573,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 13.563106796116505,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 46,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6209,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1470.249563831607,
+                "d_gross": 896.9776596561799,
+                "base_net": -7698.973012254613,
+                "kept_net": -5208.388767289173,
+                "d_net": 2490.58424496544,
+                "dropped_n": 2647,
+                "dropped_gross": -896.9776596561799,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6689,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1259.6996863725258,
+                "d_gross": 588.6099141008442,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3837.0006753716425,
+                "d_net": 1559.867167559948,
+                "dropped_n": 2540,
+                "dropped_gross": -588.6099141008442,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1485.587573757024,
+            "pooled_d_net": 4050.451412525388,
+            "pooled_kept_legs": 12898,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 13.913700107874865,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 47,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6370,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1624.1615492678043,
+                "d_gross": 743.0656742199826,
+                "base_net": -7698.973012254613,
+                "kept_net": -5460.333372838565,
+                "d_net": 2238.6396394160483,
+                "dropped_n": 2486,
+                "dropped_gross": -743.0656742199826,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 6843,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1161.867816372524,
+                "d_gross": 686.441784100846,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3799.8802631777176,
+                "d_net": 1596.987579753873,
+                "dropped_n": 2386,
+                "dropped_gross": -686.441784100846,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1429.5074583208286,
+            "pooled_d_net": 3835.6272191699213,
+            "pooled_kept_legs": 13213,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 14.253505933117584,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 48,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6491,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1597.8144893433994,
+                "d_gross": 769.4127341443875,
+                "base_net": -7698.973012254613,
+                "kept_net": -5508.489266526531,
+                "d_net": 2190.483745728083,
+                "dropped_n": 2365,
+                "dropped_gross": -769.4127341443875,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7007,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1256.3730958559163,
+                "d_gross": 591.9365046174537,
+                "base_net": -5396.8678429315905,
+                "kept_net": -3957.112010461623,
+                "d_net": 1439.7558324699676,
+                "dropped_n": 2222,
+                "dropped_gross": -591.9365046174537,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1361.3492387618412,
+            "pooled_d_net": 3630.2395781980504,
+            "pooled_kept_legs": 13498,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 14.560949298813377,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 49,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6666,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1572.382201360733,
+                "d_gross": 794.8450221270539,
+                "base_net": -7698.973012254613,
+                "kept_net": -5589.671153425999,
+                "d_net": 2109.301858828614,
+                "dropped_n": 2190,
+                "dropped_gross": -794.8450221270539,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7151,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1343.6669286402453,
+                "d_gross": 504.6426718331247,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4100.325605959369,
+                "d_net": 1296.5422369722219,
+                "dropped_n": 2078,
+                "dropped_gross": -504.6426718331247,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1299.4876939601786,
+            "pooled_d_net": 3405.844095800836,
+            "pooled_kept_legs": 13817,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 14.905070118662351,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 50,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6814,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1598.5388338329005,
+                "d_gross": 768.6883896548864,
+                "base_net": -7698.973012254613,
+                "kept_net": -5705.325182531457,
+                "d_net": 1993.647829723156,
+                "dropped_n": 2042,
+                "dropped_gross": -768.6883896548864,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7315,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1334.4099276035213,
+                "d_gross": 513.8996728698487,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4151.173606766241,
+                "d_net": 1245.6942361653491,
+                "dropped_n": 1914,
+                "dropped_gross": -513.8996728698487,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1282.588062524735,
+            "pooled_d_net": 3239.342065888505,
+            "pooled_kept_legs": 14129,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 15.241639697950378,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 51,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 6958,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1717.5591998425264,
+                "d_gross": 649.6680236452605,
+                "base_net": -7698.973012254613,
+                "kept_net": -5910.531786379466,
+                "d_net": 1788.4412258751472,
+                "dropped_n": 1898,
+                "dropped_gross": -649.6680236452605,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7486,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1432.6941429637463,
+                "d_gross": 415.61545750962364,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4315.51300254365,
+                "d_net": 1081.3548403879404,
+                "dropped_n": 1743,
+                "dropped_gross": -415.61545750962364,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 1065.2834811548842,
+            "pooled_d_net": 2869.7960662630876,
+            "pooled_kept_legs": 14444,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 15.581445523193096,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 52,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7138,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1835.2891366481897,
+                "d_gross": 531.9380868395972,
+                "base_net": -7698.973012254613,
+                "kept_net": -6134.616466140425,
+                "d_net": 1564.3565461141889,
+                "dropped_n": 1718,
+                "dropped_gross": -531.9380868395972,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7671,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1427.2606648201438,
+                "d_gross": 421.0489356532262,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4379.540539276262,
+                "d_net": 1017.3273036553283,
+                "dropped_n": 1558,
+                "dropped_gross": -421.0489356532262,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 952.9870224928234,
+            "pooled_d_net": 2581.683849769517,
+            "pooled_kept_legs": 14809,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 15.975188781014024,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 53,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7282,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1807.6113473439593,
+                "d_gross": 559.6158761438276,
+                "base_net": -7698.973012254613,
+                "kept_net": -6193.034615025999,
+                "d_net": 1505.9383972286141,
+                "dropped_n": 1574,
+                "dropped_gross": -559.6158761438276,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7822,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1496.5474671557351,
+                "d_gross": 351.76213331763483,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4506.369744831611,
+                "d_net": 890.4980980999799,
+                "dropped_n": 1407,
+                "dropped_gross": -351.76213331763483,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 911.3780094614624,
+            "pooled_d_net": 2396.436495328594,
+            "pooled_kept_legs": 15104,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 16.293419633225458,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 54,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7430,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1907.644823634677,
+                "d_gross": 459.5823998531098,
+                "base_net": -7698.973012254613,
+                "kept_net": -6381.348899153359,
+                "d_net": 1317.6241131012548,
+                "dropped_n": 1426,
+                "dropped_gross": -459.5823998531098,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 7974,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1566.7017754126855,
+                "d_gross": 281.6078250606845,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4635.63877643391,
+                "d_net": 761.2290664976808,
+                "dropped_n": 1255,
+                "dropped_gross": -281.6078250606845,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 741.1902249137943,
+            "pooled_d_net": 2078.8531795989356,
+            "pooled_kept_legs": 15404,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 16.617044228694713,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 55,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7584,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1943.260453753421,
+                "d_gross": 423.9667697343659,
+                "base_net": -7698.973012254613,
+                "kept_net": -6508.947421542833,
+                "d_net": 1190.0255907117808,
+                "dropped_n": 1272,
+                "dropped_gross": -423.9667697343659,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8095,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1630.1353279348114,
+                "d_gross": 218.17427253855863,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4744.445767281862,
+                "d_net": 652.4220756497289,
+                "dropped_n": 1134,
+                "dropped_gross": -218.17427253855863,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 642.1410422729246,
+            "pooled_d_net": 1842.4476663615096,
+            "pooled_kept_legs": 15679,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 16.913700107874867,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 56,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7691,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -1979.3902011127564,
+                "d_gross": 387.83702237503053,
+                "base_net": -7698.973012254613,
+                "kept_net": -6606.872640318629,
+                "d_net": 1092.1003719359842,
+                "dropped_n": 1165,
+                "dropped_gross": -387.83702237503053,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8221,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1627.8530154976734,
+                "d_gross": 220.45658497569661,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4790.558305620258,
+                "d_net": 606.3095373113329,
+                "dropped_n": 1008,
+                "dropped_gross": -220.45658497569661,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 608.2936073507271,
+            "pooled_d_net": 1698.409909247317,
+            "pooled_kept_legs": 15912,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 17.16504854368932,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 57,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7830,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2125.6137051122414,
+                "d_gross": 241.61351837554548,
+                "base_net": -7698.973012254613,
+                "kept_net": -6838.458678203064,
+                "d_net": 860.5143340515497,
+                "dropped_n": 1026,
+                "dropped_gross": -241.61351837554548,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8328,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1695.4306754976737,
+                "d_gross": 152.87892497569624,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4901.018175188241,
+                "d_net": 495.8496677433495,
+                "dropped_n": 901,
+                "dropped_gross": -152.87892497569624,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 394.4924433512417,
+            "pooled_d_net": 1356.3640017948992,
+            "pooled_kept_legs": 16158,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 17.43042071197411,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 58,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 7898,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2144.339892593757,
+                "d_gross": 222.88733089402967,
+                "base_net": -7698.973012254613,
+                "kept_net": -6897.92624705684,
+                "d_net": 801.0467651977733,
+                "dropped_n": 958,
+                "dropped_gross": -222.88733089402967,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8439,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1686.9840124459563,
+                "d_gross": 161.3255880274137,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4936.401158238066,
+                "d_net": 460.46668469352426,
+                "dropped_n": 790,
+                "dropped_gross": -161.3255880274137,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 384.21291892144336,
+            "pooled_d_net": 1261.5134498912976,
+            "pooled_kept_legs": 16337,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 17.623516720604098,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 59,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8040,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2193.016108218775,
+                "d_gross": 174.21111526901177,
+                "base_net": -7698.973012254613,
+                "kept_net": -7033.8132214087445,
+                "d_net": 665.1597908458689,
+                "dropped_n": 816,
+                "dropped_gross": -174.21111526901177,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8543,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1669.2731990384243,
+                "d_gross": 179.03640143494567,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4957.104883482725,
+                "d_net": 439.76295944886533,
+                "dropped_n": 686,
+                "dropped_gross": -179.03640143494567,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 353.24751670395744,
+            "pooled_d_net": 1104.9227502947342,
+            "pooled_kept_legs": 16583,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 17.88888888888889,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 60,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8184,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2059.2974694040704,
+                "d_gross": 307.9297540837165,
+                "base_net": -7698.973012254613,
+                "kept_net": -6987.720339177837,
+                "d_net": 711.2526730767768,
+                "dropped_n": 672,
+                "dropped_gross": -307.9297540837165,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8674,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1652.3126109387547,
+                "d_gross": 195.9969895346153,
+                "base_net": -5396.8678429315905,
+                "kept_net": -4988.0432922809505,
+                "d_net": 408.82455065064005,
+                "dropped_n": 555,
+                "dropped_gross": -195.9969895346153,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 503.9267436183318,
+            "pooled_d_net": 1120.0772237274168,
+            "pooled_kept_legs": 16858,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 18.18554476806904,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 61,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8366,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2068.5259903329697,
+                "d_gross": 298.70123315481715,
+                "base_net": -7698.973012254613,
+                "kept_net": -7106.164185749225,
+                "d_net": 592.8088265053884,
+                "dropped_n": 490,
+                "dropped_gross": -298.70123315481715,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8820,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1764.9249984079852,
+                "d_gross": 83.3846020653848,
+                "base_net": -5396.8678429315905,
+                "kept_net": -5158.057643754881,
+                "d_net": 238.81019917670983,
+                "dropped_n": 409,
+                "dropped_gross": -83.3846020653848,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 382.08583522020194,
+            "pooled_d_net": 831.6190256820983,
+            "pooled_kept_legs": 17186,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 18.53937432578209,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 62,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8519,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2315.612165332972,
+                "d_gross": 51.61505815481496,
+                "base_net": -7698.973012254613,
+                "kept_net": -7446.510621594041,
+                "d_net": 252.46239066057205,
+                "dropped_n": 337,
+                "dropped_gross": -51.61505815481496,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 8955,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1754.0706579829864,
+                "d_gross": 94.23894249038358,
+                "base_net": -5396.8678429315905,
+                "kept_net": -5198.657131197253,
+                "d_net": 198.21071173433756,
+                "dropped_n": 274,
+                "dropped_gross": -94.23894249038358,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 145.85400064519854,
+            "pooled_d_net": 450.6731023949096,
+            "pooled_kept_legs": 17474,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 18.850053937432577,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 63,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8668,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2361.3881704163477,
+                "d_gross": 5.839053071439139,
+                "base_net": -7698.973012254613,
+                "kept_net": -7579.288085428306,
+                "d_net": 119.68492682630767,
+                "dropped_n": 188,
+                "dropped_gross": -5.839053071439139,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 9094,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1814.810398408465,
+                "d_gross": 33.49920206490492,
+                "base_net": -5396.8678429315905,
+                "kept_net": -5312.217897004033,
+                "d_net": 84.64994592755738,
+                "dropped_n": 135,
+                "dropped_gross": -33.49920206490492,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 39.33825513634406,
+            "pooled_d_net": 204.33487275386506,
+            "pooled_kept_legs": 17762,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 19.160733549083062,
+            "in_trade_count_band": false
+          },
+          {
+            "k": 64,
+            "folds": [
+              {
+                "base_legs": 8856,
+                "kept_legs": 8856,
+                "base_gross": -2367.227223487787,
+                "kept_gross": -2367.227223487787,
+                "d_gross": 0.0,
+                "base_net": -7698.973012254613,
+                "kept_net": -7698.973012254613,
+                "d_net": 0.0,
+                "dropped_n": 0,
+                "dropped_gross": 0.0,
+                "fold": "H1->H2"
+              },
+              {
+                "base_legs": 9229,
+                "kept_legs": 9229,
+                "base_gross": -1848.30960047337,
+                "kept_gross": -1848.30960047337,
+                "d_gross": 0.0,
+                "base_net": -5396.8678429315905,
+                "kept_net": -5396.8678429315905,
+                "d_net": 0.0,
+                "dropped_n": 0,
+                "dropped_gross": 0.0,
+                "fold": "H2->H1"
+              }
+            ],
+            "pooled_d_gross": 0.0,
+            "pooled_d_net": 0.0,
+            "pooled_kept_legs": 18085,
+            "pooled_base_legs": 18085,
+            "pooled_legs_per_day": 19.509169363538295,
+            "in_trade_count_band": false
+          }
+        ],
+        "best_in_band": null
+      }
+    }
+  }
+}

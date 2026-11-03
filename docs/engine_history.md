@@ -11,13 +11,15 @@
 
 - [The engine fixes that made the backtest honest](#the-engine-fixes-that-made-the-backtest-honest)
 - [Forward-leak bugs (NB94)](#forward-leak-bugs--fixed-2026-10-21-nb94)
+- [The replay's zeroed `eod` legs](#the-replays-zeroed-eod-legs--found-and-fixed-2026-11-04)
+- [The artifact-cache fingerprint hole](#the-artifact-cache-fingerprint-hole--found-and-fixed-2026-11-04)
+- [A concurrent 1y run makes the test suite look RED](#a-concurrent-1y-run-makes-the-test-suite-look-red-2026-11-04)
 - [The dual-mode inverted_bar look-ahead](#the-dual-mode-inverted_bar-look-ahead--found-and-fixed-2026-11-03)
 - [The 1m detector — three bugs fixed](#the-1m-detector--three-bugs-fixed-2026-10-2324)
 - [Dead knobs](#dead-knobs--verified-2026-10-20)
 - [Known engine bugs and their fixes](#known-engine-bugs-and-their-fixes-chronological)
 - [Performance](#performance--the-1y-detector-and-engine)
-- [Operational gotchas](#operational-gotchas)
-## The engine fixes that made the backtest honest
+- [Operational gotchas](#operational-gotchas)## The engine fixes that made the backtest honest
 
 These are real, measured, and worth keeping. They are not edge work.
 
@@ -150,6 +152,167 @@ must be **0**.
 tighten TP1/TP2. The warmup gate is a separate, explicit concern.
 
 Full write-up: `docs/nb94_1w_vs_1y.md`.
+
+---
+
+## The replay's zeroed `eod` legs — found and fixed 2026-11-04
+
+**A diagnostic bug, not an engine bug** — but it is here because the
+*class* of bug is the one this repo keeps paying for.
+
+### The symptom
+
+The trail MFE/MFA diagnostic's **reconciliation check (b2)** printed:
+
+```
+RECONCILIATION: d_gross $+66.6330  d_fees $+0.0000  -> *** MISMATCH ***
+```
+
+The replay's own trail-off baseline did not equal the engine's. The
+one-month slice reconciled EXACTLY; the 8-month corpus did not.
+
+### The root cause
+
+`_replay_trail()` returns a **gross** alongside the exit price. Every
+branch computed it correctly — `sl`, `tp`, `trail_stop` — except the
+two **`eod`** branches, which returned a hard-coded `0.0`:
+
+```python
+# BEFORE (buggy) — the exit price was right, the gross was zeroed
+if n == 0:
+    return "eod", eod_px, 0.0
+...
+if best < 0:
+    return "eod", eod_px, 0.0
+```
+
+An `eod` leg exits at the engine's `exit_px`, so its gross is
+`(exit_px − entry_px) × side × qty` — **not zero**. The 8-month corpus
+has **8 `eod` legs** with a combined gross of **−$66.63**, which is
+**exactly** the reconciliation gap.
+
+> The `eod` bucket is tiny (0.32% of legs) and its total is small
+> (−$66 on 2,539 legs), so the error was **invisible in every headline
+> number** — it only showed up in the reconciliation check. That is
+> exactly what the check is for.
+
+### Why the one-month slice missed it
+
+2025-01 has **zero** `eod` legs (its exit reasons are `tp` 164,
+`sl` 108, `contra_close` 12). The bug is **latent on short windows**
+and only fires on windows that contain an end-of-day close. A one-month
+validation slice is not a validation of this branch.
+
+### The fix
+
+```python
+# AFTER (correct) — the gross is the engine's, in every branch
+if n == 0:
+    return "eod", eod_px, (eod_px - entry_px) * side
+...
+if best < 0:
+    return "eod", eod_px, (eod_px - entry_px) * side
+```
+
+Reconciliation is now `d_gross $+0.0000  d_fees $+0.0000 -> EXACT`.
+
+### The rule
+
+> **A branch that returns a price MUST return the gross that goes with
+> it.** A zeroed default in a P&L path is a silent-corruption field —
+> the same class as `ClosedTrade.signal_bar = 0` in AGENTS.md § 1.6.
+
+And the meta-rule, which is the one that actually caught it:
+
+> **The reconciliation check is not a formality.** It is the only thing
+> standing between a replay and a plausible-looking wrong number. It
+> found a bug that had been sitting in a branch that a one-month
+> validation slice could never exercise. **When a check fires, fix the
+> diagnostic — do not explain the mismatch away.**
+
+---
+
+## The artifact-cache fingerprint hole — found and fixed 2026-11-04
+
+**One nominal config produced TWO different books.** This is the
+fifth defect class in this repo's history, and the most insidious
+one yet, because it does not corrupt a number — it makes the SAME
+number mean two different things.
+
+### The symptom
+
+The 5-event sequence whitelist was fitted on a **64,978-leg** ledger
+and promoted. Two days later, the same canonical recipe — same
+`build_engine_kwargs()`, same data, same dates — produced **37,159
+legs** on a fresh ledger. The two ledgers could not both be right.
+
+The discriminator was not a guess:
+
+| ledger | built | `cache_hit` | vol-gate drops | legs | `trail_stop` in exit reasons? |
+|---|---|---|---|---|---|
+| `seqdrop_none` | Nov 3 22:30 | **True** | 53,568 | 64,978 | **no** |
+| `seqwl_unfiltered` | Nov 4 02:37 | **False** | 90,620 | 37,159 | **yes** |
+
+The second ledger was built with a **fresh artifact cache** — and it
+had the trailing stop in its exit reasons. The first was served from
+a **cached** artifact that predated the trailing stop going
+canonical.
+
+### The root cause
+
+`bt/_engine/vol_state.py` builds the `vol_state` measure the engine
+gates entries on. That measure is **pickled into the artifact cache**
+as the `"vol_state"` key.
+
+But the module was in **neither** fingerprint tuple:
+
+* `runtime/sweeps/cached_sweep.py::_ARTIFACT_SOURCES`
+* `runtime/diagnostics/leg_ledger.py::_source_hash()`'s file list
+
+Both tuples deliberately exclude the engine's bar loop (it changes
+often and cannot change a pickled zone set) — but `vol_state.py`
+**does** change a pickled artifact. So:
+
+> Editing `vol_state.py` never invalidated the cache. A stale
+> `vol_state` kept being served. The engine's `_vol_state_pass`
+> compared a threshold against a measure that had never been
+> materialised in the cached artifact.
+
+### The blast radius
+
+The whitelist was fitted against the stale book, shipped, and then
+re-measured against the fresh one. Only **14 of the 25 keys
+survived** the re-fit. The promotion would have shipped a set
+describing a strategy that no longer existed.
+
+### The fix
+
+`bt/_engine/vol_state.py` added to **both** fingerprint tuples.
+
+### The rule
+
+> **If a module's OUTPUT is pickled into the artifact, that module
+> belongs in the fingerprint tuple.**
+
+The tuples are not "the files that changed the recipe" — they are
+"the files that changed the ARTIFACT". A module that produces a
+pickled artifact and is missing from the tuple is a **stale-cache
+generator**: every number produced through it is unreproducible.
+
+### The companion bug — the signal-conservation chain
+
+Found in the same session, in the same file. The engine's
+`signals_unaccounted` diagnostic is required to be **0** (AGENTS.md),
+and it is computed as `n_signals_emitted − (orders placed + drops)`.
+The whitelist's drop counter — `n_dropped_seq_whitelist` — was
+**not in that chain**, exactly like the structure gate was missing
+before 2026-10-23.
+
+With the canonical whitelist ON it drops ~109k of the ~118k emitted
+signals, so omitting it made `signals_unaccounted` read as a
+**massive leak** (a negative number whose magnitude is the
+whitelist's drop count). **FIXED** — `n_dropped_seq_whitelist` is
+now in `_accounted`, and `gate_breakdown` reports it.
 
 ---
 
@@ -786,7 +949,7 @@ Pandas column assignment always copies, so it is now a **rename**
 (`df.rename(columns={"tickv": "volume"})`) — a label-only change,
 zero extra bytes.
 
-### Numba: considered, not needed (yet)
+### Numba: measured, and REJECTED (2026-11-04)
 
 A Numba kernel for the O(n_bars × n_open) loop was the original
 plan. It is not the right lever any more. After D2 + D3 + P2–P4 the
@@ -802,9 +965,241 @@ book depth is capped at 20 and the scan runs at ~71k bars/s on 1y.
 If the sweep matrix grows past ~60 cells, revisit Numba. Below that,
 the effort is better spent on the knobs.
 
+> ### ✅ RE-MEASURED 2026-11-04 — Numba was measured, and it LOSES.
+>
+> The question was re-opened on the current recipe (trailing stop +
+> `hvn_single` + the 21-key whitelist). **Numba was benchmarked, not
+> dismissed.** The result: the two places a Numba kernel *could* go
+> are both better served by **vectorised NumPy**, and the one place
+> Numba would have been a clear win is **already 99% idle**.
+>
+> **Q1 — what would a jitted bar loop actually buy?**
+>
+> A Numba-jitted bare bar scan (the shape of the engine's loop: a
+> trigger-list walk plus a scalar SL/TP test) runs at **279,184,658
+> bars/s** vs **3,306,044 bars/s** for the Python equivalent — **84.4×**
+> on the scan alone. But the scan is **not** the engine:
+>
+> | component | time (1-month slice, 1,377,190 bars) |
+> |---|---|
+> | bare scan, Numba | **4.9 ms** |
+> | bare scan, Python | 416.6 ms |
+> | **the actual engine** | **2,994 ms** |
+>
+> The engine is **7.16×** the bare Python scan. So the Numba scan is
+> **4.9 ms of a 2,994 ms engine** — the scan is **0.16%** of the work.
+> A fully-jitted engine would still have to do everything else in
+> Python (the `OpenTrade` objects, the dataclass construction, the
+> `ClosedTrade` appends, the caps' `searchsorted` lookups), because
+> Numba cannot own Python objects. **Realistic ceiling: ~1.16×**, and
+> only if every one of those object operations were also rewritten.
+>
+> **Q2 — why the scan is already idle.** The engine's per-bar work is
+> gated on events that are **rare**:
+>
+> | event | bars | share of the corpus |
+> |---|---|---|
+> | zone trigger | 2,475 | **0.180%** |
+> | zone inversion | 699 | **0.051%** |
+> | union (entry-relevant) | 3,050 | **0.221%** |
+>
+> **99.78% of bars do nothing.** The engine's book depth is
+> **max 2** on the canonical slice. This is the D3 + vol-gate +
+> whitelist story: the recipe itself made the loop idle. There is
+> nothing left for a compiler to optimise.
+>
+> **Q3 — the trailing stop does NOT change this.** The concern was
+> that a stateful trailing exit (peak tracking, arming, ratcheting)
+> would break the "fixed SL/TP" assumption that makes the loop
+> vectorisable. **It does not** — because the trail only runs on
+> **open positions**, and there are at most **2** at a time. The
+> trail's state lives on the `OpenTrade` object, not in a
+> per-bar array, so it is O(open) not O(bars). The trail's
+> contribution to the profile is **14,309 calls to
+> `_trail_level_usd` = 0.001% of the bar loop**.
+>
+> **Q4 — the ONE place Numba looked right, and why it still lost.**
+> `vol_state._rolling_median_baseline` was a **20.8 s** Python loop
+> (the single most expensive artifact in the 1y build). A hand-written
+> Numba kernel for it:
+>
+> | implementation | 1y (1,333,415 buckets, win=60) | speedup |
+> |---|---|---|
+> | Python loop (original) | 20.15 s | 1.0× |
+> | **Numba kernel** | **1.60 s** | **12.6×** |
+> | **vectorised NumPy (`sliding_window_view` + `np.median`)** | **1.07 s** | **18.8×** |
+>
+> **NumPy beat Numba by 1.5×**, and it needs no compiler, no cache
+> directory, and no warm-up. The vectorised form is **exactly
+> equivalent** (`np.array_equal`, not `allclose`) — see PERF P6 below.
+>
+> **VERDICT: no Numba.** Two vectorised-NumPy changes bought
+> **1.50×** on a 1y cell (352.0 s → 234.5 s) for a fraction of the
+> risk. Numba would have bought at most ~1.16× on the engine, **0×
+> on the artifacts** (they are already vectorised), and would have
+> cost a compile dependency in a repo whose whole value is
+> reproducibility.
+>
+> **The lever was never the compiler. It was the two Python loops
+> hiding inside a vectorised-looking module.**
+
+### PERF P5 — `memoryview` instead of numpy scalar boxing (2026-11-04)
+
+The bar loop reads **five scalars per bar**. `float(arr[i])` boxes a
+fresh numpy scalar on every read — 5 boxes × 41M bars on 1y.
+
+Measured on the 1-month slice (1,377,190 bars, five arrays read):
+
+| read pattern | time | rate | extra RAM on 1y |
+|---|---|---|---|
+| `float(arr[i])` (original) | 709.9 ms | 1.94M bars/s | 0 |
+| `arr.tolist()` | 311.8 ms | 4.42M bars/s | **+990 MB/array (~5 GB)** |
+| `arr.item(i)` | 547.2 ms | 2.52M bars/s | 0 |
+| **`memoryview(arr)`** | **270.2 ms** | **5.10M bars/s** | **0** |
+
+`memoryview` is a **VIEW**, not a copy — it costs 0 extra bytes, so it
+is the only variant affordable on 1y (the engine already peaks above
+4 GB; `.tolist()` would add ~5 GB).
+
+It yields the **same** Python scalars: a float64 memoryview read gives
+a Python `float`, an int64 memoryview read gives a Python `int`. The
+values are bit-identical.
+
+**End-to-end A/B** (same machine, same session, 5 reps each):
+
+| variant | times | median | best |
+|---|---|---|---|
+| `float(arr[i])` | 2.536 / 2.522 / 2.878 / 2.838 / 2.897 s | **2.838 s** | 2.522 s |
+| `memoryview(arr)` | 2.552 / 2.207 / 2.209 / 2.221 / 2.331 s | **2.221 s** | 2.207 s |
+
+**1.28× on the engine**, with `gross` **bit-identical**
+(48.2183186474 on the 2025-01 slice).
+
+### PERF P6 — vectorised `_rolling_median_baseline` (2026-11-04)
+
+`vol_state._rolling_median_baseline` was the **single most expensive
+artifact** in the 1y build (**20.8 s** of 92.6 s). It is now a
+**vectorised sliding window**:
+
+```python
+sw = sliding_window_view(per_bucket, win)   # every FULL window in one view
+out[start + win - 1 : end + win - 1] = np.median(sw[start:end], axis=1)
+```
+
+The first `win - 1` buckets use a **short** window (length `k + 1`)
+and are computed separately; only buckets `>= win - 1` have a
+full-length window. Chunked at 100,000 so the temporary stays bounded.
+
+**Exactly equivalent** — verified with `np.array_equal` (not
+`allclose`) against the original loop across a sweep of
+`(nb, win)` shapes: `nb ∈ {0, 1, 2, 3, 59, 60, 61, 62, 100, 1000,
+5000}` × `win ∈ {1, 2, 3, 60, 61, 120}` — **0 mismatches**, plus
+zero/constant/random edge cases.
+
+> **Rule: `np.median` over a Python loop is a vectorisation, not a
+> micro-optimisation.** The loop was O(n_buckets × win) with a Python
+> function call per bucket. `sliding_window_view` makes the windows a
+> VIEW — no copy — and `np.median(axis=1)` runs the partition in C.
+
+### The net effect of P5 + P6 (2026-11-04)
+
+| stage | 1y artifact build | 1y engine | **1y cell total** |
+|---|---|---|---|
+| before | 197.8 s | 154.2 s | **352.0 s** |
+| after | 130.5 s | 104.0 s | **234.5 s** |
+
+**1.50×**, with the canonical result **unchanged**: the 1y corpus
+returns **6,663 trades** and **gross +$2,583.18** — the same figure
+the canonical recipe has always reported.
+
 ---
 
 ## Operational gotchas
+
+### A concurrent 1y run makes the test suite look RED (2026-11-04)
+
+**The trap.** `tests/test_no_dead_imports.py::test_every_module_imports_cleanly`
+imports **every** module in the repo in **ONE** process. A corpus run
+holds ~6 GB while it works. Run them together and the import guard
+OOMs — and the suite reports a failure that is **not** a code defect.
+
+**What it looked like.** On 2026-11-04, with a `trail_sides_corpus_ab`
+run in flight, the suite reported:
+
+```
+FAILED tests/test_no_dead_imports.py::test_every_module_imports_cleanly
+1 failed, 434 passed, 1 skipped in 394.01s (0:06:34)
+```
+
+The same tree, four minutes later, with the machine to itself:
+
+```
+435 passed, 1 skipped in 27.94s
+```
+
+**The rule.** AGENTS.md § 7 already says *"never run two heavy cells
+concurrently"*, but the consequence was not stated: **a concurrent run
+makes the suite lie.** Before believing a red suite, check for a run
+in flight:
+
+```bash
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Select-Object ProcessId,CommandLine"
+```
+
+**And the converse trap:** a suite that takes **minutes** instead of
+**~28 seconds** is itself the symptom. The 394 s run above was not a
+slow machine — it was a machine with 6.7 GB free and two 6 GB
+processes on it.
+
+> **This is why the six "KNOWN RED" failures of 2026-11-04 were
+> listed as a known baseline.** A known-red baseline is only
+> meaningful if the suite is run on a quiet machine; otherwise the
+> baseline itself is contaminated.
+
+### A comment edit invalidated seven corpus ledgers (2026-11-04)
+
+**The trap.** The source fingerprint that decides "is this ledger
+still current?" was a SHA1 over the **raw bytes** of the
+artifact-producing sources:
+
+```python
+h.update((_REPO_ROOT / rel).read_bytes())
+```
+
+So **any** edit to those files invalidated the ledger — including a
+comment. On 2026-11-04, updating the measurement comment block in
+`bt/optimal_config.py` (the file that holds the canonical values
+*and* their documentation) invalidated **seven** corpus ledgers that
+had just been measured, each at roughly four minutes.
+
+**Why that is worse than a wasted rebuild.** The promote workflow is
+**change the config → re-measure → document the result**. With a
+raw-bytes hash, the *documenting* step changes the hash that says
+the measurement is current — the loop destroys its own evidence. And
+the file most likely to be edited is `bt/optimal_config.py`, which
+holds the canonical values **and** the table explaining them.
+
+**The fix.** The fingerprint is now over the **AST-normalised**
+source (`ast.dump(..., include_attributes=False)`), shared by all
+three hash sites (`leg_ledger`, `cached_sweep`, `results.registry`):
+
+```python
+h.update(ast.dump(ast.parse(src), annotate_fields=True,
+                  include_attributes=False).encode("utf-8"))
+```
+
+A comment, a docstring's prose, or a whitespace change **does not**
+move the hash. Every executable construct — names, literals, control
+flow — does. A file that does not parse falls back to raw bytes, so a
+partial file still registers a change.
+
+> **Rule it exposes.** A cache key must track **behaviour**, not
+> **bytes**. Bytes are a proxy for behaviour that is too coarse: it
+> invalidates on edits that cannot change the answer and (worse)
+> gives a false sense of safety on edits that can.
+
+Locked by `tests/test_results_registry.py::test_source_fingerprint_ignores_a_comment_only_edit`
+and `::test_source_fingerprint_detects_a_behaviour_change`.
 
 ### Diagnostic logging
 

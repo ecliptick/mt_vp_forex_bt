@@ -18,10 +18,15 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from runtime.diagnostics.leg_ledger import build_ledger  # noqa: E402
+from runtime.results import registry  # noqa: E402
 
 OUT_DIR = Path("runtime/diagnostics/_reports")
 
-THRESHOLDS = [0.0, 0.7, 0.85, 1.0]
+THRESHOLDS = [0.0, 0.7, 0.85, 1.0, 1.1, 1.2, 1.3]
+
+# The corpus window the A/B is measured over.
+CORPUS_START = "2024-01-01"
+CORPUS_END = "2026-07-16"
 
 def summarise(payload: dict) -> dict:
     legs = payload["legs"]
@@ -77,6 +82,46 @@ def main() -> None:
               f"{r['pct_days_below_30']:.1f}% | ${r['gross']:.2f} | ${r['fees']:.2f} | "
               f"${r['net']:.2f} | {r['gross_per_leg']:.4f} | {r['fee_per_leg']:.4f} | "
               f"{r['hit_rate']:.3f} |")
+
+    # ── DURABLE RECORD ───────────────────────────────────────────────
+    # § 2.3: every diagnostic that produces a verdict must record it.
+    # The PER-THRESHOLD ledgers are already recorded by ``build_ledger``;
+    # this records the A/B CURVE itself -- the thing that actually
+    # decided the knob (is the EV peak at 1.0, or on a rising slope?).
+    # Without this, the seven individual runs are in the registry but
+    # the conclusion drawn FROM them is not.
+    by_thr = {r["threshold"]: r for r in rows}
+    peak_thr = max(by_thr, key=lambda t: by_thr[t]["gross_per_leg"])
+    peak = by_thr[peak_thr]
+    registry.record_run(
+        kind="expand_prev_day_ab",
+        params={
+            "knob": "vol_state_min_expand_prev_day",
+            "thresholds": list(THRESHOLDS),
+            "start": CORPUS_START,
+            "end": CORPUS_END,
+            "criterion": "gross_per_leg",
+        },
+        summary={
+            "peak_threshold": peak_thr,
+            "peak_gross_per_leg": round(peak["gross_per_leg"], 6),
+            "peak_legs": peak["legs"],
+            "peak_net": round(peak["net"], 2),
+            "curve": {
+                str(r["threshold"]): round(r["gross_per_leg"], 6)
+                for r in rows
+            },
+        },
+        payload={"rows": rows},
+        src_fp=registry.source_fingerprint([
+            "bt/_engine/vol_state.py",
+            "bt/_engine/vp_multi_target_engine.py",
+            "bt/optimal_config.py",
+        ]),
+    )
+    print()
+    print(f"recorded: EV peak at {peak_thr} "
+          f"(gross/leg={peak['gross_per_leg']:.4f}, legs={peak['legs']})")
 
 
 if __name__ == "__main__":

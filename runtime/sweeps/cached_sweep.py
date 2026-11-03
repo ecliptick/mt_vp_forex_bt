@@ -461,6 +461,25 @@ _ARTIFACT_SOURCES = (
     "bt/_engine/rolling_p95.py",
     "bt/_engine/market_structure.py",
     "bt/_engine/timebase.py",
+    # 2026-11-04: ``vol_state`` IS a pickled artifact (the
+    # ``vol_state`` key of the artifact dict) and it is produced by
+    # this module -- so it MUST be fingerprinted. It was missing, and
+    # the omission was load-bearing: when ``vol_expand_prev_day``
+    # was added to ``build_vol_state``, the pickled artifact kept
+    # serving the OLD measure set, so the engine's
+    # ``_vol_state_pass`` compared a threshold against a measure that
+    # was never materialised.
+    #
+    # The symptom was silent and large: the SAME nominal config
+    # produced 64,978 legs (53,568 signals dropped by the vol gate)
+    # on one ledger and 37,159 legs (90,620 dropped) on another. The
+    # two ledgers disagreed because one was built against a stale
+    # ``vol_state`` artifact.
+    #
+    # RULE: if a module's OUTPUT is pickled into the artifact, that
+    # module belongs in this tuple. The comment above says
+    # "artifact-PRODUCING modules" -- this is one.
+    "bt/_engine/vol_state.py",
     "bt/optimal_config.py",
 )
 
@@ -471,16 +490,13 @@ def _source_hash() -> str:
     A missing file contributes a sentinel rather than raising, so a
     partially-installed tree still produces a (stable) fingerprint
     instead of crashing the sweep.
+
+    The hash is over the **AST-normalised** source, so a comment-only
+    edit does NOT invalidate the artifact cache. A raw-bytes hash makes
+    documenting a result invalidate the measurement that produced it.
     """
-    h = hashlib.sha1()
     root = Path(__file__).resolve().parents[2]
-    for rel in _ARTIFACT_SOURCES:
-        h.update(rel.encode("utf-8"))
-        try:
-            h.update((root / rel).read_bytes())
-        except OSError:
-            h.update(b"<missing>")
-    return h.hexdigest()[:16]
+    return registry.normalised_source_fingerprint(_ARTIFACT_SOURCES)
 
 
 def _fingerprint(path: Path, start: str | None, end: str | None,

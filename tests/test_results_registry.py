@@ -69,6 +69,62 @@ def test_config_fingerprint_does_not_depend_on_the_commit():
 
 
 # ─────────────────────────────────────────────────────────────────────
+# The SOURCE fingerprint -- must track BEHAVIOUR, not bytes
+# ─────────────────────────────────────────────────────────────────────
+def test_source_fingerprint_ignores_a_comment_only_edit(tmp_path):
+    """A comment edit must NOT invalidate a measurement.
+
+    The promote workflow is "change the config -> re-measure ->
+    document the result". With a raw-bytes hash, DOCUMENTING the
+    result changes the hash that says the measurement is current --
+    so the loop destroys its own evidence. That is not theoretical:
+    it happened on 2026-11-04, when updating the comment block in
+    ``bt/optimal_config.py`` invalidated seven corpus ledgers that
+    had just been measured (each ~4 minutes).
+    """
+    src = tmp_path / "mod.py"
+    src.write_text("X = 1\n# a comment\n", encoding="utf-8")
+
+    before = registry.normalised_source_fingerprint([str(src)])
+    src.write_text("X = 1\n# a DIFFERENT comment\n", encoding="utf-8")
+    after = registry.normalised_source_fingerprint([str(src)])
+    assert before == after, (
+        "a comment-only edit changed the source fingerprint -- "
+        "documenting a result must not invalidate its measurement"
+    )
+
+
+def test_source_fingerprint_detects_a_behaviour_change(tmp_path):
+    """The whole point of the fingerprint: a REAL change must move it."""
+    src = tmp_path / "mod.py"
+    src.write_text("X = 1\n", encoding="utf-8")
+    before = registry.normalised_source_fingerprint([str(src)])
+
+    src.write_text("X = 2\n", encoding="utf-8")
+    assert registry.normalised_source_fingerprint([str(src)]) != before, (
+        "a value change did NOT change the source fingerprint -- "
+        "the fingerprint must track behaviour, not just comments"
+    )
+
+
+def test_source_fingerprint_detects_a_structural_change(tmp_path):
+    """Adding a branch must move the fingerprint too."""
+    src = tmp_path / "mod.py"
+    src.write_text("def f(x):\n    return x\n", encoding="utf-8")
+    before = registry.normalised_source_fingerprint([str(src)])
+
+    src.write_text("def f(x):\n    if x:\n        return 1\n    return x\n",
+                   encoding="utf-8")
+    assert registry.normalised_source_fingerprint([str(src)]) != before
+
+
+def test_source_fingerprint_tolerates_a_missing_file(tmp_path):
+    """A partially-installed tree must yield a stable hash, not crash."""
+    h = registry.normalised_source_fingerprint([str(tmp_path / "nope.py")])
+    assert isinstance(h, str) and len(h) == 16
+
+
+# ─────────────────────────────────────────────────────────────────────
 # The run_id
 # ─────────────────────────────────────────────────────────────────────
 def test_run_id_is_a_legal_filename_on_windows():

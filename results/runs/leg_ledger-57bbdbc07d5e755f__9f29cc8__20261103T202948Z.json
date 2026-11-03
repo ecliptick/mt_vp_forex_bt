@@ -1,0 +1,71 @@
+{
+  "schema": "results-run/1",
+  "run_id": "leg_ledger-57bbdbc07d5e755f__9f29cc8__20261103T202948Z",
+  "kind": "leg_ledger",
+  "config_fp": "57bbdbc07d5e755f",
+  "ts_utc": "2026-11-03T20:29:48Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "bed59c744ea9e083",
+  "params": {
+    "start": "2025-07-09",
+    "end": "2026-07-16",
+    "warmup_days": 14,
+    "engine_overrides": {
+      "structure_seq_whitelist": "frozenset({'long|cCcbb', 'long|bCcbb', 'long|bbCcb', 'long|CcbCB', 'long|CcbbC', 'long|cCcCB', 'long|bbbbC', 'long|CcbCc', 'long|cCcCc', 'long|CcCBc', 'long|BcCcC', 'long|cbCcC', 'long|Ccbbb'})"
+    },
+    "lots": 0.01,
+    "contract_size": 100.0,
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "variant": true
+  },
+  "summary": {
+    "legs": 1997,
+    "gross": 110.370708,
+    "fees": 953.581831,
+    "net": -843.211123,
+    "gross_per_leg": 0.055268,
+    "fee_per_leg": 0.477507,
+    "drift": 313.255,
+    "excess": -202.884292,
+    "trades_per_day": 5.3683
+  },
+  "path": "results/runs/leg_ledger-57bbdbc07d5e755f__9f29cc8__20261103T202948Z.json",
+  "parent_fp": "57bbdbc07d5e755f",
+  "payload": {
+    "n_legs": 1997,
+    "meta": {
+      "scope": "XAUUSD_S1_1y__20250709_20260716",
+      "exec_start": "2025-06-25",
+      "exec_end": "2026-07-16",
+      "score_start": "2025-07-09",
+      "score_end": "2026-07-16",
+      "bars": 18437492,
+      "n_zones": 61177,
+      "cache_hit": true,
+      "engine_secs": 37.76648070000374,
+      "legs_total": 2035,
+      "legs_kept": 1997,
+      "legs_skipped_warmup": 38,
+      "n_dropped_vol_state": 49652,
+      "n_signals_emitted": 63131
+    },
+    "exit_reasons": [
+      "tp",
+      "tp1",
+      "tp2",
+      "sl",
+      "inv",
+      "eod",
+      "soft_sl",
+      "contra_close",
+      "replaced_by_new_signal",
+      "other",
+      "trail_stop"
+    ],
+    "ledger_path": "runtime\\diagnostics\\_reports\\leg_ledger_seqwlf_longonly_on_H2.json",
+    "ledger_fingerprint": "9a6235913ee23bcf"
+  }
+}

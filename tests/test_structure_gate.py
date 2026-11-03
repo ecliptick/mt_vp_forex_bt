@@ -85,15 +85,60 @@ def test_tp2_is_capped_by_the_swing_window():
     was ``tp_zone_mult_fallback * zone_width`` = 200 x $0.36 = $72,
     then clamped only by the much looser p95 cap). The user asked for
     ALL targets inside the 3-day swing.
+
+    ── RETIRED 2026-11-03 ──
+
+    The knob is no longer reachable from the canonical config: under
+    ``tp_mode='hvn_single'`` there is ONE target, no partial close and
+    no runner leg, so ``tp2_swing_cap`` has nothing to cap.
+
+    The ENGINE still accepts the parameter (the ``multi_target`` A/B
+    path uses it directly), so the guarantee it encodes is preserved
+    for any caller that still drives the multi-target shape. What must
+    NOT happen is the knob coming back through ``build_engine_kwargs``
+    -- a knob the engine accepts but the config does not forward is a
+    knob with a default, and a default is a silent-corruption field
+    (AGENTS.md § 1.6).
     """
-    assert TP2_SWING_CAP is True
-    assert build_engine_kwargs()["tp2_swing_cap"] is True
+    # The engine-level default still caps TP2 to the swing window.
+    import inspect
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+    sig = inspect.signature(run_vp_sniper_backtest)
+    assert sig.parameters["tp2_swing_cap"].default is True, (
+        "the engine must still default tp2_swing_cap to True -- the "
+        "multi_target A/B path relies on it"
+    )
+    # But the canonical config must NOT forward it.
+    assert "tp2_swing_cap" not in build_engine_kwargs(), (
+        "tp2_swing_cap was RETIRED on 2026-11-03 -- under "
+        "tp_mode='hvn_single' there is no runner leg to cap"
+    )
 
 
 def test_tp2_mode_is_hvn_and_sweepable():
-    assert TP2_MODE == "hvn"
-    for mode in ("zone_mult", "hvn", "swing"):
-        assert build_engine_kwargs(tp2_mode=mode)["tp2_mode"] == mode
+    """``tp2_mode`` is RETIRED from the sweep surface.
+
+    The engine still implements the three TP2 modes for the
+    ``multi_target`` A/B, but the canonical recipe is ``hvn_single``
+    and ``tp2_mode`` is no longer in ``_ENGINE_OVERRIDES_ALLOWED`` --
+    so it cannot be swept. A knob that is not on an allowlist does not
+    exist (AGENTS.md § 1.5): passing it raises ``KeyError`` before any
+    cell runs, which is the whole point.
+    """
+    from bt.optimal_config import _ENGINE_OVERRIDES_ALLOWED
+
+    assert TP2_MODE == "hvn", (
+        "the config constant is retained for import compatibility, but "
+        "the knob itself is retired"
+    )
+    assert "tp2_mode" not in _ENGINE_OVERRIDES_ALLOWED, (
+        "tp2_mode was RETIRED on 2026-11-03 -- it must not be "
+        "sweepable, or a sweep would look like it measured something "
+        "and measure nothing"
+    )
+    # And it must not be forwardable.
+    with pytest.raises(KeyError):
+        build_engine_kwargs(tp2_mode="hvn")
 
 
 def test_tp2_hvn_searches_beyond_tp1_not_from_the_entry():

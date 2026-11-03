@@ -113,6 +113,61 @@ The full table, with shipping bars, lives in
 | **5** | `contra_close_spread_usd` | `1.0,2.0,3.0,4.5,5.0,6.5,8.0` | the canonical `$5.00` was **set by instruction**, not picked from the ladder |
 | **6** | `sl_mode` / `sl_nth_hvn_n` / `hvn_buffer_usd` | see AGENTS.md § 4.1 | only became live on 2026-10-25 (the SL ceiling moved to `$8.00`) |
 
+### ✅ The test suite is GREEN (fixed 2026-11-04)
+
+`pytest tests/` gives **435 passed, 1 skipped, 0 failed**.
+
+> **⚠️ A CONCURRENT 1y PROCESS MAKES THE SUITE LOOK RED.** The
+> import guard (`test_every_module_imports_cleanly`) imports EVERY
+> module in ONE process, and a corpus run holds ~6 GB. Run it
+> alongside another 1y measurement and it OOMs — and the suite then
+> reports failures that are **not** code defects. This is not
+> hypothetical: on 2026-11-04 a concurrent `trail_sides_corpus_ab`
+> run made the suite report `test_every_module_imports_cleanly` as
+> failing, and the SAME suite was fully green 4 minutes later once
+> the machine was free. **A green suite needs the machine to
+> itself** (AGENTS.md § 7). Before believing a red suite, check
+> whether a corpus run is in flight:
+>
+> ```bash
+> powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Select-Object ProcessId,CommandLine"
+> ```
+
+> **History.** Before the 2026-11-04 fingerprint work the suite was
+> **17 failed / 413 passed**; the AST-hash change fixed 11 of them
+> and broke none. The remaining 6 were **assertions that lag the code**
+> — the `tp2` retirement and the SL ceiling move to `$15.00`. They have
+> since been realigned to the current contract:
+
+| was failing | now asserts |
+| --- | --- |
+| `test_sl_ceiling_is_promoted_to_8_...` | the ceiling is **$15.00** (was $8), and carries the ⚠️ OWED note below |
+| `test_tp2_mode_is_hvn_and_sweepable` | `tp2_mode` is **not** on `_ENGINE_OVERRIDES_ALLOWED` and **not** forwardable — a knob that is not on an allowlist does not exist (§ 1.5) |
+| `test_tp2_is_capped_by_the_swing_window` | the **engine** still defaults `tp2_swing_cap=True` (the `multi_target` A/B path relies on it) while the **config** no longer forwards it |
+| `test_partial_close_pct_in_engine_kwargs` | `partial_close_pct` is **absent** from `build_engine_kwargs()` — the assertion is inverted from the old one |
+| `test_hvn_single_knobs_are_inert_under_the_canonical_mode` | the retired knobs are absent, not merely inert |
+| `test_ledger_excess_agrees_with_the_timing_diagnostic` | `gross == drift + excess` holds **on any ledger** (an identity, always checked); the cross-artifact comparison now **skips** when the two artifacts describe different books |
+
+> **The skip is not a dodge.** `leg_random_entry.json` is dated
+> 2026-10-25 and describes the OLD wide book (51,075 legs, gross
+> $7,312.96); the current ledger is the 6,663-leg narrow book (gross
+> $2,583.18). The old test compared them and reported a
+> decomposition mismatch — but the decomposition is an exact
+> algebraic identity in both files; the **books** differed.
+> Re-running that diagnostic is **prompt-only** (it is a placebo, and
+> placebos rewrite their report artifact).
+
+#### ⚠️ THE ONE REAL DEBT LEFT: the SL ceiling is UNMEASURED at $15.00
+
+`sl_max_usd` moved `$8.00 → $15.00` as part of the trailing-stop
+work, but the **paired** re-measurement with `vol_state_min_range_norm`
+(tier 3 below) has **not** been run at the new ceiling.
+
+**$15.00 is UNMEASURED, not PROMOTED** — the same status § 1.5 gives a
+knob that looks sweepable but was never swept. Until the pair is
+measured together, the ceiling is an **assumption**, and the test now
+says so in its own failure message.
+
 ### The CLI limitation that bites on tiers 2 and 5
 
 `--knob X --grid a,b,c` parses values as **int, then float** — it
@@ -301,6 +356,16 @@ run; it does not replace telling the user what you are about to do.
 | 1 month (2025-01) | 1,377,190 | **2.0 s** | **1.6 s** | **~6 s** |
 | 1y (2024-01 → 2026-07) | 41,233,730 | **86.5–97.3 s** | **51.0–58.5 s** (narrow book) | **~2.3–2.7 min cold, ~1 min warm** |
 | 1y, **WIDE book** (vol gate 1.0) | 41,233,730 | cached | **~300 s** (51,075 legs) | **~5 min** |
+| **1y, current recipe (2026-11-04)** | 41,233,730 | **130.5 s** | **104.0 s** (6,663 legs) | **234.5 s** |
+
+> **⚠️ The last row is the CURRENT cost model** — measured on the
+> trailing-stop + `hvn_single` + 21-key-whitelist recipe, after the
+> P5/P6 perf changes (**1.50×** faster than the rows above it). The
+> rows above it are the **narrow book** (vol gate 3.0) and the
+> **pre-trailing-stop** wide book; their per-cell costs are **not
+> comparable** to the current recipe, because the trailing stop and
+> the whitelist changed the book from 51,075 legs to 6,663. **Re-measure
+> before quoting a per-cell cost.**
 
 > **⚠️ The engine cell cost depends on the BOOK SIZE, not just the
 > bar count.** On the narrow book (vol gate 3.0, 1,692 legs) the 1y
@@ -346,6 +411,56 @@ Engine bar rate on the 1y run: **~730,000–790,000 bars/s**, with a
 **measured max open depth of 2** — the vol gate drops 56% of
 signals, so the book is nearly always empty and the
 O(n_bars × open) scan is effectively free.
+
+> ### ✅ RE-MEASURED 2026-11-04 — the cost model is now 1.50× cheaper
+>
+> Two perf changes (PERF P5 `memoryview`, PERF P6 vectorised
+> rolling median — see [`docs/engine_history.md`](engine_history.md))
+> were measured on the **current** recipe (trailing stop +
+> `hvn_single` + the 21-key whitelist) and on the **full 1y corpus**:
+>
+> | stage | before | after | speedup |
+> |---|---|---|---|
+> | artifact build (cold) | 197.8 s | **130.5 s** | 1.52× |
+> | engine cell | 154.2 s | **104.0 s** | 1.48× |
+> | **1y cell total** | **352.0 s** | **234.5 s** | **1.50×** |
+>
+> The canonical result is **unchanged**: 6,663 trades, gross
+> **+$2,583.18**.
+>
+> **The stage breakdown moved with it** — `vol_state` was the largest
+> stage (92.6 s) and is now 48.2 s, because the vectorised
+> `_rolling_median_baseline` removed a 20.8 s Python loop from it:
+>
+> ```
+> artifacts MISS in 130.5s (114,479 zones at the 1m cadence)
+>  vol_state     48.2s   <- was 92.6s (PERF P6 removed a 20.8s loop)
+>  structure     40.7s   <- now the largest stage
+>  vp_set        17.1s
+>  zones         13.3s
+>  swing_cap      4.3s
+>  p95_cap        2.4s
+> ```
+>
+> **The artifact build is STILL the dominant cost of a cold 1y cell**
+> (130.5 s vs 104.0 s of engine). `structure` is now the largest
+> single stage. It is **cached**, so it is paid once per fingerprint,
+> not once per sweep cell.
+>
+> > **⚠️ The old table above is the NARROW book (vol gate 3.0).** Its
+> > numbers are still the right ones for the narrow book, but the
+> > "wide book ~300 s engine cell" figure is a **2026-10-25** number
+> > on the **pre-trailing-stop** recipe and is **not comparable** to
+> > the 104.0 s measured on the current one — the trailing stop and
+> > the whitelist changed the book from 51,075 legs to 6,663.
+> > **Re-measure before quoting a per-cell cost.**
+>
+> **Numba was measured and rejected** — see the Numba section in
+> [`docs/engine_history.md`](engine_history.md). The short version: the
+> bar loop is **99.78% idle** (only 0.221% of bars carry an entry-
+> relevant event), a jitted scan is **0.16%** of the engine's work,
+> and the one kernel that *did* look Numba-shaped (the rolling median)
+> was **faster in vectorised NumPy** (1.07 s) than in Numba (1.60 s).
 
 > **⚠️ Never run two heavy cells concurrently.** AGENTS.md's
 > "Operational gotcha: memory contention kills 1y runs silently"

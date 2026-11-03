@@ -278,7 +278,12 @@ def _replay_trail(
     """
     n = hi.size
     if n == 0:
-        return "eod", eod_px, 0.0
+        # No bars on this path — the leg ends where it ended, at the
+        # engine's own exit price. The gross MUST be the engine's, not
+        # zero: the reconciliation check (b2) compares the replay's
+        # baseline against the engine's, and a zeroed eod leg shows up
+        # there as a gross mismatch.
+        return "eod", eod_px, (eod_px - entry_px) * side
 
     # ── SL / TP hit masks ──
     if side > 0:
@@ -333,7 +338,10 @@ def _replay_trail(
     # First bar wins; ties go to the stop (sl), then the trail, then tp.
     best = min([x for x in (i_sl, i_tr, i_tp) if x >= 0], default=-1)
     if best < 0:
-        return "eod", eod_px, 0.0
+        # Nothing fired — the leg ran to the end of the path at the
+        # engine's exit price. Same rule as the empty-path branch: the
+        # gross is the engine's, not zero.
+        return "eod", eod_px, (eod_px - entry_px) * side
 
     if i_sl == best:
         px = _resolve_exit_price(
@@ -868,6 +876,79 @@ def main() -> None:
     print()
 
     # ================================================================
+    # 2b. THE ORACLE BOUND  (can ANY trail geometry work here?)
+    # ================================================================
+    #
+    # Before tuning the geometry, bound the question. The ORACLE trail
+    # exits at the PERFECT moment: at the peak, with zero giveback.
+    # No real trailing stop can beat it — it is the ceiling on what
+    # trailing can bank, because a trail can only exit at a price the
+    # market actually printed.
+    #
+    # If the oracle loses, the question is closed: no geometry helps.
+    # If the oracle wins by a lot, the question is OPEN and the
+    # geometry ladder is worth reading.
+    print("=" * 78)
+    print("2b. THE ORACLE BOUND  (can ANY trail geometry work here?)")
+    print("=" * 78)
+    print("The oracle exits at the PEAK with zero giveback — the best")
+    print("any trailing stop could possibly do on these paths. It is a")
+    print("bound, not a candidate.")
+    print()
+
+    orc_gross = 0.0
+    orc_fee = 0.0
+    n_orc_beats = 0
+    n_orc_loses = 0
+    for l, (hi, lo, op, peak), modelled in zip(legs, paths, is_modelled):
+        if not modelled:
+            orc_gross += l.gross
+            orc_fee += l.fee
+            continue
+        # The oracle exits at the peak, but only if the SL is not hit
+        # FIRST (the SL is a hard stop the trail cannot override).
+        if l.side > 0:
+            sl_hit = lo <= l.sl_px
+            peak_bar = int(np.argmax(hi))
+        else:
+            sl_hit = hi >= l.sl_px
+            peak_bar = int(np.argmin(lo))
+        sl_first = bool(sl_hit[:peak_bar + 1].any())
+        if sl_first:
+            px = l.exit_px
+        else:
+            px = float(peak[peak_bar])
+        g_px = (px - l.entry_px) * l.side
+        orc_gross += g_px * l.qty_oz
+        orc_fee += leg_fee(l.entry_px, px) * (l.qty_oz / OZ)
+        base_g = (l.exit_px - l.entry_px) * l.side * l.qty_oz
+        if g_px * l.qty_oz > base_g + 1e-9:
+            n_orc_beats += 1
+        elif g_px * l.qty_oz < base_g - 1e-9:
+            n_orc_loses += 1
+    orc_net = orc_gross - orc_fee
+    print(f"  {'trail OFF (baseline)':<34} gross ${gross_off:>10,.2f}  "
+          f"fees ${fee_off:>9,.2f}  net ${gross_off - fee_off:>10,.2f}")
+    print(f"  {'ORACLE (exit at the peak)':<34} gross ${orc_gross:>10,.2f}  "
+          f"fees ${orc_fee:>9,.2f}  net ${orc_net:>10,.2f}")
+    print(f"  {'oracle vs baseline':<34} "
+          f"${orc_net - (gross_off - fee_off):>+10,.2f}")
+    print()
+    print(f"  legs the oracle BEATS: {n_orc_beats}   "
+          f"legs it LOSES to: {n_orc_loses}")
+    print()
+    if orc_net <= (gross_off - fee_off):
+        print("  VERDICT: the oracle does NOT beat the baseline. No")
+        print("  trailing geometry can win on this book — the TP is")
+        print("  worth more than the peak a trail could bank. The trail")
+        print("  question is CLOSED, and the geometry ladder below is")
+        print("  measuring the size of the loss, not a way to win.")
+    else:
+        print("  VERDICT: the oracle DOES beat the baseline. Trailing has")
+        print("  room; the geometry ladder below is the way to find it.")
+    print()
+
+    # ================================================================
     # 3. Per side
     # ================================================================
     print("=" * 78)
@@ -1338,6 +1419,221 @@ def main() -> None:
         print("  mode silently becomes a giveback trail — a different")
         print("  geometry wearing the same name.")
         print()
+
+    # ================================================================
+    # 7b2. THE ATR LENGTH  (1m cadence, but WHICH 1m length?)
+    # ================================================================
+    #
+    # The cadence is 1m — that is settled. But the LENGTH is still a
+    # free choice: Wilder ATR(14) on 1m candles is 14 minutes of true
+    # range, and ATR(20) is 20 minutes. A longer length is a smoother,
+    # slower yardstick. This ladder measures whether the length matters
+    # at the SETTINGS THE ANALYSIS POINTS TO, so the final recipe does
+    # not bake in an arbitrary 14.
+    print("=" * 78)
+    print("7b2. THE ATR LENGTH  (1m cadence — but which length?)")
+    print("=" * 78)
+    print("Same 1m cadence, different Wilder length. The yardstick")
+    print("changes, so the SAME k means a different distance in $.")
+    print()
+    hdr_len = (f"{'ATR length':>11}{'p50 ATR $':>11}{'k':>6}"
+               f"{'distance $':>12}{'net $':>11}{'vs base':>11}")
+    print(hdr_len)
+    print("-" * len(hdr_len))
+    base_net_len = gross_off - fee_off
+    for length in (7, 14, 20, 30):
+        atr_len = _build_atr_1m_forward_filled(
+            high, low, close, times, length=length)
+        al = atr_len[atr_len > 0]
+        med = float(np.median(al)) if al.size else 0.0
+        for k in (8.0, 12.0):
+            net_len, _bd = _replay_net(
+                legs, paths, is_modelled, atr_len, mode="chandelier", k=k,
+                act=1.0, gb=0.5, fill_model=fill_model, leg_fee=leg_fee,
+                want_breakdown=True)
+            print(f"{length:>11}{med:>11.3f}{k:>6.1f}{k * med:>12.3f}"
+                  f"{net_len:>11,.2f}{net_len - base_net_len:>11,.2f}")
+    print()
+    print("READ: if the length barely moves the net, the trail is NOT")
+    print("sensitive to the yardstick's fine structure — it is sensitive")
+    print("to the DISTANCE it implies, which is the actionable knob.")
+    print()
+
+    # ================================================================
+    # 7c. WHERE THE TRAIL'S MONEY COMES FROM
+    # ================================================================
+    #
+    # The grid says the trail loses. But a trail can lose on the TP
+    # bucket and still be worth having if it truncates the SL bucket.
+    # This decomposition splits the net delta by the leg's ORIGINAL
+    # exit reason (the trail-OFF book), which is the only way to tell
+    # a RISK knob (truncates the loss tail) from a GEOMETRY change
+    # (replaces a good exit with a worse one).
+    print("=" * 78)
+    print("7c. WHERE THE TRAIL'S MONEY COMES FROM  (by ORIGINAL exit)")
+    print("=" * 78)
+    print("Each leg is bucketed by the exit it had with the trail OFF.")
+    print("'delta' is the replayed gross minus the trail-off gross, for")
+    print("the legs in that bucket.")
+    print()
+
+    for mode, k, act, gb in (("chandelier", 8.0, 1.0, 0.5),
+                              ("chandelier", 4.0, 1.0, 0.5),
+                              ("chandelier", 2.0, 1.0, 0.5),
+                              ("combined", 2.0, 3.0, 0.5),
+                              ("combined", 2.0, 6.0, 0.5),
+                              ("combined", 2.0, 1.0, 0.5)):
+        buckets: dict[str, list[float]] = {}
+        for l, (hi, lo, op, peak), modelled in zip(legs, paths, is_modelled):
+            if not modelled:
+                continue
+            reason, px, gross_px = _replay_trail(
+                hi=hi, lo=lo, op=op, peak=peak, entry_px=l.entry_px,
+                side=l.side, atr_1m=l.atr_1m, sl_px=l.sl_px, tp_px=l.tp_px,
+                mode=mode, atr_mult=k, activation_mult=act,
+                giveback_frac=gb, fill_model=fill_model, eod_px=l.exit_px,
+            )
+            d = (gross_px - (l.exit_px - l.entry_px) * l.side) * l.qty_oz
+            buckets.setdefault(l.exit_reason, []).append(d)
+        tot = sum(sum(v) for v in buckets.values())
+        print(f"  {mode} k={k} act={act} gb={gb}   total gross delta "
+              f"${tot:+,.2f}")
+        print(f"    {'orig exit':<12}{'n':>5}{'delta $':>12}{'per leg':>11}")
+        for r in sorted(buckets, key=lambda x: -len(buckets[x])):
+            v = buckets[r]
+            print(f"    {r:<12}{len(v):>5}{sum(v):>12,.2f}"
+                  f"{sum(v) / len(v):>11,.4f}")
+        print()
+
+    # ================================================================
+    # 7d. THE LOSS TAIL — does the trail truncate it?
+    # ================================================================
+    print("=" * 78)
+    print("7d. THE LOSS TAIL  (the risk-knob test)")
+    print("=" * 78)
+    print("A risk knob earns its keep by cutting the WORST losses. The")
+    print("measure is the p-tail of the per-leg gross, trail-off vs")
+    print("trail-on, on the SAME legs.")
+    print()
+    off_px = np.array([(l.exit_px - l.entry_px) * l.side * l.qty_oz
+                        for l in legs])
+    print(f"{'config':<28}{'worst':>9}{'p5':>9}{'p10':>9}"
+          f"{'mean':>9}{'n<-$5':>9}")
+    print(f"{'trail OFF':<28}"
+          f"{off_px.min():>9,.2f}"
+          f"{np.percentile(off_px, 5):>9,.2f}"
+          f"{np.percentile(off_px, 10):>9,.2f}"
+          f"{off_px.mean():>9,.2f}"
+          f"{int((off_px < -5).sum()):>9}")
+    for mode, k, act, gb in (("chandelier", 8.0, 1.0, 0.5),
+                              ("chandelier", 4.0, 1.0, 0.5),
+                              ("chandelier", 2.0, 1.0, 0.5),
+                              ("combined", 2.0, 1.0, 0.5),
+                              ("combined", 2.0, 0.5, 0.5)):
+        vals = []
+        for l, (hi, lo, op, peak), modelled in zip(legs, paths, is_modelled):
+            if not modelled:
+                vals.append(l.gross)
+                continue
+            _reason, px, gross_px = _replay_trail(
+                hi=hi, lo=lo, op=op, peak=peak, entry_px=l.entry_px,
+                side=l.side, atr_1m=l.atr_1m, sl_px=l.sl_px, tp_px=l.tp_px,
+                mode=mode, atr_mult=k, activation_mult=act,
+                giveback_frac=gb, fill_model=fill_model, eod_px=l.exit_px,
+            )
+            vals.append(gross_px * l.qty_oz)
+        v = np.array(vals)
+        print(f"{mode + ' k=' + str(k) + ' act=' + str(act):<28}"
+              f"{v.min():>9,.2f}"
+              f"{np.percentile(v, 5):>9,.2f}"
+              f"{np.percentile(v, 10):>9,.2f}"
+              f"{v.mean():>9,.2f}"
+              f"{int((v < -5).sum()):>9}")
+    print()
+
+    # ================================================================
+    # 7e. THE ENGINE A/B  (the replay RANKS; the engine DECIDES)
+    # ================================================================
+    #
+    # The replay holds the leg set fixed. The engine does not: a
+    # trail-closed leg frees a same-direction slot, so a LATER signal
+    # is admitted; and a trail-closed leg cannot be netted by
+    # contra-close. So the top replay candidates must be re-measured
+    # through the real engine before anything is believed.
+    print("=" * 78)
+    print("7e. THE ENGINE A/B  (the replay RANKS; the engine DECIDES)")
+    print("=" * 78)
+    print("Each candidate is run through the real engine on the same")
+    print("window. The engine's book is allowed to CHANGE — that is the")
+    print("whole point of the A/B.")
+    print()
+    hdr3 = (f"{'config':<28}{'legs':>6}{'gross':>11}{'fees':>10}"
+            f"{'net':>11}{'trail':>7}{'vs base':>11}")
+    print(hdr3)
+    print("-" * len(hdr3))
+    base_net_engine = gross_off - fee_off
+    print(f"{'trail OFF (baseline)':<28}{len(trades):>6}{gross_off:>11,.2f}"
+          f"{fee_off:>10,.2f}{base_net_engine:>11,.2f}{0:>7}"
+          f"{0.0:>11,.2f}")
+
+    # The candidates the replay liked, plus the canonical.
+    cands = [
+        ("chandelier k=32 act=1 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 32.0,
+          "trail_activation_mult": 1.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=24 act=1 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 24.0,
+          "trail_activation_mult": 1.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=16 act=8 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 16.0,
+          "trail_activation_mult": 8.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=32 act=8 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 32.0,
+          "trail_activation_mult": 8.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=24 act=8 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 24.0,
+          "trail_activation_mult": 8.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=32 act=2 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 32.0,
+          "trail_activation_mult": 2.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=12 act=1 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 12.0,
+          "trail_activation_mult": 1.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=8 act=1 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 8.0,
+          "trail_activation_mult": 1.0, "trail_giveback_frac": 0.5}),
+        ("chandelier k=8 act=8 gb=0.5",
+         {"trail_mode": "chandelier", "trail_atr_mult": 8.0,
+          "trail_activation_mult": 8.0, "trail_giveback_frac": 0.5}),
+        ("combined k=2 act=12 gb=0.5",
+         {"trail_mode": "combined", "trail_atr_mult": 2.0,
+          "trail_activation_mult": 12.0, "trail_giveback_frac": 0.5}),
+        ("combined k=2 act=3 gb=0.5",
+         {"trail_mode": "combined", "trail_atr_mult": 2.0,
+          "trail_activation_mult": 3.0, "trail_giveback_frac": 0.5}),
+        ("CANONICAL combined k=2 act=1",
+         {"trail_mode": "combined", "trail_atr_mult": 2.0,
+          "trail_activation_mult": 1.0, "trail_giveback_frac": 0.5}),
+    ]
+    engine_rows: list[dict[str, object]] = []
+    for label, over in cands:
+        tr, _, _ = _run({**base_over, **over})
+        g = sum(t.pnl_gross_usd for t in tr)
+        f = sum(t.fee_usd for t in tr)
+        nt = sum(1 for t in tr if t.exit_reason == "trail_stop")
+        print(f"{label:<28}{len(tr):>6}{g:>11,.2f}{f:>10,.2f}"
+              f"{g - f:>11,.2f}{nt:>7}{(g - f) - base_net_engine:>11,.2f}")
+        engine_rows.append({
+            "label": label, "legs": len(tr), "gross": g, "fees": f,
+            "net": g - f, "n_trail": nt,
+            "delta": (g - f) - base_net_engine,
+        })
+    print()
+    print("READ: compare each row's 'vs base' with the SAME config's")
+    print("replay delta. Where the engine is WORSE than the replay, the")
+    print("trail changed the BOOK for the worse (freed slots admitted")
+    print("later, worse signals; or lost the contra-close netting).")
+    print()
 
     # ================================================================
     # 8. The giveback ladder

@@ -1,0 +1,146 @@
+{
+  "schema": "results-run/1",
+  "run_id": "expand_prev_day_ab-464c49d77dec2e49__9f29cc8__20261103T202314Z",
+  "kind": "expand_prev_day_ab",
+  "config_fp": "464c49d77dec2e49",
+  "ts_utc": "2026-11-03T20:23:14Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "489e662454a92a90",
+  "params": {
+    "knob": "vol_state_min_expand_prev_day",
+    "thresholds": [
+      0.0,
+      0.7,
+      0.85,
+      1.0,
+      1.1,
+      1.2,
+      1.3
+    ],
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "criterion": "gross_per_leg"
+  },
+  "summary": {
+    "peak_threshold": 1.0,
+    "peak_gross_per_leg": 0.387691,
+    "peak_legs": 6663,
+    "peak_net": -741.16,
+    "curve": {
+      "0.0": 0.172006,
+      "0.7": 0.266642,
+      "0.85": 0.29782,
+      "1.0": 0.387691,
+      "1.1": 0.318609,
+      "1.2": 0.302985,
+      "1.3": 0.305906
+    }
+  },
+  "path": "results/runs/expand_prev_day_ab-464c49d77dec2e49__9f29cc8__20261103T202314Z.json",
+  "parent_fp": "464c49d77dec2e49",
+  "payload": {
+    "rows": [
+      {
+        "legs": 11305,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 12.195253505933117,
+        "legs_per_signal_day": 15.85553997194951,
+        "pct_days_below_30": 89.06030855539971,
+        "gross": 1944.5268808908613,
+        "fees": 5690.487572041319,
+        "net": -3745.960691150458,
+        "gross_per_leg": 0.17200591604518897,
+        "fee_per_leg": 0.5033602452048933,
+        "hit_rate": 0.8196373286156567,
+        "threshold": 0.0
+      },
+      {
+        "legs": 9117,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 9.83495145631068,
+        "legs_per_signal_day": 13.446902654867257,
+        "pct_days_below_30": 91.74041297935102,
+        "gross": 2430.9736821380047,
+        "fees": 4556.078898973931,
+        "net": -2125.1052168359265,
+        "gross_per_leg": 0.2666418429459257,
+        "fee_per_leg": 0.4997344410413438,
+        "hit_rate": 0.8218712295711309,
+        "threshold": 0.7
+      },
+      {
+        "legs": 7822,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 8.43797195253506,
+        "legs_per_signal_day": 12.39619651347068,
+        "pct_days_below_30": 93.18541996830429,
+        "gross": 2329.5486967297206,
+        "fees": 3910.6844297028238,
+        "net": -1581.1357329731031,
+        "gross_per_leg": 0.2978200839593097,
+        "fee_per_leg": 0.49995965606019227,
+        "hit_rate": 0.8252365124009204,
+        "threshold": 0.85
+      },
+      {
+        "legs": 6663,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 7.1877022653721685,
+        "legs_per_signal_day": 11.547660311958406,
+        "pct_days_below_30": 93.58752166377816,
+        "gross": 2583.182732648421,
+        "fees": 3324.3435012948694,
+        "net": -741.1607686464486,
+        "gross_per_leg": 0.38769063974912515,
+        "fee_per_leg": 0.4989259344581824,
+        "hit_rate": 0.8266546600630347,
+        "threshold": 1.0
+      },
+      {
+        "legs": 5677,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 6.124056094929881,
+        "legs_per_signal_day": 12.287878787878787,
+        "pct_days_below_30": 92.42424242424242,
+        "gross": 1808.7429400125739,
+        "fees": 2838.5272354817153,
+        "net": -1029.7842954691414,
+        "gross_per_leg": 0.31860893782148564,
+        "fee_per_leg": 0.5000047975130729,
+        "hit_rate": 0.8236744759556104,
+        "threshold": 1.1
+      },
+      {
+        "legs": 5088,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 5.488673139158576,
+        "legs_per_signal_day": 12.201438848920864,
+        "pct_days_below_30": 92.32613908872902,
+        "gross": 1541.5883237301646,
+        "fees": 2560.874894929574,
+        "net": -1019.2865711994095,
+        "gross_per_leg": 0.3029851265192934,
+        "fee_per_leg": 0.5033166067078565,
+        "hit_rate": 0.8209512578616353,
+        "threshold": 1.2
+      },
+      {
+        "legs": 4610,
+        "calendar_days": 927,
+        "legs_per_calendar_day": 4.973031283710895,
+        "legs_per_signal_day": 12.16358839050132,
+        "pct_days_below_30": 92.0844327176781,
+        "gross": 1410.228200550359,
+        "fees": 2327.22179196586,
+        "net": -916.9935914155012,
+        "gross_per_leg": 0.30590633417578283,
+        "fee_per_leg": 0.50482034532882,
+        "hit_rate": 0.8206073752711497,
+        "threshold": 1.3
+      }
+    ]
+  }
+}

@@ -298,10 +298,9 @@ def main() -> None:
     short_h1 = _bucket_table(sig, mask=short_m & first, **common)
     short_h2 = _bucket_table(sig, mask=short_m & second, **common)
 
-    # The one-event buckets (the granularity the engine's
-    # ``structure_seq_drop_set`` uses today) -- reported for
-    # comparison, because a 1-event rule cannot express a 5-event
-    # whitelist.
+    # The one-event buckets (the granularity the REMOVED
+    # ``structure_seq_drop_set`` used) -- reported for comparison,
+    # because a 1-event rule cannot express a 5-event whitelist.
     def _by_last(table: dict, side: str) -> dict:
         out: dict[str, dict[str, Any]] = {}
         for s, v in table.items():

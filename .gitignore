@@ -50,6 +50,7 @@ _chart_*.npy
 _*.bak
 *.bak_*
 AGENTS.md.bak_*
+_trail_*.txt
 
 # ---- editor / OS ----
 .vscode/

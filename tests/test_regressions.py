@@ -274,11 +274,36 @@ def test_partial_close_pct_reaches_compute_structural_tp():
 
 
 def test_partial_close_pct_in_engine_kwargs():
+    """``partial_close_pct`` is RETIRED -- it must NOT reach the engine.
+
+    HISTORY (2026-11-03): the engine was multi-target (TP1 partial at
+    50%, TP2 runner). Under ``tp_mode='hvn_single'`` there is ONE
+    target, no partial close and no runner leg, so the knob has no
+    meaning at all.
+
+    The constant is kept in ``bt/optimal_config.py`` ONLY so old code
+    that imports it keeps importing (sweep JSON, legacy diagnostics).
+    What must NOT happen is the knob being forwarded to the engine --
+    a knob the engine accepts but the config does not forward is a
+    knob with a default, and a default is a silent-corruption field
+    (AGENTS.md § 1.6).
+
+    So the assertion is INVERTED relative to the old test: the knob
+    must be ABSENT from ``build_engine_kwargs``.
+    """
     from bt.optimal_config import build_engine_kwargs
     ek = build_engine_kwargs()
-    assert ek["partial_close_pct"] == pytest.approx(0.50)
-    ek2 = build_engine_kwargs(partial_close_pct=0.25)
-    assert ek2["partial_close_pct"] == pytest.approx(0.25)
+    assert "partial_close_pct" not in ek, (
+        "partial_close_pct was RETIRED on 2026-11-03 -- under "
+        "tp_mode='hvn_single' there is no partial close, so the knob "
+        "must not reach the engine"
+    )
+    # And the retired multi-target knobs must all be absent.
+    for retired in ("tp2_mode", "tp2_nth_hvn_n", "tp2_swing_cap"):
+        assert retired not in ek, (
+            f"{retired} was RETIRED on 2026-11-03 and must not reach "
+            "the engine"
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -1759,19 +1784,30 @@ def test_hvn_single_returns_one_target_and_no_partial():
 
 
 def test_hvn_single_knobs_are_inert_under_the_canonical_mode():
-    """``partial_close_pct`` is INACTIVE under ``hvn_single``.
+    """The multi-target knobs are RETIRED, not merely inert.
 
-    This is the allowlist rule showing up in a new place: the knob is
-    alive in the ENGINE and dead in the CANONICAL CONFIGURATION. A
-    sweep of it under the canonical mode measures nothing.
+    HISTORY (2026-11-03): these knobs were alive in the ENGINE and
+    dead in the CANONICAL CONFIGURATION -- forwarded but with no
+    effect under ``tp_mode='hvn_single'``. A sweep of them under the
+    canonical mode measured nothing.
+
+    They have since been REMOVED outright: the engine no longer
+    accepts them and ``build_engine_kwargs`` no longer emits them.
+    That is a stronger guarantee than "inert" -- an absent knob cannot
+    be swept at all, and a knob the engine accepts but the config does
+    not forward is a knob with a default (a silent-corruption field,
+    AGENTS.md § 1.6).
     """
     from bt.optimal_config import build_engine_kwargs
 
     ek = build_engine_kwargs()
     assert ek["tp_mode"] == "hvn_single"
-    # The knob is still forwarded (it is live for the multi_target
-    # A/B) -- the document is what tells the reader it is inert.
-    assert "partial_close_pct" in ek
+    for retired in ("partial_close_pct", "tp2_mode",
+                    "tp2_nth_hvn_n", "tp2_swing_cap"):
+        assert retired not in ek, (
+            f"{retired} was RETIRED on 2026-11-03 -- it must not be "
+            "forwarded to the engine"
+        )
 
 
 def test_vol_gate_is_live_in_the_engine():
@@ -1790,8 +1826,8 @@ def test_vol_gate_is_live_in_the_engine():
     assert all(admits_off)
 
 
-def test_sl_ceiling_is_promoted_to_8_and_is_paired_with_the_vol_gate():
-    """The SL ceiling is $8.00 and it is PAIRED with the vol gate.
+def test_sl_ceiling_is_promoted_to_15_and_is_paired_with_the_vol_gate():
+    """The SL ceiling is $15.00 and it is PAIRED with the vol gate.
 
     HISTORY (2026-10-24) -- the ceiling was $2.50, NOT $5.00, and the
     joint screen (``runtime/diagnostics/combined_screen.py``, 6
@@ -1834,6 +1870,22 @@ def test_sl_ceiling_is_promoted_to_8_and_is_paired_with_the_vol_gate():
     $0.1432 gross/leg is BELOW the $0.5029 measured round trip. The
     count target and the edge are in direct tension; the count target
     WINS because it was asked for.
+
+    ── CEILING RAISED $8.00 -> $15.00 (2026-11-04) ──
+
+    The ceiling was raised as part of the trailing-stop work. The
+    measurement above was taken at $8.00, so it does NOT describe the
+    book at $15.00.
+
+    ⚠️⚠️ THE PAIRED RE-MEASUREMENT IS OWED. The ceiling is PAIRED
+    with ``vol_state_min_range_norm`` -- they were never independent
+    (the $2.50 ceiling pinned EVERY stop, making the HVN SL anchor
+    inert). The tier-3 sweep (``vol_state_min_range_norm`` x
+    ``sl_max_usd``) has **not** been re-run at the new ceiling.
+
+    **$15.00 is UNMEASURED, not PROMOTED** -- the same status § 1.5
+    gives a knob that looks sweepable but was never swept. Until the
+    pair is re-measured together, the ceiling is an ASSUMPTION.
     """
     from bt.optimal_config import (
         SL_MAX_USD,
@@ -1841,13 +1893,13 @@ def test_sl_ceiling_is_promoted_to_8_and_is_paired_with_the_vol_gate():
         build_engine_kwargs,
     )
 
-    assert SL_MAX_USD == pytest.approx(8.0), (
+    assert SL_MAX_USD == pytest.approx(15.0), (
         "the SL ceiling changed -- re-run "
         "runtime.diagnostics.config_iso_2026_10_25 (the ceiling is "
         "PAIRED with the vol gate; do not tune it in isolation)"
     )
     assert VOL_STATE_MIN_RANGE_NORM == pytest.approx(1.0)
-    assert build_engine_kwargs()["sl_max_usd"] == pytest.approx(8.0)
+    assert build_engine_kwargs()["sl_max_usd"] == pytest.approx(15.0)
     assert build_engine_kwargs(sl_max_usd=5.0)["sl_max_usd"] == pytest.approx(5.0)
 
 
@@ -2024,30 +2076,34 @@ def test_structure_whitelist_powered_heldout_is_not_significantly_profitable():
     )
 
 
-def test_seq_drop_set_engine_matches_the_posthoc_filter():
-    """The engine's per-side sequence drop set must be EXACTLY
-    equivalent to the post-hoc filter that was measured.
+def test_seq_whitelist_engine_matches_the_posthoc_filter():
+    """The engine's 5-event whitelist must be EXACTLY equivalent to
+    the post-hoc filter that was measured.
 
     If they diverge, the measurement does not transfer to the knob
-    and every number in AGENTS.md § "The per-side sequence filter"
-    is about a strategy the engine does not run.
+    and every number in ``docs/seq5_table.md`` is about a strategy
+    the engine does not run.
 
     Checked on all 8 benchmark slices: leg count AND gross P&L must
     match the cent.
+
+    (This test USED to guard the 1-event drop set. It was rewritten
+    on 2026-11-04 to guard the 5-event whitelist, which replaced
+    the drop set.)
     """
     import json
     import pathlib
 
     repo = pathlib.Path(__file__).resolve().parents[1]
     out = (repo / "runtime" / "diagnostics" / "_reports"
-           / "seq_drop_set_equivalence.json")
+           / "seq_whitelist_equivalence.json")
     assert out.exists(), (
         "the equivalence report is missing -- run "
-        "`python -m runtime.diagnostics.seq_drop_set_equivalence`"
+        "`python -m runtime.diagnostics.seq_whitelist_equivalence`"
     )
     d = json.loads(out.read_text(encoding="utf-8"))
     assert d["all_equivalent"] is True, (
-        "the engine-side drop set no longer matches the post-hoc filter "
+        "the engine-side whitelist no longer matches the post-hoc filter "
         f"on: {[r['slice'] for r in d['rows'] if not r['equivalent']]}"
     )
     assert len(d["rows"]) == 8, "the equivalence check must cover 8 slices"
@@ -2061,8 +2117,8 @@ def test_seq_drop_set_engine_matches_the_posthoc_filter():
             f"{r['posthoc_gross']}"
         )
         # The gate must actually be doing something.
-        assert r["n_dropped_seq_side"] > 0, (
-            f"{r['slice']}: the drop set never fired -- the gate is dead"
+        assert r["n_dropped_seq_whitelist"] > 0, (
+            f"{r['slice']}: the whitelist never fired -- the gate is dead"
         )
 
 
@@ -2129,116 +2185,88 @@ def test_entry_side_gates_must_evaluate_at_the_signal_bar():
         )
 
 
-def test_per_side_sequence_drop_set_is_promoted():
-    """The per-side sequence filter is PROMOTED.
+def test_per_side_sequence_drop_set_is_removed():
+    """The 1-event sequence DROP SET is REMOVED (2026-11-04).
 
-    The rule: do not take a SHORT when the last structure event was
-    a REVERSAL ("c" = CHoCH bull, "C" = CHoCH bear). Do take shorts
-    after a bearish CONTINUATION ("B" = BoS bear).
+    It was PROMOTED on 2026-10-24 and is now DELETED. The reason is
+    not that it was measured wrong -- it was not. It is that the
+    5-event WHITELIST that replaced it is STRICTLY MORE INFORMED, and
+    the two gates CONTRADICTED each other:
 
-    2026-10-24, ``runtime/diagnostics/seq_drop_set_validate.py`` over
-    8 slices, measured at the SIGNAL bar (the bar the engine gates
-    on). Exactly two buckets are negative on BOTH the fit and the
-    held-out halves: ``short|c`` (FIT -$24 / HELD -$36) and
-    ``short|C`` (FIT -$23 / HELD -$20).
+      * The drop set said "never short after a structure reversal
+        ('c'/'C')".
+      * The whitelist said "short after THIS specific 5-event history
+        is good" -- and 3 of the 8 whitelisted SHORT shapes END in a
+        reversal, including the single best one (``short|BcCcC``,
+        +0.532 gross/leg).
 
-    Effect (pooled, 8 slices):
+    So the drop set vetoed the whitelist's best short shape, and the
+    two rules could never both be satisfied.
 
-        metric                control    filtered
-        legs                       577         395
-        total gross              +$276       +$379
-        total net                  +$9       +$197
-        short-side gross          -$21        +$82
-        short-side gross/leg    -$0.081     +$0.996
-        long-side gross          +$297       +$297   <- UNTOUCHED
-        long-side legs             313         313   <- UNTOUCHED
-        dropped-trade t-stat       --      -1.55
+    END-TO-END (7-arm corpus A/B, ``seq_whitelist_corpus_ab2.py``),
+    the drop set's isolated effect on the SAME 21-key whitelist:
 
-    Why this is a QUALITY win and not a "trade less" win:
-      * GROSS improves by +$103 while fee savings are only $86, so
-        the gross delta alone is positive.
-      * The short side's gross PER LEG goes from NEGATIVE to
-        POSITIVE (12x better).
-      * The LONG side is completely untouched.
-      * BOTH sides still trade -- this is not a directional bet.
+        gross  +$2,583 -> +$2,357   (ON - OFF = -$226)
+        net    -$741   -> -$467     (ON - OFF = +$274)
+        legs   6,663   -> 5,664    (-999)
 
-    ⚠️ THE MEASUREMENT TRAP THIS TEST GUARDS. The first measurement
-    tagged the trade's FILL bar and found "short|b" with 105 trades,
-    t = -2.10 and a +$104 gross improvement. That was a FILL-TIME
-    REGIME effect, not a signal-time one: under the D2 resting-order
-    model the order fills a median 42 bars after the signal. The
-    engine gate cannot act on a fill-time effect. The signal-time
-    measurement is the one that matters, and it gives a different
-    (and better) answer. ``short|b`` is in fact STRUCTURALLY EMPTY
-    at the signal bar -- a bullish BoS invalidates the opposing bear
-    FVGs, so no short can be signalled on such a bar.
+    A NET-only win that LOSES GROSS is a fee artefact, not a signal
+    (AGENTS.md 5.2). The whitelist ALONE is the better book.
+
+    THIS TEST GUARDS THE REMOVAL. If a future change reintroduces
+    the drop set, the two gates will silently start fighting again
+    and the best short shape will go back to never firing.
     """
-    import json
-    import pathlib
+    import inspect
 
-    from bt.optimal_config import (
-        STRUCTURE_SEQ_DROP_SET,
-        build_engine_kwargs,
-    )
+    import bt.optimal_config as oc
+    from bt.optimal_config import build_engine_kwargs
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
 
-    assert STRUCTURE_SEQ_DROP_SET == frozenset({"short|c", "short|C"}), (
-        f"the canonical drop set is {sorted(STRUCTURE_SEQ_DROP_SET)} -- "
-        f"re-measure the per-side sequence filter before changing it"
+    # The constant must be GONE.
+    assert not hasattr(oc, "STRUCTURE_SEQ_DROP_SET"), (
+        "STRUCTURE_SEQ_DROP_SET is back -- it was removed on 2026-11-04 "
+        "as redundant with, and contradictory to, the 5-event whitelist"
     )
+    # The knob must not be forwarded to the engine.
     ek = build_engine_kwargs()
-    assert ek["structure_seq_drop_set"] == STRUCTURE_SEQ_DROP_SET
+    assert "structure_seq_drop_set" not in ek, (
+        "structure_seq_drop_set is back in the engine kwargs -- the "
+        "drop set was removed on 2026-11-04"
+    )
+    # The engine must not accept it either. Checked on the AST, not
+    # on the raw text: the docstring deliberately MENTIONS the
+    # removed knob (to record why it went), and a text search would
+    # trip over its own history.
+    import ast
 
-    repo = pathlib.Path(__file__).resolve().parents[1]
-    out = (repo / "runtime" / "diagnostics" / "_reports"
-           / "seq_drop_set_validate.json")
-    assert out.exists(), (
-        "the validated per-side report is missing -- run "
-        "`python -m runtime.diagnostics.seq_drop_set_validate`"
-    )
-    d = json.loads(out.read_text(encoding="utf-8"))
-    cand = d["candidates"]["drop_short_cC"]
-    sc = cand["score"]
-    mc = cand["market_corr"]
-
-    # The dropped trades must remain loss-making.
-    assert sc["dropped_t"] < 0, (
-        f"the dropped buckets' t-stat is now {sc['dropped_t']:.2f} -- they "
-        f"are no longer loss-making. Re-measure."
-    )
-    # GROSS must improve -- a net-only win is just fee savings.
-    assert sc["d_gross"] > 0, (
-        f"pooled gross no longer improves ({sc['d_gross']:+,.0f}) -- re-measure."
-    )
-    # The flat-slice test must hold.
-    assert sc["flat_d_net"] >= 0, (
-        f"the flat-slice test now fails ({sc['flat_d_net']:+,.0f}) -- re-measure."
-    )
-    # BOTH sides must still trade -- the whole point of the filter.
-    assert mc["long"]["n"] > 0 and mc["short"]["n"] > 0, (
-        "the filter eliminated a side entirely -- that is a long-only "
-        "strategy in disguise, which is explicitly rejected"
-    )
-    # And neither side may become a directional bet.
-    assert abs(mc["long"]["corr"]) < 0.5, (
-        f"long-side market correlation is {mc['long']['corr']:.3f} -- the "
-        f"strategy has become a directional bet"
-    )
-    assert abs(mc["short"]["corr"]) < 0.5, (
-        f"short-side market correlation is {mc['short']['corr']:.3f} -- the "
-        f"strategy has become a directional bet"
-    )
-    # The LONG side must be completely untouched by the filter.
-    base_mc = d["candidates"]["drop_none"]["market_corr"]
-    assert mc["long"]["n"] == base_mc["long"]["n"], (
-        "the long trade set changed -- the filter must not disturb it"
-    )
-    # The short side's gross PER LEG must improve (quality, not volume).
-    base_short = base_mc["short"]
-    assert (mc["short"]["gross"] / mc["short"]["n"]
-            > base_short["gross"] / base_short["n"]), (
-        "the short side's gross per leg did not improve -- this would be "
-        "a volume reduction, not a quality win"
-    )
+    src = inspect.getsource(run_vp_sniper_backtest)
+    tree = ast.parse(src)
+    banned = {"structure_seq_drop_set", "n_dropped_seq_side"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.arg) and node.arg in banned:
+            raise AssertionError(
+                f"the engine still takes {node.arg!r} as a parameter -- "
+                f"the drop set was removed on 2026-11-04"
+            )
+        if isinstance(node, ast.Name) and node.id in banned:
+            raise AssertionError(
+                f"the engine still reads {node.id!r} -- the drop set "
+                f"was removed on 2026-11-04"
+            )
+        if isinstance(node, ast.Attribute) and node.attr in banned:
+            raise AssertionError(
+                f"the engine still reads {node.attr!r} -- the drop set "
+                f"was removed on 2026-11-04"
+            )
+    # The retired diagnostics must be gone too.
+    repo = __import__("pathlib").Path(__file__).resolve().parents[1]
+    for name in ("seq_drop_set_equivalence.py", "seq_drop_set_validate.py",
+                 "seq1_drop_candidates.py", "seq1_drop_validate.py",
+                 "seq_drop_set_corpus_ab.py"):
+        assert not (repo / "runtime" / "diagnostics" / name).exists(), (
+            f"{name} is back -- it drives the removed drop set"
+        )
 
 
 def test_five_event_sequence_whitelist_is_promoted():
@@ -2288,26 +2316,24 @@ def test_five_event_sequence_whitelist_is_promoted():
 
     # The set itself must not change silently. Re-measure before
     # changing it -- the corpus-level table is the source.
+    #
+    # RE-FITTED 2026-11-04: the first version (25 keys) was fitted on
+    # a 64,978-leg ledger built BEFORE the recipe changed. The
+    # current book is 37,159 legs and only 14 of the 25 keys
+    # survived -- so the set was re-fitted from scratch.
     assert STRUCTURE_SEQ_WHITELIST == frozenset({
-        "long|Ccbbb", "long|cCBcC", "long|cCcCc", "long|cbCcC",
-        "long|bCcbb", "long|CcbCc", "long|cCcCB", "long|CBcbC",
-        "long|cCcbb", "long|BcCcC", "long|CcbbC", "long|bbbbC",
-        "long|CcbCB", "long|bCcCc", "long|bbCBB", "long|CcCcb",
-        "long|bbCcb", "long|CBBcb",
-        "short|BcCcC", "short|CBBcC", "short|cbbCB", "short|BBcbC",
-        "short|cCBBB", "short|BBcbb", "short|BBBcC",
+        "long|Ccbbb", "long|bCcbb", "long|cCcCB", "long|CcbCc",
+        "long|cbCcC", "long|BcCcC", "long|bbCcb", "long|cCcCc",
+        "long|bbbbC", "long|cCcbb", "long|CcCBc", "long|CcbbC",
+        "long|CcbCB",
+        "short|BBcbb", "short|BcCcC", "short|cCcbb", "short|BBBcb",
+        "short|Bcbbb", "short|CBBBB", "short|cCcbC", "short|CBcCc",
     }), (
         f"the canonical 5-event whitelist is {len(STRUCTURE_SEQ_WHITELIST)} "
         f"keys -- re-measure the corpus table before changing it"
     )
     ek = build_engine_kwargs()
     assert ek["structure_seq_whitelist"] == STRUCTURE_SEQ_WHITELIST
-
-    # POLARITY: the whitelist is a WHITELIST (present = take), the
-    # drop set is a BLACKLIST (present = drop). They must not be
-    # confused -- a polarity inversion would silently invert the
-    # filter.
-    assert ek["structure_seq_drop_set"] != STRUCTURE_SEQ_WHITELIST
 
     # Every key must be "<side>|<5 chars>" over the four event
     # letters. A malformed key would NEVER match and would silently
@@ -2326,22 +2352,23 @@ def test_five_event_sequence_whitelist_is_promoted():
     # The corpus table must exist -- it is the evidence.
     repo = pathlib.Path(__file__).resolve().parents[1]
     out = (repo / "runtime" / "diagnostics" / "_reports"
-           / "seq5_table_none.json")
+           / "seq5_table_fresh.json")
     assert out.exists(), (
         "the corpus 5-event table is missing -- run "
         "`python -m runtime.diagnostics.seq5_table "
         "--ledger runtime/diagnostics/_reports/"
-        "leg_ledger_seqdrop_none.json`"
+        "leg_ledger_seqwl_unfiltered.json --min-n 50 "
+        "--out runtime/diagnostics/_reports/seq5_table_fresh.json`"
     )
     d = json.loads(out.read_text(encoding="utf-8"))
     cand = d["candidates"]
-    assert len(cand["long"]) == 18, (
+    assert len(cand["long"]) == 13, (
         f"the long side now has {len(cand['long'])} candidate signatures "
-        f"(was 18) -- re-measure"
+        f"(was 13) -- re-measure"
     )
-    assert len(cand["short"]) == 7, (
+    assert len(cand["short"]) == 8, (
         f"the short side now has {len(cand['short'])} candidate signatures "
-        f"(was 7) -- re-measure"
+        f"(was 8) -- re-measure"
     )
     # Every shipped key must be a candidate the table admits.
     for key in STRUCTURE_SEQ_WHITELIST:
@@ -2356,6 +2383,207 @@ def test_five_event_sequence_whitelist_is_promoted():
                 f"{side}|{sig} is a candidate but was not shipped -- "
                 f"re-measure and update the canonical set together"
             )
+
+
+def test_engine_level_walkforward_locks_the_shipped_whitelist():
+    """The ENGINE-LEVEL walk-forward verdict is recorded and locked.
+
+    This is the test that was OPEN when the 5-event whitelist was
+    promoted. It is the ONLY measurement that fits the set on one
+    half of the corpus and re-runs the ENGINE on the other -- the
+    post-hoc walk-forward cannot do this, because it never
+    re-evaluates the ``contra_close`` netting or the same-direction
+    cap.
+
+    WHAT IT FOUND (2026-11-04):
+
+      * the rule GENERALISES -- out-of-sample gross/leg +0.1033
+        against the in-sample +0.1770 (58% retention);
+      * the LONG half generalises cleanly (+0.2233 -> +0.2189);
+      * the SHORT half SIGN-FLIPS (+0.0700 -> -0.1803) and is fit
+        noise;
+      * and the long-only variant that the short half would have
+        enabled is a DIRECTIONAL PROXY -- its per-leg ``excess``
+        (timing) is significantly NEGATIVE in both halves and its
+        market correlation on H2 is +0.459, the same number that got
+        ``trade_sides="long"`` REJECTED.
+
+    WHY ALL 21 KEYS STILL SHIP. The long-only variant has the better
+    gross/leg and the better net, and it is NOT shipped: dropping the
+    short side does not remove the market beta, it CONCENTRATES it.
+    The short keys are the honest cost of keeping the book two-sided.
+
+    This test guards the DECISION, not the numbers -- a re-measure
+    that moves them is legitimate, but it must be a deliberate,
+    documented re-measure rather than a silent drift.
+    """
+    import json
+    import pathlib
+
+    from bt.optimal_config import STRUCTURE_SEQ_WHITELIST
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    reports = repo / "runtime" / "diagnostics" / "_reports"
+
+    wf = reports / "seq5_engine_walkforward.json"
+    assert wf.exists(), (
+        "the engine-level walk-forward report is missing -- run "
+        "`python -m runtime.diagnostics.seq5_engine_walkforward` before "
+        "changing the 5-event whitelist"
+    )
+    d = json.loads(wf.read_text(encoding="utf-8"))
+
+    # The three books the decision rests on must all be present.
+    for key in ("oos", "in_sample", "shipped", "long_only"):
+        assert key in d, f"the walk-forward report has no {key!r} block"
+
+    oos = d["oos"]
+    ins = d["in_sample"]
+
+    # The OOS gross/leg must be POSITIVE -- the whole point of the
+    # whitelist is that it survives being scored on data it never saw.
+    assert oos["oos_gross_per_leg"] > 0.0, (
+        "the out-of-sample gross/leg is no longer positive -- "
+        f"({oos['oos_gross_per_leg']:.4f}) -- the whitelist no longer "
+        "generalises and must be re-measured"
+    )
+
+    # And it must be BELOW the in-sample number -- a walk-forward that
+    # reports the in-sample number as out-of-sample is the bug this
+    # test was written after (see the SUPERSEDED registry run).
+    assert oos["oos_gross_per_leg"] < ins["oos_gross_per_leg"], (
+        "the 'out-of-sample' gross/leg is not below the in-sample one -- "
+        "the pooling helper is probably reading the wrong arms"
+    )
+
+    # The short side must NOT be silently promoted on a sign flip.
+    # If the short side ever becomes genuinely out-of-sample
+    # positive, that IS a new finding and the docs must be updated.
+    short_oos = _side_gross_per_leg(d, "short")
+    if short_oos is not None:
+        assert short_oos <= 0.0, (
+            f"the short side is now out-of-sample positive ({short_oos:+.4f}) "
+            "-- a genuine new finding; update AGENTS.md § 3.10.0 and "
+            "re-consider the long-only variant"
+        )
+
+    # The long-only variant must stay a documented PROXY, not a
+    # quiet promotion. Its timing component must stay negative.
+    beta = reports / "seq5_beta_regression.json"
+    assert beta.exists(), (
+        "the beta regression report is missing -- run "
+        "`python -m runtime.diagnostics.seq5_beta_regression`"
+    )
+    b = json.loads(beta.read_text(encoding="utf-8"))
+    for arm in ("longonly_on_H1", "longonly_on_H2"):
+        blk = b["arms"][arm]
+        assert blk["long"]["excess_per_leg"] < 0.0, (
+            f"{arm} long excess is no longer negative "
+            f"({blk['long']['excess_per_leg']:+.4f}) -- the long-only "
+            "book may have become a TIMING book; re-measure and update "
+            "AGENTS.md § 3.10.0"
+        )
+
+    # The canonical set must still carry BOTH sides -- a long-only
+    # whitelist is a directional bet, which is the defect this repo
+    # exists to avoid.
+    assert any(k.startswith("short|") for k in STRUCTURE_SEQ_WHITELIST), (
+        "the canonical whitelist no longer has any short keys -- "
+        "that is a directional bet; it needs an explicit promotion"
+    )
+
+
+def _side_gross_per_leg(report: dict, side: str) -> float | None:
+    """The pooled out-of-sample gross/leg for ONE side, if derivable."""
+    arms = {a["arm"]: a for a in report.get("arms", [])}
+    used = ("fitH2_on_H1", "fitH1_on_H2")
+    legs = 0
+    gross = 0.0
+    for name in used:
+        a = arms.get(name)
+        if not a:
+            return None
+        legs += a[f"{side}_legs"]
+        gross += a[f"{side}_gross"]
+    return gross / legs if legs else None
+
+
+def test_trade_count_band_is_measured_unreachable_not_merely_asserted():
+    """The 30-70 legs/day band is UNREACHABLE for the 5-event whitelist.
+
+    This is the engine-level follow-up to the post-hoc
+    ``seq5_ksweep.py`` screen, and it closes the last open question
+    about the whitelist's trade count.
+
+    THE POST-HOC SCREEN said: to stay in the 30-70 legs/day band you
+    would have to keep 48 of 64 signatures per side -- i.e. barely
+    filter at all. The post-hoc filter ranks signatures by the very
+    statistic it is judged on, so that claim needed an engine-side
+    confirmation.
+
+    THE ENGINE-SIDE RUN (``seq5_ksweep_engine_check.py``) confirms
+    it, and the answer is worse than the screen promised:
+
+        shipped (21 keys)    7.19/day   gross/leg +0.3877  0.777x
+        ranked top-48       30.13/day   gross/leg +0.0458  0.092x
+
+    The band variant lands in the band, but gross/leg collapses to
+    12% of the shipped set, net worsens by $11,820, its timing
+    component is STRONGLY negative (t = -17.37), and its short side
+    turns negative over 13,524 legs.
+
+    So the trade-count band and the edge are in DIRECT conflict. The
+    user's waiver of the band for this knob is not a compromise -- it
+    is the only admissible choice.
+    """
+    import json
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    out = (repo / "runtime" / "diagnostics" / "_reports"
+           / "seq5_ksweep_engine_check.json")
+    assert out.exists(), (
+        "the engine-level K-sweep check is missing -- run "
+        "`python -m runtime.diagnostics.seq5_ksweep_engine_check`"
+    )
+    d = json.loads(out.read_text(encoding="utf-8"))
+    arms = {a["arm"]: a for a in d["engine_arms"]}
+    assert "shipped_21" in arms and "ranked_top48" in arms, (
+        "the engine check is missing an arm"
+    )
+    ship = arms["shipped_21"]
+    k48 = arms["ranked_top48"]
+
+    # The band variant must actually land in the band -- otherwise
+    # this test is comparing two things that both miss it.
+    assert 30.0 <= k48["legs_per_calendar_day"] <= 70.0, (
+        f"the K=48 variant is at {k48['legs_per_calendar_day']:.2f}/day, "
+        "not in the 30-70 band -- re-measure"
+    )
+
+    # And it must be worse on the per-leg edge.
+    assert k48["gross_per_leg"] < ship["gross_per_leg"], (
+        "the K=48 band variant is no longer worse per-leg than the "
+        "shipped set -- the band may now be reachable; re-measure and "
+        "update AGENTS.md § 3.10.2"
+    )
+
+    # And its timing component must be strongly negative.
+    assert k48["excess_t"] < -5.0, (
+        f"the K=48 variant's excess t is {k48['excess_t']:+.2f} -- if it "
+        "is no longer strongly negative, the extra signatures are no "
+        "longer pure noise; re-measure"
+    )
+
+    # The shipped set must still be the one that carries the edge.
+    assert ship["gross_per_leg"] > 0.3, (
+        f"the shipped set's gross/leg fell to {ship['gross_per_leg']:.4f} "
+        "-- re-measure the whitelist"
+    )
+    assert ship["gross_over_fee"] > k48["gross_over_fee"], (
+        "the shipped set no longer covers more of the round trip than "
+        "the band variant"
+    )
 
 
 def test_short_side_is_a_measured_drag_but_the_strategy_stays_two_sided():
@@ -2407,3 +2635,198 @@ def test_short_side_is_a_measured_drag_but_the_strategy_stays_two_sided():
         f"sequence filter instead."
     )
     assert build_engine_kwargs()["trade_sides"] == "both"
+
+# ─────────────────────────────────────────────────────────────────────
+# 16. The trail replay's eod gross — never zeroed
+# ─────────────────────────────────────────────────────────────────────
+def test_trail_replay_eod_branch_carries_the_real_gross():
+    """The trail replay's ``eod`` branch must return the ENGINE's gross.
+
+    Regression for a bug found 2026-11-04: ``_replay_trail`` returned a
+    hard-coded ``gross_px = 0.0`` from both of its ``eod`` branches,
+    while returning the correct exit price. The replay's trail-off
+    baseline therefore came out $66.63 BELOW the engine's on the
+    8-month corpus -- exactly the 8 ``eod`` legs' combined gross.
+
+    The diagnostic's reconciliation check (b2) caught it. A one-month
+    slice did NOT, because 2025-01 has zero ``eod`` legs: the bug is
+    latent on short windows.
+
+    The invariant: a branch that returns a price must return the gross
+    that goes with it. Same class as AGENTS.md 1.6 (a field with a
+    default is a silent-corruption field).
+    """
+    import inspect
+
+    from runtime.diagnostics.trail_mfe_mfa import _replay_trail
+
+    src = inspect.getsource(_replay_trail)
+
+    # Every ``return "eod"`` must carry a computed gross.
+    eod_returns = [
+        line.strip() for line in src.splitlines()
+        if line.strip().startswith('return "eod"')
+    ]
+    assert eod_returns, "the eod branches are gone -- the guard is stale"
+
+    zeroed = [r for r in eod_returns if r.endswith(", 0.0")]
+    assert not zeroed, (
+        "the trail replay's eod branch returns a ZERO gross -- the "
+        "replay's baseline will not reconcile with the engine: "
+        f"{zeroed}"
+    )
+
+    # And the gross must be derived from the exit price.
+    for r in eod_returns:
+        assert "(eod_px - entry_px) * side" in r, (
+            "the eod branch must compute its gross from the exit price "
+            f"and the side, got: {r!r}"
+        )
+
+
+def test_trail_replay_eod_gross_matches_the_engine_arithmetic():
+    """The eod gross must equal ``(exit - entry) * side`` for BOTH sides.
+
+    A short that exits ABOVE its entry is a LOSS, so the sign must
+    follow the side -- a positive-only gross would flatter the short
+    side.
+    """
+    import numpy as np
+
+    from runtime.diagnostics.trail_mfe_mfa import _replay_trail
+
+    empty_hi = np.zeros(0, dtype=np.float64)
+    empty_lo = np.zeros(0, dtype=np.float64)
+    empty_op = np.zeros(0, dtype=np.float64)
+    empty_peak = np.zeros(0, dtype=np.float64)
+
+    common = dict(
+        hi=empty_hi, lo=empty_lo, op=empty_op, peak=empty_peak,
+        atr_1m=0.0, sl_px=0.0, tp_px=0.0,
+        mode="off", atr_mult=0.0, activation_mult=0.0,
+        giveback_frac=0.0, fill_model="pessimistic",
+    )
+
+    # A long that exits above entry is a WIN.
+    reason, px, g = _replay_trail(entry_px=100.0, side=1, eod_px=105.0,
+                                  **common)
+    assert reason == "eod"
+    assert px == 105.0
+    assert g == pytest.approx(5.0)
+
+    # A short that exits above entry is a LOSS (side = -1).
+    reason, px, g = _replay_trail(entry_px=100.0, side=-1, eod_px=105.0,
+                                  **common)
+    assert reason == "eod"
+    assert px == 105.0
+    assert g == pytest.approx(-5.0)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# 17. trail_sides — the per-side trailing-stop scope
+# ─────────────────────────────────────────────────────────────────────
+def test_trail_sides_is_forwarded_to_the_engine():
+    """The knob must reach the engine, or it is a knob that cannot move.
+
+    AGENTS.md § 1.5: a knob on the allowlist can still be DEAD if the
+    engine does not actually read it. That is strictly worse than an
+    absent knob -- the sweep reports a "canonical" cell that is not
+    canonical.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+    from bt.optimal_config import build_engine_kwargs
+
+    sig = set(inspect.signature(run_vp_sniper_backtest).parameters)
+    assert "trail_sides" in sig, (
+        "run_vp_sniper_backtest has no trail_sides parameter -- the "
+        "knob would be accepted by the allowlist and measured as a no-op"
+    )
+
+    ek = build_engine_kwargs()
+    assert "trail_sides" in ek, (
+        "build_engine_kwargs does not emit trail_sides -- the engine "
+        "would silently use its default"
+    )
+    assert ek["trail_sides"] in ("both", "long", "short")
+
+
+def test_trail_sides_rejects_an_unknown_mode():
+    """A typo must fail LOUDLY, not select a plausible wrong scope.
+
+    ``tp_mode`` sets the precedent: the engine raises ``ValueError`` on
+    an unknown mode rather than silently falling back to a default that
+    looks like a valid measurement.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+
+    src = inspect.getsource(run_vp_sniper_backtest)
+    assert "trail_sides" in src
+
+    # The validation must be a ValueError raise, and it must list the
+    # three legal values.
+    assert "raise ValueError" in src, (
+        "trail_sides must reject an unknown mode with a ValueError"
+    )
+    assert "'both', 'long' or 'short'" in src or \
+        '"both", "long" or "short"' in src, (
+        "the trail_sides error message must name the legal values"
+    )
+
+
+def test_trail_sides_gate_is_applied_per_position_direction():
+    """The gate must consult the POSITION's direction.
+
+    A trail scoped to shorts must leave longs on the TP/SL exit. If the
+    gate were a single global boolean, ``trail_sides='short'`` would be
+    indistinguishable from ``trail_sides='both'``.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+
+    src = inspect.getsource(run_vp_sniper_backtest)
+
+    # The two per-side flags must exist ...
+    assert "_trail_on_long" in src, (
+        "the engine must compute a per-side trail flag for longs"
+    )
+    assert "_trail_on_short" in src, (
+        "the engine must compute a per-side trail flag for shorts"
+    )
+
+    # ... and the bar loop must pick between them by the position's
+    # direction.
+    assert "ot.direction > 0 else _trail_on_short" in src, (
+        "the trail gate must select the flag by the position's direction"
+    )
+
+
+def test_trail_sides_is_not_the_entry_side_gate():
+    """``trail_sides`` and ``trade_sides`` are DIFFERENT knobs.
+
+    ``trade_sides`` decides which trades may OPEN. ``trail_sides``
+    decides which POSITIONS get a trailing EXIT. A short-scoped trail
+    must NOT stop shorts from trading -- it only changes their exit.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+
+    src = inspect.getsource(run_vp_sniper_backtest)
+
+    # The ENTRY gate must still read ``trade_sides`` -- not
+    # ``trail_sides``. If the trail scope had been wired into the
+    # entry path, a short-scoped trail would silently stop trading
+    # shorts, which is a DIFFERENT strategy (and the one AGENTS.md § 6
+    # already rejected: ``trade_sides='long'``).
+    assert "if trade_sides == \"long\" and direction < 0:" in src, (
+        "the entry-side gate must still be driven by trade_sides"
+    )
+    assert "if trail_sides == \"long\"" not in src, (
+        "trail_sides must not be wired into the ENTRY path -- it is an "
+        "exit-scope knob, not an entry gate"
+    )

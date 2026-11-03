@@ -321,10 +321,6 @@ class BacktestResult:
     # direction was on a side the config does not permit. Non-zero
     # means the side gate actually fired.
     n_dropped_sides: int = 0
-    # Signals rejected by the PER-SIDE SEQUENCE DROP SET (2026-10-24)
-    # -- the trade's (side, last structure event) pair was in the drop
-    # set. Non-zero means the per-side sequence filter actually fired.
-    n_dropped_seq_side: int = 0
     # Signals rejected by the PER-SIDE 5-EVENT SEQUENCE WHITELIST
     # (2026-11-04) -- the trade's (side, trailing-5-event signature)
     # pair was NOT in the whitelist, so it was dropped. Non-zero means
@@ -2404,37 +2400,6 @@ def run_vp_sniper_backtest(
     # ``structure_score_lookback`` so the signature covers exactly the
     # events the score averaged.
     structure_seq_len: int = 0,
-    # ── PER-SIDE SEQUENCE DROP SET (2026-10-24) ────────────────
-    # Keys are ``"<side>|<last-event>"`` where side is ``"long"`` or
-    # ``"short"`` and last-event is the signature letter of the most
-    # recent structure break (``b``=BoS bull, ``B``=BoS bear,
-    # ``c``=CHoCH bull, ``C``=CHoCH bear).
-    #
-    # A key PRESENT in the set means: do not open that trade.
-    #
-    # WHY THIS IS PER-SIDE: the same event type is good for one side
-    # and bad for the other. Measured 2026-10-24 on 8 slices
-    # (``runtime/diagnostics/per_side_sequence_pooled.py``):
-    #
-    #   bucket        FIT gross   HELD gross   verdict
-    #   long|b  (bull BoS)    -$47         +$13    NOT consistent
-    #   short|b (bull BoS)    -$86         -$18    consistent negative
-    #
-    # So a bullish break of structure is a reliably BAD setup for a
-    # SHORT but not for a long. A pooled filter can never express
-    # that.
-    #
-    # The canonical drop set is ``{"short|b"}`` -- drop shorts whose
-    # last structure event was a bullish BoS. That single rule:
-    #   * moved the short side from -$54 to +$50 gross WHILE STILL
-    #     TRADING 272 legs (a quality win, not a trading-less win),
-    #   * improved gross on 7 of 8 slices,
-    #   * left both side correlations at ~0.05 (NOT a directional
-    #     bet), and
-    #   * kept the flat-slice test intact.
-    #
-    # ``None`` (default) disables the feature entirely.
-    structure_seq_drop_set: Optional[set] = None,
     # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ────────
     # Keys are ``"<side>|<5-char signature>"`` where the signature is
     # the trailing FIVE BoS/CHoCH events at the SIGNAL bar, oldest
@@ -2442,14 +2407,16 @@ def run_vp_sniper_backtest(
     # ``C``=CHoCH bear) -- e.g. ``"long|Ccbbb"``.
     #
     # A key PRESENT in the set means: TAKE that trade. A trade whose
-    # key is ABSENT is DROPPED. So the set is a WHITELIST, the
-    # opposite polarity of ``structure_seq_drop_set``.
+    # key is ABSENT is DROPPED.
     #
-    # This is a SEPARATE knob from the drop set on purpose: the drop
-    # set is 1-event granularity ("what is the last break?") and the
-    # whitelist is 5-event granularity ("what is the last FIVE
-    # breaks?"). They answer different questions and were fitted on
-    # different evidence, so they must be able to move independently.
+    # This knob REPLACED the 1-event ``structure_seq_drop_set``, which
+    # was removed on 2026-11-04 as REDUNDANT and self-contradictory:
+    # the drop set vetoed 3 of the 8 whitelisted short shapes (their
+    # last event is a reversal, 'c'/'C'), including the single best
+    # one, and the whitelist ALONE measured better end-to-end. The
+    # whitelist is the strictly more informed rule -- it asks "what
+    # are the last FIVE breaks?" rather than "what is the last
+    # break?" -- so there is nothing left for the drop set to do.
     #
     # The signature is read with the SAME helper the direction flip
     # uses (``_sequence_signature``), so the whitelist and the flip
@@ -2482,6 +2449,30 @@ def run_vp_sniper_backtest(
     trail_atr_mult: float = 0.0,
     trail_activation_mult: float = 0.0,
     trail_giveback_frac: float = 0.0,
+    # ── Which SIDES the trail applies to (2026-11-04) ───────────
+    #
+    # ``trail_sides``: 'both' | 'long' | 'short'.
+    #
+    # WHY THIS EXISTS. The corpus MFE/MFA analysis
+    # (``docs/trail_stop.md`` § 8.4) measured the trail's effect
+    # PER SIDE on the 8-month corpus (2,539 legs):
+    #
+    #   side   n      baseline gross   canonical trail delta
+    #   long   1,685  +$1,073.50       -$906.77   (753 TPs cut)
+    #   short    854   -$245.05        +$533.38   (290 SLs rescued)
+    #
+    # The trail helps the side that is LOSING money and hurts the side
+    # that is making it: the short side's MFA p50 ($3.716) sits close
+    # to its MFE p50 ($4.380) -- shorts go against the trade FIRST,
+    # which is exactly the population a trailing stop rescues. The long
+    # side runs 8.36 ATR of MFE, so truncating its winners destroys
+    # more than the trail captures.
+    #
+    # ``trade_sides`` (the entry-side gate) is a DIFFERENT knob: it
+    # decides which trades MAY OPEN. ``trail_sides`` decides which
+    # positions get a trailing EXIT. Both sides keep trading under
+    # ``trail_sides='short'``.
+    trail_sides: str = "both",
     # ── SL_MODE_HVN_LVN (2026-10-22, user request) ──────────────
     #
     # When ``sl_mode == 'hvn_lvn'`` the stop is anchored to the Nth
@@ -2717,6 +2708,30 @@ def run_vp_sniper_backtest(
     close = bars["close"].to_numpy(dtype=np.float64)
     n = len(close)
 
+    # PERF P5 (2026-11-04): read the OHLC/timestamp arrays through
+    # ``memoryview`` instead of ``float(arr[i])``.
+    #
+    # The bar loop reads five scalars PER BAR. ``float(arr[i])`` boxes a
+    # fresh numpy scalar on every read -- 5 boxes x 41M bars on the 1y
+    # corpus. Measured on the 1-month slice (1,377,190 bars):
+    #
+    #     float(arr[i])      709.9 ms   (1.94M bars/s)
+    #     arr.tolist()       311.8 ms   (4.42M bars/s)   but +990 MB/array
+    #     arr.item(i)        547.2 ms   (2.52M bars/s)
+    #     memoryview(arr)    270.2 ms   (5.10M bars/s)   <- 2.63x, 0 extra RAM
+    #
+    # ``memoryview`` is a VIEW, not a copy: it costs 0 extra bytes, so it
+    # is the only variant that is affordable on the 1y corpus (where the
+    # engine already peaks above 4 GB and ``.tolist()`` would add ~5 GB).
+    #
+    # It yields the SAME Python scalars: a float64 memoryview read gives a
+    # Python ``float``, an int64 memoryview read gives a Python ``int``.
+    # The values are bit-identical to ``float(arr[i])`` / ``int(arr[i])``.
+    _mv_open = memoryview(open_)
+    _mv_high = memoryview(high)
+    _mv_low = memoryview(low)
+    _mv_close = memoryview(close)
+    _mv_times = memoryview(times)
     # ── Trailing-stop ATR basis (2026-11-03) ─────────────────────
     # ATR is ONLY a distance yardstick for the trail — the structural
     # SL never reads it. 1m Wilder ATR(14), forward-filled onto the
@@ -2728,6 +2743,24 @@ def run_vp_sniper_backtest(
     else:
         _atr1m = _build_atr_1m_forward_filled(high, low, close, times)
     _trail_on = str(trail_mode).lower().strip() not in ("", "off", "none", "disabled")
+
+    # ── Which sides the trail applies to (2026-11-04) ──────────────
+    #
+    # ``trail_sides`` restricts the trail to one side of the book. The
+    # default ``'both'`` is byte-for-byte the old behaviour: every
+    # position gets the trailing exit.
+    #
+    # The gate is computed ONCE here (not per bar) because it is a
+    # property of the run, not of the position. The per-position
+    # direction is applied in the bar loop.
+    _trail_sides = str(trail_sides).lower().strip()
+    if _trail_sides not in ("both", "long", "short"):
+        raise ValueError(
+            f"trail_sides must be 'both', 'long' or 'short', "
+            f"got {trail_sides!r}"
+        )
+    _trail_on_long = _trail_on and _trail_sides in ("both", "long")
+    _trail_on_short = _trail_on and _trail_sides in ("both", "short")
 
     # Pre-bucket signals
     #
@@ -2909,11 +2942,11 @@ def run_vp_sniper_backtest(
                 f"rate={_eng_i/_el:.0f}/s open={len(open_trades)}\n")
             _sys.stderr.flush()
         _eng_i += 1
-        b_open = float(open_[i])
-        b_high = float(high[i])
-        b_low = float(low[i])
-        b_close = float(close[i])
-        b_time = int(times[i])
+        b_open = _mv_open[i]
+        b_high = _mv_high[i]
+        b_low = _mv_low[i]
+        b_close = _mv_close[i]
+        b_time = _mv_times[i]
 
         # NB87b: snapshot closed-trade count so we can attribute the
         # delta to this bar's step 3. Cheap (O(1)) and avoids having
@@ -3095,26 +3128,8 @@ def run_vp_sniper_backtest(
                 if trade_sides == "long" and direction < 0:
                     res.n_dropped_sides += 1
                     continue
-                # ── PER-SIDE SEQUENCE DROP SET (2026-10-24) ─────────
-                # Drop the trade if its (side, last structure event)
-                # pair is in the drop set. See the ``structure_seq_drop_set``
-                # docstring for the measurement.
-                #
-                # It is applied AFTER the sequence flip (so it sees the
-                # FINAL side) and AFTER the side gate, and BEFORE the
-                # conflict-policy check.
-                if structure_seq_drop_set:
-                    _side_lbl = "long" if direction > 0 else "short"
-                    _last_ev = _sequence_signature(
-                        structure, i,
-                        structure_seq_len or structure_score_lookback,
-                    )[-1:]
-                    if f"{_side_lbl}|{_last_ev}" in structure_seq_drop_set:
-                        res.n_dropped_seq_side += 1
-                        continue
                 # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──
-                # OPPOSITE polarity to the drop set above: a key
-                # PRESENT means TAKE, ABSENT means DROP.
+                # A key PRESENT means TAKE, ABSENT means DROP.
                 #
                 # It sits here, AFTER the sequence flip (so it sees
                 # the FINAL side) and AFTER the side gate, and BEFORE
@@ -3267,17 +3282,6 @@ def run_vp_sniper_backtest(
             if trade_sides == "long" and direction < 0:
                 res.n_dropped_sides += 1
                 continue
-            # ── PER-SIDE SEQUENCE DROP SET (2026-10-24) ───────────
-            # Sniper path -- same rule as the immediate path.
-            if structure_seq_drop_set:
-                _side_lbl = "long" if direction > 0 else "short"
-                _last_ev = _sequence_signature(
-                    structure, i,
-                    structure_seq_len or structure_score_lookback,
-                )[-1:]
-                if f"{_side_lbl}|{_last_ev}" in structure_seq_drop_set:
-                    res.n_dropped_seq_side += 1
-                    continue
             # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──
             # Sniper path -- same rule as the immediate path.
             if structure_seq_whitelist:
@@ -4143,7 +4147,14 @@ def run_vp_sniper_backtest(
             # stop-wins precedence. ATR is ONLY the distance
             # yardstick — the structural SL above never reads it.
             trail_hit = False
-            if _trail_on and ot.trail_atr_value > 0.0:
+            # The per-side gate (2026-11-04). ``trail_sides='short'``
+            # gives shorts a trailing exit and leaves longs on the
+            # TP/SL exit -- the trail's measured value is concentrated
+            # on the losing side (docs/trail_stop.md § 8.4).
+            _trail_for_side = (
+                _trail_on_long if ot.direction > 0 else _trail_on_short
+            )
+            if _trail_for_side and ot.trail_atr_value > 0.0:
                 _t_atr = float(ot.trail_atr_value)
                 if ot.direction > 0:
                     if b_high > ot.peak_price:
@@ -4476,6 +4487,18 @@ def run_vp_sniper_backtest(
         # -- i.e. it looked like the engine had lost 80% of its
         # signals. AGENTS.md requires this to be 0.
         + res.n_dropped_structure
+        # 2026-11-04: the 5-EVENT WHITELIST is ALSO a signal-time
+        # drop, and it was missing from this chain -- the same bug
+        # class as the structure gate above. With the canonical
+        # whitelist ON it drops ~109k of the ~118k emitted signals,
+        # so omitting it made ``signals_unaccounted`` read as a
+        # MASSIVE leak (a negative number whose magnitude is the
+        # whitelist's drop count).
+        #
+        # Note the (1-event) sequence drop set is GONE -- it was
+        # removed on 2026-11-04 as redundant with the whitelist, so
+        # there is no ``n_dropped_seq_side`` term to add.
+        + res.n_dropped_seq_whitelist
     )
     diag["signals_emitted"] = int(res.n_signals_emitted)
     diag["signals_accounted"] = int(_accounted)
@@ -4497,6 +4520,7 @@ def run_vp_sniper_backtest(
     }
     diag["gate_breakdown"] = {
         "structure": int(res.n_dropped_structure),
+        "seq_whitelist": int(res.n_dropped_seq_whitelist),
         "vol_state": int(res.n_dropped_vol_state),
         "p95_warmup": int(res.n_dropped_p95_warmup),
         "p95_warmup_sniper": int(res.n_dropped_p95_warmup_sniper),

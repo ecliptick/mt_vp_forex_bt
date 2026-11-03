@@ -1,0 +1,321 @@
+{
+  "schema": "results-run/1",
+  "run_id": "trail_sides_ab-1376b3d3e86aba52__9f29cc8__20261103T222530Z",
+  "kind": "trail_sides_ab",
+  "config_fp": "1376b3d3e86aba52",
+  "ts_utc": "2026-11-03T22:25:30Z",
+  "commit": "9f29cc86b9ada67a0327ab9037e55ca38e2050d2",
+  "commit_short": "9f29cc8",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "62acccc364395d39",
+  "params": {
+    "knob": "trail_sides",
+    "arms": [
+      "trail OFF (baseline)",
+      "combined k=2 act=1 | both",
+      "combined k=2 act=1 | short"
+    ],
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "expand_prev_day": null,
+    "warmup_days": 14,
+    "split_at": "2025-04-01",
+    "criterion": "net"
+  },
+  "summary": {
+    "baseline_net": 1593.16,
+    "baseline_legs": 7284,
+    "best_arm": "combined k=2 act=1 | short",
+    "best_net": 2298.2,
+    "best_delta": 705.04,
+    "best_short_scoped_arm": "combined k=2 act=1 | short",
+    "best_short_scoped_delta": 705.04,
+    "per_arm": {
+      "trail OFF (baseline)": {
+        "legs": 7284,
+        "gross": 4917.66,
+        "net": 1593.16,
+        "delta_vs_base": 0.0,
+        "delta_long": 0.0,
+        "delta_short": 0.0,
+        "n_trail_stop": 0,
+        "h1_delta": 0.0,
+        "h2_delta": 0.0,
+        "wins_both_halves": false
+      },
+      "combined k=2 act=1 | both": {
+        "legs": 6663,
+        "gross": 2583.18,
+        "net": -741.16,
+        "delta_vs_base": -2334.32,
+        "delta_long": -2284.31,
+        "delta_short": -50.0,
+        "n_trail_stop": 5324,
+        "h1_delta": -959.69,
+        "h2_delta": -1374.62,
+        "wins_both_halves": false
+      },
+      "combined k=2 act=1 | short": {
+        "legs": 7122,
+        "gross": 5622.77,
+        "net": 2298.2,
+        "delta_vs_base": 705.04,
+        "delta_long": 782.13,
+        "delta_short": -77.09,
+        "n_trail_stop": 1640,
+        "h1_delta": 35.4,
+        "h2_delta": 669.64,
+        "wins_both_halves": true
+      }
+    }
+  },
+  "path": "results/runs/trail_sides_ab-1376b3d3e86aba52__9f29cc8__20261103T222530Z.json",
+  "parent_fp": "1376b3d3e86aba52",
+  "payload": {
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "expand_prev_day": null,
+    "warmup_days": 14,
+    "split_at": "2025-04-01",
+    "split": {
+      "split_at": "2025-04-01",
+      "rows": [
+        {
+          "arm": "trail OFF (baseline)",
+          "h1": {
+            "net": 610.648146749286,
+            "delta": 0.0,
+            "legs": 2613
+          },
+          "h2": {
+            "net": 982.5080473873363,
+            "delta": 0.0,
+            "legs": 4671
+          }
+        },
+        {
+          "arm": "combined k=2 act=1 | both",
+          "h1": {
+            "net": -349.0457556679886,
+            "delta": -959.6939024172746,
+            "legs": 2518
+          },
+          "h2": {
+            "net": -392.1150129784603,
+            "delta": -1374.6230603657966,
+            "legs": 4145
+          }
+        },
+        {
+          "arm": "combined k=2 act=1 | short",
+          "h1": {
+            "net": 646.0528539380264,
+            "delta": 35.40470718874042,
+            "legs": 2607
+          },
+          "h2": {
+            "net": 1652.1480480505875,
+            "delta": 669.6400006632512,
+            "legs": 4515
+          }
+        }
+      ]
+    },
+    "rows": [
+      {
+        "long": {
+          "legs": 4746,
+          "gross": 4079.2817381312025,
+          "fees": 2186.2747444840866,
+          "net": 1893.006993647116,
+          "gross_per_leg": 0.8595199616795622,
+          "n_trail_stop": 0,
+          "exit_reasons": {
+            "tp": 1904,
+            "sl": 2224,
+            "contra_close": 618
+          }
+        },
+        "short": {
+          "legs": 2538,
+          "gross": 838.3774488958882,
+          "fees": 1138.228248406382,
+          "net": -299.85079951049374,
+          "gross_per_leg": 0.33032996410397486,
+          "n_trail_stop": 0,
+          "exit_reasons": {
+            "sl": 1188,
+            "tp": 791,
+            "contra_close": 559
+          }
+        },
+        "all": {
+          "legs": 7284,
+          "gross": 4917.65918702709,
+          "fees": 3324.5029928904687,
+          "net": 1593.1561941366217,
+          "gross_per_leg": 0.6751316841058609,
+          "fee_per_leg": 0.456411723351245,
+          "n_trail_stop": 0,
+          "exit_reasons": {
+            "tp": 2695,
+            "sl": 3412,
+            "contra_close": 1177
+          }
+        },
+        "arm": "trail OFF (baseline)",
+        "overrides": {
+          "trail_mode": "'off'"
+        },
+        "wall_secs": 116.3,
+        "delta_vs_base_net": 0.0,
+        "delta_long_net": 0.0,
+        "delta_short_net": 0.0,
+        "h1": {
+          "net": 610.648146749286,
+          "delta": 0.0,
+          "legs": 2613
+        },
+        "h2": {
+          "net": 982.5080473873363,
+          "delta": 0.0,
+          "legs": 4671
+        }
+      },
+      {
+        "long": {
+          "legs": 4374,
+          "gross": 1794.8065804901375,
+          "fees": 2186.111683911138,
+          "net": -391.30510342100024,
+          "gross_per_leg": 0.41033529503661126,
+          "n_trail_stop": 3531,
+          "exit_reasons": {
+            "trail_stop": 3531,
+            "sl": 681,
+            "tp": 128,
+            "contra_close": 34
+          }
+        },
+        "short": {
+          "legs": 2289,
+          "gross": 788.376152158283,
+          "fees": 1138.2318173837318,
+          "net": -349.8556652254488,
+          "gross_per_leg": 0.3444194635903377,
+          "n_trail_stop": 1793,
+          "exit_reasons": {
+            "sl": 400,
+            "trail_stop": 1793,
+            "tp": 56,
+            "contra_close": 40
+          }
+        },
+        "all": {
+          "legs": 6663,
+          "gross": 2583.182732648421,
+          "fees": 3324.3435012948694,
+          "net": -741.1607686464486,
+          "gross_per_leg": 0.38769063974912515,
+          "fee_per_leg": 0.4989259344581824,
+          "n_trail_stop": 5324,
+          "exit_reasons": {
+            "trail_stop": 5324,
+            "sl": 1081,
+            "tp": 184,
+            "contra_close": 74
+          }
+        },
+        "arm": "combined k=2 act=1 | both",
+        "overrides": {
+          "trail_activation_mult": "1.0",
+          "trail_atr_mult": "2.0",
+          "trail_giveback_frac": "0.5",
+          "trail_mode": "'combined'",
+          "trail_sides": "'both'"
+        },
+        "wall_secs": 112.0,
+        "delta_vs_base_net": -2334.3169627830703,
+        "delta_long_net": -2284.312097068116,
+        "delta_short_net": -50.00486571495503,
+        "h1": {
+          "net": -349.0457556679886,
+          "delta": -959.6939024172746,
+          "legs": 2518
+        },
+        "h2": {
+          "net": -392.1150129784603,
+          "delta": -1374.6230603657966,
+          "legs": 4145
+        }
+      },
+      {
+        "long": {
+          "legs": 4829,
+          "gross": 4861.471792671734,
+          "fees": 2186.3305754078865,
+          "net": 2675.1412172638475,
+          "gross_per_leg": 1.006724330642314,
+          "n_trail_stop": 0,
+          "exit_reasons": {
+            "tp": 1951,
+            "sl": 2297,
+            "contra_close": 581
+          }
+        },
+        "short": {
+          "legs": 2293,
+          "gross": 761.2934352104306,
+          "fees": 1138.2337504856646,
+          "net": -376.94031527523396,
+          "gross_per_leg": 0.3320076036678721,
+          "n_trail_stop": 1640,
+          "exit_reasons": {
+            "sl": 368,
+            "trail_stop": 1640,
+            "tp": 55,
+            "contra_close": 230
+          }
+        },
+        "all": {
+          "legs": 7122,
+          "gross": 5622.765227882164,
+          "fees": 3324.564325893551,
+          "net": 2298.200901988613,
+          "gross_per_leg": 0.7894924498570857,
+          "fee_per_leg": 0.4668020676626722,
+          "n_trail_stop": 1640,
+          "exit_reasons": {
+            "tp": 2006,
+            "sl": 2665,
+            "trail_stop": 1640,
+            "contra_close": 811
+          }
+        },
+        "arm": "combined k=2 act=1 | short",
+        "overrides": {
+          "trail_activation_mult": "1.0",
+          "trail_atr_mult": "2.0",
+          "trail_giveback_frac": "0.5",
+          "trail_mode": "'combined'",
+          "trail_sides": "'short'"
+        },
+        "wall_secs": 108.0,
+        "delta_vs_base_net": 705.0447078519915,
+        "delta_long_net": 782.1342236167316,
+        "delta_short_net": -77.08951576474021,
+        "h1": {
+          "net": 646.0528539380264,
+          "delta": 35.40470718874042,
+          "legs": 2607
+        },
+        "h2": {
+          "net": 1652.1480480505875,
+          "delta": 669.6400006632512,
+          "legs": 4515
+        }
+      }
+    ]
+  }
+}

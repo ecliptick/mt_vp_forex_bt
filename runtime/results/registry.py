@@ -83,6 +83,7 @@ across commits -- the headline metrics, not the whole payload.
 """
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import os
@@ -161,6 +162,36 @@ def source_fingerprint(files: list[str] | tuple[str, ...] | None = None
     sources determine the artifact (the engine, the detector, the
     config). This is what makes two runs comparable when the tree is
     dirty: ``commit`` is the same but the code is not.
+
+    The hash is over the **AST-normalised** source (comments and
+    formatting stripped), so a documentation-only edit does NOT
+    invalidate a measurement. See ``normalised_source_fingerprint``.
+    """
+    if not files:
+        return None
+    return normalised_source_fingerprint(files)
+
+
+def normalised_source_fingerprint(
+    files: list[str] | tuple[str, ...] | None = None,
+) -> str | None:
+    """SHA1 over the AST-normalised content of a set of source files.
+
+    A raw-bytes hash makes a **comment edit** invalidate a 6-minute
+    corpus measurement, which is self-defeating for the promote
+    workflow: the loop is "change the config -> re-measure ->
+    document the result", and documenting the result changes the hash
+    that says the measurement is current.
+
+    This normalises each file to its **AST dump** (``ast.dump`` with
+    no attributes), which drops comments and formatting but preserves
+    every executable construct -- names, literals, control flow. A
+    change that can alter behaviour changes the hash; a change that
+    cannot (a comment, a docstring's prose, whitespace) does not.
+
+    A file that does not parse as Python contributes a sentinel
+    rather than raising, so a partially-installed tree still yields a
+    stable fingerprint instead of crashing the run.
     """
     if not files:
         return None
@@ -168,9 +199,17 @@ def source_fingerprint(files: list[str] | tuple[str, ...] | None = None
     for rel in sorted(files):
         h.update(rel.encode("utf-8"))
         try:
-            h.update((_REPO_ROOT / rel).read_bytes())
+            src = (_REPO_ROOT / rel).read_text(encoding="utf-8")
         except OSError:
             h.update(b"<missing>")
+            continue
+        try:
+            h.update(ast.dump(ast.parse(src), annotate_fields=True,
+                              include_attributes=False).encode("utf-8"))
+        except SyntaxError:
+            # Not parseable as Python (or a partial file) -- fall back
+            # to raw bytes so the change is still detected.
+            h.update(src.encode("utf-8"))
     return h.hexdigest()[:16]
 
 

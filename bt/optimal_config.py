@@ -298,6 +298,33 @@ TRAIL_ATR_MULT = 2.0          # k: trail distance in 1m ATRs
 TRAIL_ACTIVATION_MULT = 1.0   # m: arm only after MFE >= m * ATR_1m
 TRAIL_GIVEBACK_FRAC = 0.5     # f: exit after giving back f of peak MFE
 
+# Which SIDES the trailing stop applies to: 'both' | 'long' | 'short'.
+#
+# ⚠️ This is NOT the same knob as ``TRADE_SIDES`` (the entry gate).
+# ``TRADE_SIDES`` decides which trades may OPEN; ``TRAIL_SIDES`` decides
+# which POSITIONS get a trailing EXIT. Both sides keep trading under
+# ``TRAIL_SIDES='short'``.
+#
+# WHY IT EXISTS (2026-11-04). The corpus MFE/MFA analysis
+# (``docs/trail_stop.md`` § 8.4) measured the trail PER SIDE on the
+# 8-month corpus (2,539 legs):
+#
+#   side   n      baseline gross   canonical trail delta
+#   long   1,685  +$1,073.50       -$906.77   (753 TPs cut)
+#   short    854   -$245.05        +$533.38   (290 SLs rescued)
+#
+# The trail helps the side that is LOSING money and hurts the side that
+# is making it. The short side's MFA p50 ($3.716) sits close to its MFE
+# p50 ($4.380) -- shorts go against the trade FIRST, which is exactly
+# the population a trailing stop rescues. The long side runs 8.36 ATR of
+# MFE, so truncating its winners destroys more than the trail captures.
+#
+# CANONICAL IS 'both' — the scope is MEASURED, not assumed. The
+# 'short'-scoped arm is a CANDIDATE until its end-to-end engine A/B
+# exists (the replay number above is a screen, not a verdict: the trail
+# changes the BOOK, so it must be re-measured through the engine).
+TRAIL_SIDES = 'both'
+
 # ─── Signal gates ───────────────────────────────────────────────
 #
 # vol_state_min_range_norm: the single largest measured improvement in
@@ -420,35 +447,43 @@ VOL_STATE_MAX_WICK_RATIO = 0.0
 # executed and discarded) via
 # ``runtime/diagnostics/expand_prev_day_corpus_ab.py``:
 #
-#   thr   legs   legs/day   EV(gross/leg)   fee/leg      net
-#   0.0   48188      51.98        -0.1344      0.5028  -30706.86
-#   0.7   38475      41.50        -0.1112      0.4986  -23462.25
-#   0.85  33110      35.72        -0.1235      0.4988  -20601.58
-#   0.9   31153      33.61        -0.1097      0.4981  -18935.46
-#   0.95  29405      31.72        -0.1089      0.4984  -17859.43
-#   1.0   27619      29.79        -0.1019      0.4975  -16556.59   <-- EV PEAK
-#   1.1   23558      25.41        -0.1244      0.4986  -14677.32
+#   thr   legs   legs/day   EV(gross/leg)  drift/leg  excess/leg  fee/leg      net
+#   0.0   11305      12.20         0.1720    +0.2704     -0.0984   0.5034  -3745.96
+#   0.7    9117       9.83         0.2666    +0.3512     -0.0846   0.4997  -2125.11
+#   0.85   7822       8.44         0.2978    +0.3740     -0.0762   0.5000  -1581.14
+#   1.0    6663       7.19         0.3877    +0.4641     -0.0764   0.4989   -741.16  <-- EV PEAK
+#   1.1    5677       6.12         0.3186    +0.3866     -0.0680   0.5000  -1029.78
+#   1.2    5088       5.49         0.3030    +0.3740     -0.0710   0.5033  -1019.29
+#   1.3    4610       4.97         0.3059    +0.3798     -0.0739   0.5048   -916.99
 #
-# EV is the criterion (user instruction). 1.0 is the EV maximum:
-# gross/leg improves from -0.1344 to -0.1019 (+0.0325) and the book
-# trades 29.79 legs/calendar-day.
+# EV is the criterion (user instruction). The EV curve RISES to a
+# peak at 1.0 and then FALLS AWAY -- 1.1/1.2/1.3 were measured
+# specifically to confirm 1.0 is a peak, not a point on a rising
+# slope. 1.0 beats every higher threshold (dEV +0.0691 vs 1.1,
+# +0.0847 vs 1.2, +0.0818 vs 1.3) and lifts EV over gate-off by
+# dEV +0.2157 (t = +2.60 -- statistically significant).
+#
+# The peak is a DRIFT peak, not a timing peak: drift peaks at 1.0
+# (+0.4641) while excess (timing) is flat at -0.07..-0.10 across
+# the whole range. The gate selects on directional drift.
 #
 # ⚠️ HONEST LIMITS (recorded, not hidden):
-#   * The EV lift is NOT statistically separable from its neighbours:
-#     1.0 vs 0.95 is t = +0.16, 1.0 vs 0.9 is t = +0.17. The EV
-#     curve is flat across 0.9-1.0; 1.0 is the argmax of a flat
-#     region, not a sharp optimum.
+#   * The EV lift over gate-off IS statistically significant
+#     (t = +2.60), but the lift over the NEAR neighbours is not:
+#     1.0 vs 0.85 is t = +1.00, 1.0 vs 1.1 is t = +0.71. The
+#     plateau 0.85-1.0 is not sharply separated from the peak.
 #   * The book is still NEGATIVE at every threshold. The gate
-#     REDUCES a loss ($-30,707 -> $-16,557); it does not make the
-#     book profitable. Gross/leg (-0.1019) remains far below the
-#     measured round trip (0.4975), so the strategy is still
-#     fee-limited.
+#     REDUCES a loss ($-3,746 -> $-741); it does not make the book
+#     profitable. EV/leg (0.3877) remains below the measured round
+#     trip (0.4989), so the strategy is still fee-limited.
 #   * ``excess`` (the timing component, as opposed to drift) remains
-#     NEGATIVE and significant at every threshold (t = -15.53 at
+#     NEGATIVE and significant at every threshold (t = -8.45 at
 #     1.0). The gross is dominated by drift -- the market going the
 #     way the position already pointed.
-#   * 29.79 legs/day sits just BELOW the 30-70/day target band, and
-#     47.2% of days fall under 30 legs.
+#   * 7.19 legs/day sits FAR BELOW the 30-70/day target band, and
+#     93.6% of days fall under 30 legs. The instruction to promote
+#     on EV overrides the trade-count preference -- a deliberate
+#     trade-off, not an oversight.
 #
 # The knob is LIVE and CANONICAL at 1.0. Re-measure it whenever the
 # exit geometry changes (it is paired with the SL/volume gate by
@@ -479,91 +514,45 @@ STRUCTURE_MAX_AGE_BARS = 300
 # attacked with a per-side sequence filter instead.
 TRADE_SIDES = 'both'
 
-# ─── Per-side sequence drop set (PROMOTED 2026-10-24) ───────────
+# ─── Per-side sequence drop set — REMOVED 2026-11-04 ─────────────
 #
-# Keys are ``"<side>|<last-event>"`` where side is ``"long"`` or
-# ``"short"`` and last-event is the signature letter of the most recent
-# structure break (``b``=BoS bull, ``B``=BoS bear, ``c``=CHoCH bull,
-# ``C``=CHoCH bear). A key PRESENT in the set means: do not open that
-# trade.
+# The 1-event drop set (``{"short|c", "short|C"}``) is DELETED. It was
+# REDUNDANT with, and in direct CONTRADICTION with, the 5-event whitelist
+# below. Measured on the corpus (2024-01-01 -> 2026-07-16, one continuous
+# execution, 14d warmup), 3 of the 8 whitelisted SHORT shapes end in a
+# reversal ('c'/'C') and were therefore VETOED by this gate:
 #
-# THE RULE: do not take a SHORT when the last structure event was a
-# REVERSAL ("c" = CHoCH bull, "C" = CHoCH bear). Do take shorts after
-# a bearish CONTINUATION ("B" = BoS bear).
+#     short|BcCcC    <- the single best short shape (+0.532 gross/leg)
+#     short|CBcCc
+#     short|cCcbC
 #
-# MARKET READING. The FVG that triggers a short formed BEFORE the
-# reversal. The reversal event is precisely what invalidates it. So
-# a short taken after a fresh structure reversal is trading against
-# the structure that has just been established. A short after a
-# bearish CONTINUATION ("B") is with the trend -- and that bucket is
-# POSITIVE on both halves (+$70 fit / +$11 held), so it is kept.
+# The two gates answer the SAME question at DIFFERENT granularity and
+# disagreed: the drop set said "never short after a reversal", the
+# whitelist said "short after THIS specific 5-event history is good".
+# The 5-event rule is strictly more informed, and it is the one that
+# survived the split-half test. Keeping both meant the whitelist's best
+# short shape could never fire.
 #
-# MEASURED AT THE SIGNAL BAR (the bar the engine gates on), 8 slices,
-# canonical MT4 sizing, promoted vol gate
-# (``runtime/diagnostics/seq_drop_set_validate.py``):
+# END-TO-END (7-arm corpus A/B, ``seq_whitelist_corpus_ab2.py``):
 #
-#   bucket        FIT gross   HELD gross   verdict
-#   long|b          +$7         +$40        keep
-#   long|B          +$29        -$13        keep (not consistent)
-#   long|c          +$21         $0         keep
-#   long|C         +$211         +$2        KEEP -- best long bucket
-#   short|B         +$70        +$11        KEEP -- the good short bucket
-#   short|c         -$24        -$36        DROP (consistent negative)
-#   short|C         -$23        -$20        DROP (consistent negative)
-#   short|b          --          --        STRUCTURALLY EMPTY (see below)
+#   arm            wl   dropset   legs  legs/day     gross        net   g/leg
+#   unfiltered      0        0  37159    40.09   -$4,742  -$23,091  -0.1276
+#   split          21        0   6663     7.19   +$2,583     -$741  +0.3877
+#   split_canon    21        2   5664     6.11   +$2,357     -$467  +0.4161
 #
-# WHY THIS IS PER-SIDE: the same event type is good for one side and
-# bad for the other. A pooled filter can never express that.
+# The drop set's isolated effect on the SAME 21-key whitelist:
 #
-# EFFECT of dropping short|c and short|C (8 slices, pooled):
+#   gross  +$2,583 -> +$2,357   (ON - OFF = -$226)
+#   net    -$741   -> -$467     (ON - OFF = +$274)
+#   legs   6,663   -> 5,664    (-999)
 #
-#   metric                control    filtered
-#   legs                       577         395
-#   total gross              +$276       +$379   (+$103)
-#   total net                  +$9       +$197   (+$187)
-#   short-side gross          -$21        +$82
-#   short-side gross/leg    -$0.081     +$0.996  (12x better)
-#   long-side gross          +$297       +$297   <- UNTOUCHED
-#   long-side legs             313         313   <- UNTOUCHED
-#   long-side corr          +0.042      +0.042
-#   short-side corr         +0.070      +0.131
-#   dropped-trade t-stat        --      -1.55
-#   flat-slice d net           --       +$47
+# So the drop set costs 999 legs and $226 of GROSS to save $274 of NET.
+# A NET-only win that loses GROSS is a FEE artefact, not a signal --
+# exactly the failure mode AGENTS.md 5.2 distinguishes. The whitelist
+# ALONE is the better book: same direction of travel, more gross, more
+# legs, and the higher gross/leg.
 #
-# WHY THIS IS NOT A "TRADE LESS" WIN:
-#   * GROSS improves by +$103. Fee savings are only $86, so the gross
-#     delta alone is positive -- the signal is real.
-#   * The short side's gross PER LEG goes from NEGATIVE to POSITIVE
-#     (12x better). The side is being IMPROVED, not muted.
-#   * The LONG side is completely untouched -- same legs, same gross,
-#     same correlation. The filter does not disturb it.
-#   * BOTH sides still trade (82 short legs, corr +0.131), so this is
-#     NOT a directional bet.
-#
-# THE `short|b` BUCKET IS STRUCTURALLY EMPTY. A bullish BoS
-# invalidates the opposing bear FVGs, so no short can be signalled on
-# a bar whose last structure event is a bullish BoS. That is a
-# property of the strategy, not a data artefact -- see
-# ``runtime/diagnostics/seq_signal_vs_fill_bar.py``.
-#
-# ⚠️ MEASUREMENT TRAP (this cost one wrong promotion). The FIRST
-# measurement tagged the trade's FILL bar and found "short|b" with
-# 105 trades, a t-stat of -2.10, and a +$104 gross improvement. That
-# was a FILL-TIME REGIME measurement, not a signal-time one: under
-# the D2 resting-order model the order fills a median 42 bars after
-# the signal and the structure has moved on by then. The engine gate
-# CANNOT act on a fill-time effect -- the decision is made at the
-# signal. The correct signal-time measurement gives a different (and
-# much better) answer. Always gate on the signal bar.
-#
-# Applied AFTER the sequence-direction flip (so it sees the FINAL
-# side), AFTER the side gate, and BEFORE the conflict-policy check (so
-# a dropped trade cannot consume a same-direction slot or perturb the
-# book). Both the immediate and the sniper path are gated; dropped
-# signals are counted in ``res.n_dropped_seq_side``.
-#
-# Locked by ``tests/test_regressions.py::test_per_side_sequence_drop_set_is_promoted``.
-STRUCTURE_SEQ_DROP_SET: frozenset[str] = frozenset({"short|c", "short|C"})
+# Locked by ``tests/test_regressions.py::test_per_side_sequence_drop_set_is_removed``.
 
 # ─── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──────────
 #
@@ -578,62 +567,97 @@ STRUCTURE_SEQ_DROP_SET: frozenset[str] = frozenset({"short|c", "short|C"})
 # the signatures worth trading.
 #
 # WHAT IT IS. A set of ``"<side>|<5-char signature>"`` keys. A key
-# PRESENT means TAKE that trade; ABSENT means DROP it. This is the
-# OPPOSITE polarity of ``STRUCTURE_SEQ_DROP_SET`` (which is a
-# blacklist of 1-event buckets), and it is a SEPARATE knob so the two
-# can move independently -- they answer different questions at
-# different granularity ("what is the last break?" vs "what are the
-# last FIVE breaks?").
+# PRESENT means TAKE that trade; ABSENT means DROP it. It REPLACED the
+# 1-event ``structure_seq_drop_set`` (removed 2026-11-04) -- see the
+# tombstone comment above for why the two contradicted each other.
+#
+# ⚠️ THIS SET WAS RE-FITTED ON 2026-11-04. The first version (25 keys)
+# was fitted on a 64,978-leg ledger that was built BEFORE the recipe
+# changed (the trailing stop became canonical, ``tp_mode`` moved to
+# ``hvn_single``, the SL ceiling moved, and the
+# ``vol_state_min_expand_prev_day`` gate went live). That change moved
+# the book to 37,159 legs, and a set fitted on the old book does not
+# describe the new one -- only 14 of the 25 keys survived. See
+# ``docs/engine_history.md`` for the cache-fingerprint bug that made
+# the two books disagree.
 #
 # THE MEASUREMENT. ``runtime/diagnostics/seq5_table.py`` over the
 # FULL corpus (2024-01-01 -> 2026-07-16, one continuous execution,
-# 14d warmup prefix, 64,978 legs on the unfiltered book):
+# 14d warmup prefix, 37,159 legs on the unfiltered book):
 #
-#   LONG  -- 18 of 64 signatures have positive gross/leg on BOTH
-#   halves. Top of the table (gross/leg, H1, H2):
-#     Ccbbb  +0.565  (+0.199, +0.952)   n=586
-#     cCBcC  +0.440  (+0.118, +0.762)   n=517
-#     cCcCc  +0.366  (+0.061, +0.617)   n=590
-#     cbCcC  +0.305  (+0.365, +0.239)   n=479
-#     bCcbb  +0.305  (+0.222, +0.382)   n=658
-#     CcbCc  +0.266  (+0.257, +0.277)   n=619
+#   LONG  -- 13 of 64 signatures have positive gross/leg on BOTH
+#   halves:
+#     Ccbbb  +0.776  (+0.473, +1.035)   n=345
+#     bCcbb  +0.561  (+0.584, +0.542)   n=385
+#     cCcCB  +0.558  (+1.055, +0.161)   n=313
+#     CcbCc  +0.529  (+0.621, +0.441)   n=384
+#     cbCcC  +0.525  (+0.669, +0.363)   n=298
+#     BcCcC  +0.396  (+0.342, +0.433)   n=330
+#     bbCcb  +0.390  (+0.060, +0.873)   n=362
+#     cCcCc  +0.386  (+0.095, +0.636)   n=318
+#     bbbbC  +0.370  (+0.249, +0.481)   n=365
+#     cCcbb  +0.273  (+0.113, +0.473)   n=327
+#     CcCBc  +0.220  (+0.358, +0.072)   n=359
+#     CcbbC  +0.154  (+0.111, +0.199)   n=356
+#     CcbCB  +0.081  (+0.169, +0.011)   n=291   n=302
 #
-#   SHORT -- 7 of 64 signatures qualify:
-#     BcCcC  +0.480  (+0.390, +0.570)   n=592
-#     CBBcC  +0.415  (+0.633, +0.153)   n=435
-#     cbbCB  +0.364  (+0.167, +0.539)   n=487
-#     BBcbC  +0.364  (+0.028, +0.735)   n=442
-#     cCBBB  +0.221  (+0.019, +0.417)   n=430
-#     BBcbb  +0.164  (+0.078, +0.271)   n=529
-#     BBBcC  +0.149  (+0.012, +0.301)   n=440
+#   SHORT -- 8 of 64 signatures qualify:
+#     BBcbb  +0.716  (+0.624, +0.824)   n=271
+#     BcCcC  +0.532  (+0.229, +0.819)   n=378
+#     cCcbb  +0.397  (+0.244, +0.539)   n=294
+#     BBBcb  +0.349  (+0.372, +0.325)   n=253
+#     Bcbbb  +0.325  (+0.175, +0.487)   n=283
+#     CBBBB  +0.272  (+0.231, +0.315)   n=202
+#     cCcbC  +0.195  (+0.155, +0.239)   n=340
+#     CBcCc  +0.119  (+0.107, +0.129)   n=291
 #
 # THE WALK-FORWARD TEST (``seq5_walkforward.py``, 2 folds by time,
 # 2000 random-whitelist permutations of the same size as the null):
 #
-#   LONG  fold H1->H2: d gross +$1,159, null p95 +$1,725 -> 69.3%
-#         fold H2->H1: d gross +$1,069, null p95 +$973  -> 97.9%
-#   SHORT fold H1->H2: d gross +$3,504, null p95 +$3,506 -> 95.0%
-#         fold H2->H1: d gross +$2,258, null p95 +$2,386 -> 87.0%
+#   LONG  fold H1->H2: d gross +$593, null p95 +$888 -> 77.0%
+#         fold H2->H1: d gross +$449, null p95 +$381 -> 97.9%
+#   SHORT fold H1->H2: d gross +$1,605, null p95 +$2,121 -> 56.3%
+#         fold H2->H1: d gross +$1,495, null p95 +$1,550 -> 91.7%
 #
-# WHY THE SHORT SIDE IS THE ONE THAT EARNS THE SLOT. Its two folds
-# land at the 95th and 87th percentile of the random-whitelist null
-# -- the whitelist beats "trade less at random" BOTH ways round.
-# The long side's folds are 69% and 98%: one fold is barely better
-# than chance. Both sides' POOLED out-of-sample gross improves
-# (long +$2,229, short +$5,762) and the dropped trades carry a
-# decisively negative t (long -2.16/-2.95, short -5.07/-6.01).
+# WHY THE SHORT SIDE IS THE ONE THAT EARNS THE SLOT. Its H2->H1 fold
+# lands at the 91.7th percentile of the random-whitelist null -- the
+# whitelist beats "trade less at random" that way round. The long
+# side's H2->H1 fold is at 97.9%. The two OTHER folds (77.0% and
+# 56.3%) are barely better than chance, and that is recorded here
+# rather than smoothed over.
+#
+# THE END-TO-END A/B (``seq_whitelist_corpus_ab2.py``, 7 arms, each a
+# full corpus continuous re-run -- post-hoc filtering cannot see the
+# contra-close netting):
+#
+#   arm            wl   dropset   legs  legs/day     gross        net   g/leg
+#   unfiltered      0        0  37159    40.09   -$4,742  -$23,091  -0.1276
+#   old            25        0   7926     8.55   +$2,599   -$1,367  +0.3279
+#   old_canon      25        2   6753     7.28   +$2,319   -$1,074  +0.3434
+#   split          21        0   6663     7.19   +$2,583     -$741  +0.3877
+#   split_canon    21        2   5664     6.11   +$2,357     -$467  +0.4161
+#   ranked21       42        0  12655    13.65   +$3,917   -$2,395  +0.3095
+#   ranked21_canon 42        2   9377    10.12   +$3,414   -$1,281  +0.3640
+#
+# The SHIPPED set is ``split``: the split-half candidate set at FULL
+# STRENGTH, with the drop set removed. It beats the old set on gross
+# per leg (+0.3877 vs +0.3279) and on net (-$741 vs -$1,367).
 #
 # ⚠️ THE HONEST LIMITS, RECORDED SO THEY ARE NOT FORGOTTEN:
 #
-#   1. THE BOOK IS STILL NET-NEGATIVE. The whitelist's kept book is
-#      gross -$634 (long) and -$848 (short) on the corpus. The
-#      improvement is real; the profitability is NOT there. This is a
-#      QUALITY knob, not an EDGE knob -- the same verdict the
-#      ``vol_state_min_expand_prev_day`` gate got (see AGENTS.md
-#      § 3.7.2).
-#   2. THE PER-LEG EDGE IS FEE-LIMITED. Kept gross/leg is -$0.039
-#      (long) against a measured fee/leg of $0.515. The whitelist
-#      makes the surviving trades much better, not profitable.
+#   1. THE BOOK IS STILL NET-NEGATIVE (-$741 over 927 days). The
+#      whitelist's kept book has a POSITIVE gross (+$2,583) but its
+#      per-leg edge (+$0.3877) is still BELOW the measured round trip
+#      ($0.4989). This is a QUALITY knob, not an EDGE knob -- the same
+#      verdict the ``vol_state_min_expand_prev_day`` gate got (see
+#      AGENTS.md § 3.7.2).
+#   2. THE TRADE COUNT IS FAR BELOW THE 30-70/DAY BAND: 7.19
+#      legs/calendar-day, and 93.6% of days trade fewer than 30 legs.
+#      The user explicitly waived the band for this knob ("dont need
+#      to be too strict on trade count for this"). To stay inside the
+#      band the whitelist would have to keep 48 of 64 signatures per
+#      side -- i.e. barely filter at all (``seq5_ksweep.py``). The
+#      full-strength set is the one that carries the signal.
 #   3. THE WHITELIST IS FIT ON THE WHOLE CORPUS. The walk-forward
 #      validates the SHAPE of the rule (fit-on-half, score-on-other),
 #      but the SHIPPED SET is the whole-corpus fit. The
@@ -647,15 +671,14 @@ STRUCTURE_SEQ_DROP_SET: frozenset[str] = frozenset({"short|c", "short|C"})
 #
 # Locked by ``tests/test_regressions.py::test_five_event_sequence_whitelist_is_promoted``.
 STRUCTURE_SEQ_WHITELIST: frozenset[str] = frozenset({
-    # LONG -- 18 of 64 signatures, positive gross/leg on both halves.
-    "long|Ccbbb", "long|cCBcC", "long|cCcCc", "long|cbCcC",
-    "long|bCcbb", "long|CcbCc", "long|cCcCB", "long|CBcbC",
-    "long|cCcbb", "long|BcCcC", "long|CcbbC", "long|bbbbC",
-    "long|CcbCB", "long|bCcCc", "long|bbCBB", "long|CcCcb",
-    "long|bbCcb", "long|CBBcb",
-    # SHORT -- 7 of 64 signatures, positive gross/leg on both halves.
-    "short|BcCcC", "short|CBBcC", "short|cbbCB", "short|BBcbC",
-    "short|cCBBB", "short|BBcbb", "short|BBBcC",
+    # LONG -- 13 of 64 signatures, positive gross/leg on both halves.
+    "long|Ccbbb", "long|bCcbb", "long|cCcCB", "long|CcbCc",
+    "long|cbCcC", "long|BcCcC", "long|bbCcb", "long|cCcCc",
+    "long|bbbbC", "long|cCcbb", "long|CcCBc", "long|CcbbC",
+    "long|CcbCB",
+    # SHORT -- 8 of 64 signatures, positive gross/leg on both halves.
+    "short|BBcbb", "short|BcCcC", "short|cCcbb", "short|BBBcb",
+    "short|Bcbbb", "short|CBBBB", "short|cCcbC", "short|CBcCc",
 })
 
 # Book concurrency cap (D3 fix, 2026-10-22).
@@ -1102,6 +1125,7 @@ _ENGINE_OVERRIDES_ALLOWED: frozenset[str] = frozenset({
     'trail_atr_mult',
     'trail_activation_mult',
     'trail_giveback_frac',
+    'trail_sides',
     # 1m Wilder ATR(14) forward-filled onto the 1s grid. Built by the
     # sweep driver, passed per bar to the engine.
     'atr_1m',
@@ -1142,13 +1166,10 @@ _ENGINE_OVERRIDES_ALLOWED: frozenset[str] = frozenset({
     # signature to a direction multiplier; None disables it.
     'structure_seq_flip_map',
     'structure_seq_len',
-    # PER-SIDE SEQUENCE DROP SET (promoted 2026-10-24). A set of
-    # "<side>|<last-event>" keys; a key present means "do not open
-    # that trade". Canonical = {"short|b"}.
-    'structure_seq_drop_set',
     # PER-SIDE 5-EVENT SEQUENCE WHITELIST (promoted 2026-11-04). A
     # set of "<side>|<5-char signature>" keys; a key PRESENT means
-    # "TAKE that trade". OPPOSITE polarity to the drop set above.
+    # "TAKE that trade". It REPLACED the 1-event drop set, which was
+    # removed on 2026-11-04 as redundant and self-contradictory.
     'structure_seq_whitelist',
     'sl_scale_min',
     'sl_scale_max',
@@ -1443,6 +1464,7 @@ def build_engine_kwargs(
         trail_atr_mult=TRAIL_ATR_MULT,
         trail_activation_mult=TRAIL_ACTIVATION_MULT,
         trail_giveback_frac=TRAIL_GIVEBACK_FRAC,
+        trail_sides=TRAIL_SIDES,
         # ── HVP chain ──
         poc_buffer_usd=POC_BUFFER_USD,
         hvn_buffer_usd=HVN_BUFFER_USD,
@@ -1474,15 +1496,14 @@ def build_engine_kwargs(
         max_same_dir_open=MAX_SAME_DIR_OPEN,
         conflict_policy=CONFLICT_POLICY,
         trade_sides=TRADE_SIDES,
-        # PER-SIDE SEQUENCE DROP SET (2026-10-24): drop shorts whose
-        # last structure event was a bullish BoS ('b'). The one
-        # (side, event) bucket that is negative on BOTH the fit and
-        # the held-out slices. See ``STRUCTURE_SEQ_DROP_SET``.
-        structure_seq_drop_set=STRUCTURE_SEQ_DROP_SET,
         # PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04): TAKE a
         # trade only if its (side, trailing-5-event signature) is in
-        # the whitelist. OPPOSITE polarity to the drop set above.
-        # See ``STRUCTURE_SEQ_WHITELIST``.
+        # the whitelist. It REPLACED the 1-event ``structure_seq_
+        # drop_set``, which was removed on 2026-11-04: the two gates
+        # contradicted each other (the drop set vetoed 3 of the 8
+        # whitelisted short shapes, including the best one) and the
+        # whitelist ALONE measured better. See the tombstone comment
+        # above and ``STRUCTURE_SEQ_WHITELIST``.
         structure_seq_whitelist=STRUCTURE_SEQ_WHITELIST,
         # CONTRA CLOSE / HEDGE NETTING (2026-10-24). OFF by default;
         # see CONTRA_CLOSE / CONTRA_CLOSE_SPREAD_USD above.
@@ -1851,7 +1872,6 @@ __all__ = [
     'VOL_STATE_MAX_EXPAND_PREV_DAY',
     'STRUCTURE_GATE',
     'STRUCTURE_MAX_AGE_BARS',
-    'STRUCTURE_SEQ_DROP_SET',
     'STRUCTURE_SEQ_WHITELIST',
     'TRADE_SIDES',
     'MAX_SAME_DIR_OPEN',

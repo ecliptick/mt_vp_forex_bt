@@ -88,13 +88,6 @@ DEFAULT_SLOTS: list[tuple[str, str, str]] = [
     ("2026-01 up",        "2026-01-01", "2026-02-01"),
 ]
 
-# Sentinel meaning "use whatever the canonical config says".
-#
-# This CANNOT be ``None``: the canonical ``STRUCTURE_SEQ_DROP_SET`` is
-# a real (non-empty) drop set, and passing ``None`` to
-# ``build_engine_kwargs`` would OVERRIDE it with "disabled". The
-# diagnostic must measure the RECIPE by default.
-_USE_CANONICAL = object()
 
 
 def _load(path: Path, start: str, end: str) -> pd.DataFrame:
@@ -218,8 +211,8 @@ def _direction_breakdown(trades: list) -> dict[str, Any]:
 
 def run_slice(*, path: Path, label: str, start: str, end: str,
               sl_zone_mult: float, max_same_dir_open: int,
-              conflict_policy: str, structure_gate: bool = False,
-              structure_seq_drop_set=_USE_CANONICAL) -> dict[str, Any]:
+              conflict_policy: str,
+              structure_gate: bool = False) -> dict[str, Any]:
     scope = f"{label.replace(' ', '_').replace('-', '')}"
     bars = _load(path, start, end)
     if bars.empty:
@@ -239,14 +232,6 @@ def run_slice(*, path: Path, label: str, start: str, end: str,
         vol_state=art["vol_state"],
         structure_gate=structure_gate,
     )
-    # 2026-10-24: the per-side sequence drop set. The canonical value
-    # IS a real drop set, so the diagnostic must measure the RECIPE by
-    # default. It is only overridden when the caller asks for a
-    # specific set (e.g. an empty set to reproduce a pre-promotion
-    # baseline). Passing ``None`` here would OVERRIDE the canonical
-    # value with "disabled", so the sentinel is a distinct object.
-    if structure_seq_drop_set is not _USE_CANONICAL:
-        ek["structure_seq_drop_set"] = structure_seq_drop_set
     t0 = time.perf_counter()
     res, diag = run_vp_sniper_backtest_forex(
         bars=bars, zones=art["zones"], vp_set=art["vp_set"],
@@ -392,14 +377,7 @@ def main() -> None:
                     help="Enable the two-stage structure x momentum score "
                          "filter (Stage 1 admits on sign, Stage 2 scales "
                          "SL/TP by magnitude). Default OFF.")
-    ap.add_argument("--no-seq-drop-set", action="store_true",
-                    help="Disable the per-side sequence drop set, to "
-                         "reproduce a PRE-PROMOTION baseline. The "
-                         "canonical value is a real drop set, so the "
-                         "default (no flag) measures the RECIPE.")
     args = ap.parse_args()
-
-    seq_drop = frozenset() if args.no_seq_drop_set else _USE_CANONICAL
 
     slots = DEFAULT_SLOTS
     if args.sl_slots:
@@ -427,7 +405,6 @@ def main() -> None:
             max_same_dir_open=args.max_same_dir_open,
             conflict_policy=args.conflict_policy,
             structure_gate=args.structure_gate,
-            structure_seq_drop_set=seq_drop,
         )
         results.append(r)
         print(_fmt_row(r), flush=True)

@@ -269,6 +269,11 @@ def _source_hash() -> str:
     Mirrors ``runtime.sweeps.cached_sweep._source_hash`` so a change
     to the engine or the detector invalidates the ledger exactly when
     it invalidates the artifact cache.
+
+    The hash is over the **AST-normalised** source, so a comment-only
+    edit does NOT invalidate the ledger. This matters for the promote
+    workflow: "change the config -> re-measure -> document the result"
+    would otherwise invalidate the measurement by documenting it.
     """
     rels = (
         "bt/_engine/ict_signals.py",
@@ -277,17 +282,22 @@ def _source_hash() -> str:
         "bt/_engine/rolling_p95.py",
         "bt/_engine/market_structure.py",
         "bt/_engine/timebase.py",
+        # 2026-11-04: ``bt/_engine/vol_state.py`` builds the
+        # ``vol_state`` measure the engine gates on, so a change to it
+        # changes the legs. It was missing here AND in
+        # ``cached_sweep._ARTIFACT_SOURCES`` -- which is how the SAME
+        # nominal config produced two different books (64,978 legs vs
+        # 37,159 legs): one ledger was built against a cached
+        # ``vol_state`` artifact that predated the module's edit.
+        "bt/_engine/vol_state.py",
         "bt/_engine/vp_multi_target_engine.py",
         "bt/optimal_config.py",
     )
-    h = hashlib.sha1()
-    for rel in rels:
-        h.update(rel.encode("utf-8"))
-        try:
-            h.update((_REPO_ROOT / rel).read_bytes())
-        except OSError:
-            h.update(b"<missing>")
-    return h.hexdigest()[:16]
+    # AST-normalised: a comment-only edit does NOT invalidate the
+    # ledger. The promote workflow is "change config -> re-measure ->
+    # document", and a raw-bytes hash would invalidate the measurement
+    # by documenting it.
+    return registry.normalised_source_fingerprint(rels)
 
 
 def ledger_fingerprint(*, data: Path, start: str, end: str,
