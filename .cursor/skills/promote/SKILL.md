@@ -31,12 +31,43 @@ is not.
    skill.
 3. **Does the per-leg edge cover the MEASURED round trip?** A gross edge
    below the fee bill is not an edge.
-4. **Is the improvement larger than the noise?** The buckets report a
-   standard error on the mean. A t-stat near zero is not a finding.
+4. **Is it the MOST PROFITABLE cell of its grid?** The criterion is **NET
+   PROFIT** (user instruction, 2026-11-04: *"just promote whatever is most
+   profitable. monthly aggs are meaningless for this high freq strat"*).
+   The candidate must be the top cell of the grid it was measured in — not
+   merely better than the incumbent.
 5. **Does it survive the held-out check?** A filter fitted and scored on the
    same slices proves nothing. The per-side sequence filter shipped as a
    **fixed, pre-registered pair of buckets** — not a general learner —
    precisely because walk-forward re-fitting was 2/7 out-of-sample.
+
+> **⚠️ WHAT MAY NOT GATE A PROMOTION (2026-11-04).**
+>
+> * **The per-bucket `excess` sign.** The engine books P&L at the **actual
+>   SL / TP fill price**; `excess` benchmarks against a **close-to-close**
+>   passive hold. Those are not exchangeable, so on a stop or target exit the
+>   bucket's `excess` is the **execution-gap differential**, not a timing
+>   measure — and its sign FLIPS with book composition. The whole-book and
+>   per-side excess remain useful DIAGNOSTICS.
+> * **The monthly market-beta regression.** A month is n=31 draws at ~7
+>   legs/day. The month is a REPORTING dimension (AGENTS.md § 1.1), never an
+>   evaluation boundary.
+>
+> These EXPLAIN a result; they do not BLOCK it. A positive net with an
+> unfavourable decomposition still ships — the decomposition is a caveat on
+> the book's characterisation, not a veto.
+>
+> **BUT the net must still clear the round trip (question 3), and the
+> comparison driver's arms must be EXPLICIT OVERRIDES** — never "whatever
+> the canonical value currently is", or the driver silently compares the
+> book against itself the moment the canonical value changes.
+
+> **⚠️ A COMPARISON DRIVER'S ARMS MUST BE EXPLICIT.** After the
+> `trail_sides='short'` promotion the canonical recipe **IS** `'short'`, so
+> a driver that took its "canonical" arm from the no-overrides path would
+> compare the book against **itself**. Every arm must name its scope
+> explicitly. See `docs/engine_history.md` → *The per-bucket `excess` was
+> measuring fill geometry*.
 
 ## Then: change ONE thing
 

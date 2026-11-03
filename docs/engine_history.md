@@ -13,6 +13,7 @@
 - [Forward-leak bugs (NB94)](#forward-leak-bugs--fixed-2026-10-21-nb94)
 - [The replay's zeroed `eod` legs](#the-replays-zeroed-eod-legs--found-and-fixed-2026-11-04)
 - [The artifact-cache fingerprint hole](#the-artifact-cache-fingerprint-hole--found-and-fixed-2026-11-04)
+- [The per-bucket `excess` was measuring fill geometry](#the-per-bucket-excess-was-measuring-fill-geometry--found-2026-11-04)
 - [A concurrent 1y run makes the test suite look RED](#a-concurrent-1y-run-makes-the-test-suite-look-red-2026-11-04)
 - [The dual-mode inverted_bar look-ahead](#the-dual-mode-inverted_bar-look-ahead--found-and-fixed-2026-11-03)
 - [The 1m detector — three bugs fixed](#the-1m-detector--three-bugs-fixed-2026-10-2324)
@@ -1111,6 +1112,113 @@ zero/constant/random edge cases.
 **1.50×**, with the canonical result **unchanged**: the 1y corpus
 returns **6,663 trades** and **gross +$2,583.18** — the same figure
 the canonical recipe has always reported.
+
+---
+
+## The per-bucket `excess` was measuring fill geometry — found 2026-11-04
+
+**This is not an engine bug — the engine is right. It is a MEASUREMENT
+bug, in the metric, and it had been gating promotions.**
+
+### The symptom
+
+`tests/test_signal_bar_completeness.py::test_excess_is_negative_for_every_exit_reason`
+asserted that **every** exit bucket with n ≥ 100 has a **negative**
+`excess`. Under the promoted `trail_sides='short'` recipe it failed on
+the `sl` bucket, which read **+$134.24**.
+
+The instinct was to relax the test. **That would have been wrong**, and
+the reason why is the whole point of this entry.
+
+### Why the `sl` bucket's excess is positive
+
+`excess = gross − drift`, where `drift` is a **close-to-close**
+passive hold. But the engine books P&L at the **actual fill price**.
+Measured on the promoted book (7,122 legs):
+
+| exit | n | fills exactly at the level | off-level fills |
+|---|---|---|---|
+| `sl` | 2,665 | **85.9%** | 14.1% — **100% of them ADVERSE** (beyond the stop) |
+| `tp` | 2,006 | 80.7% | 19.3% fill **better** (a gap-through fills a resting limit) |
+
+And on **71.6%** of the `sl` legs the exit bar's **close is BEYOND the
+stop** — the bar gapped through the level.
+
+So for a stop exit the realised price and the bar's close are
+**different prices by construction**. Which gives an exact identity
+(verified to **1e-15** in every bucket of every book):
+
+```text
+excess == gap@exit − gap@entry
+        where gap = (fill_price − bar_close) · side · qty
+```
+
+**The `sl` bucket's `excess` is the EXECUTION-GAP DIFFERENTIAL, not a
+timing measure.** A stop fill and a close-to-close benchmark are
+**not exchangeable** — exactly the confound AGENTS.md § 5.1 rule 4
+warns about for the random-entry control ("a control must be
+EXCHANGEABLE with what it controls for").
+
+### The tell: the sign FLIPS with book composition
+
+| book | `sl` excess | `sl` t |
+|---|---|---|
+| scope `'both'` | −$42.30 | −1.52 |
+| scope `'short'` (promoted) | **+$134.24** | +3.13 |
+| scope `'long'` | −$36.50 | −1.15 |
+| trail OFF | +$116.66 | +2.62 |
+
+A property of the **strategy** does not flip because the book
+composition changed. A property of the **fill geometry** does.
+
+### The fix
+
+The per-bucket assertion was replaced by the forms that DO hold, and
+which have **no fill-price/close divergence** to confound them:
+
+1. the **whole-book** excess (negative: **−$458.39**),
+2. the **per-side** excess (negative: **−$198.80** long, **−$259.59**
+   short) — these pool every exit reason, so the gap differential
+   averages out,
+3. every exit bucket with **no fill-price divergence**
+   (`contra_close`, `trail_stop`, `replaced_by_new_signal`) — these
+   have no confound in them at all.
+
+A NEW guard locks the mechanism itself:
+`tests/test_signal_bar_completeness.py::test_pnl_is_booked_at_the_actual_fill_price_not_the_close`
+— it asserts that stop exits fill at-or-beyond the stop (never
+favourably) and that target exits fill at-or-better than the target.
+
+### The rule
+
+> **A benchmark must be EXCHANGEABLE with the execution model it
+> benchmarks.** A close-to-close passive hold is not exchangeable with
+> a book that books P&L at the stop/target fill price. When the two
+> differ, the difference is **arithmetic**, and a metric built on the
+> difference measures the arithmetic.
+
+And the corollary, which is the actual promotion rule:
+
+> **A promotion is judged on NET PROFIT.** The drift/excess
+> decomposition and the monthly beta regression are **DIAGNOSTICS**.
+> They explain a result; they do not gate it.
+
+### The second bug this exposed — the driver's arms
+
+`runtime/diagnostics/trail_sides_ledger_verdict.py` built its
+"canonical" arm from the **no-overrides** path. After the promotion
+the canonical recipe **IS** `trail_sides='short'`, so the driver
+would have compared the book against **itself** — a comparison that
+measures nothing and reads like a verdict.
+
+Every arm now names its scope **explicitly** (`trail_sides='both'`,
+`'long'`, `'short'`, and `trail_mode='off'`), so the driver keeps
+measuring the grid after any change to the canonical value.
+
+> **Rule: a comparison driver's arms must be EXPLICIT OVERRIDES, not
+> "whatever the config currently is".** A driver that reads the
+> canonical value has no fixed reference, and it silently becomes a
+> self-comparison the moment the canonical value changes.
 
 ---
 

@@ -93,8 +93,12 @@ diagnostics/
  seq5_walkforward.py POST-HOC walk-forward (also a screen — no engine re-run)
  seq5_engine_walkforward.py THE ENGINE-LEVEL walk-forward — the verdict
                           (fits on one half, re-runs the ENGINE on the other)
- seq5_beta_regression.py Is the whitelisted book a DIRECTIONAL PROXY?
-                          (monthly gross ~ market return, + drift/excess)
+ seq5_beta_regression.py Is the whitelisted book a DIRECTIONAL BET?
+                         (DAILY gross ~ market return + per-leg excess)
+ daily_direction_dependence.py THE daily direction-dependence test
+                          (the sanctioned instrument — n≈577 days, corr t)
+ rejected_knob_ledgers.py Builds the ledgers for the § 6 NOT-PROMOTED
+                          knobs, so the daily test can re-ground them
  seq5_ksweep.py How many signatures keep the trade count in band?
                           (POST-HOC — a screen for picking K)
  seq5_ksweep_engine_check.py The K=48 band variant, ENGINE-level

@@ -1,0 +1,297 @@
+{
+  "schema": "results-run/1",
+  "run_id": "trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225836Z",
+  "kind": "trail_sides_ledger_verdict",
+  "config_fp": "3df39553b61b89f2",
+  "ts_utc": "2026-11-03T22:58:36Z",
+  "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+  "commit_short": "92d9ee5",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "62acccc364395d39",
+  "params": {
+    "knob": "trail_sides",
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "split_at": "2025-04-01",
+    "variant_overrides": {
+      "trail_sides": "'short'"
+    },
+    "criterion": "gross_per_leg vs measured_fee"
+  },
+  "summary": {
+    "canonical_legs": 6663,
+    "variant_legs": 7122,
+    "canonical_net": -741.1608,
+    "variant_net": 2298.2009,
+    "delta_net": 3039.36,
+    "canonical_gross_per_leg": 0.387691,
+    "variant_gross_per_leg": 0.789492,
+    "canonical_gross_over_fee": 0.7771,
+    "variant_gross_over_fee": 1.6913,
+    "variant_covers_round_trip": true,
+    "canonical_excess_per_leg": -0.076393,
+    "variant_excess_per_leg": -0.064363,
+    "canonical_excess_t": -8.4484,
+    "variant_excess_t": -7.0262,
+    "paired_n": 6659,
+    "paired_delta_total": 1289.78,
+    "paired_t": 1.6203,
+    "welch_t": 2.8015,
+    "canonical_beta": 0.33,
+    "variant_beta": 22.94,
+    "canonical_alpha": 82.55,
+    "variant_alpha": 127.2,
+    "canonical_corr": 0.0161,
+    "variant_corr": 0.3373,
+    "variant_is_proxy": false,
+    "wins_both_net": true,
+    "wins_both_gross_per_leg": true
+  },
+  "path": "results/runs/trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225836Z.json",
+  "parent_fp": "3df39553b61b89f2",
+  "payload": {
+    "window": {
+      "start": "2024-01-01",
+      "end": "2026-07-16",
+      "split_at": "2025-04-01"
+    },
+    "canonical": {
+      "legs": 6663,
+      "gross": 2583.1827,
+      "fees": 3324.3435,
+      "net": -741.1608,
+      "gross_per_leg": 0.387691,
+      "fee_per_leg": 0.498926,
+      "gross_per_leg_over_fee": 0.7771,
+      "hit_rate": 0.826655,
+      "drift_total": 3092.192,
+      "excess_total": -509.0093,
+      "excess_per_leg": -0.076393,
+      "excess_t": -8.4484,
+      "drift_per_leg": 0.464084,
+      "drift_t": 7.0111,
+      "timing_edge_per_leg": -0.076393,
+      "per_side": {
+        "long": {
+          "n": 4374,
+          "gross_per_leg": 0.410335,
+          "fee_per_leg": 0.499797,
+          "gross_per_leg_over_fee": 0.821,
+          "hit_rate": 0.835848,
+          "edge_pp": 4.1096,
+          "payoff_ratio": 0.2583,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.055471,
+          "excess_t": -5.0008,
+          "drift_per_leg": 0.465806,
+          "drift_t": 5.9371
+        },
+        "short": {
+          "n": 2289,
+          "gross_per_leg": 0.344419,
+          "fee_per_leg": 0.497262,
+          "gross_per_leg_over_fee": 0.6926,
+          "hit_rate": 0.809087,
+          "edge_pp": 3.4927,
+          "payoff_ratio": 0.2917,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.116374,
+          "excess_t": -7.472,
+          "drift_per_leg": 0.460793,
+          "drift_t": 3.8065
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 184,
+          "gross": 1690.1162
+        },
+        "sl": {
+          "n": 1081,
+          "gross": -8987.3555
+        },
+        "contra_close": {
+          "n": 74,
+          "gross": 292.4595
+        },
+        "trail_stop": {
+          "n": 5324,
+          "gross": 9587.9625
+        }
+      },
+      "verdict": "no edge: gross $0.3877/leg does not cover the $0.4989 measured round trip (0.78x)"
+    },
+    "variant": {
+      "legs": 7122,
+      "gross": 5622.7652,
+      "fees": 3324.5643,
+      "net": 2298.2009,
+      "gross_per_leg": 0.789492,
+      "fee_per_leg": 0.466802,
+      "gross_per_leg_over_fee": 1.6913,
+      "hit_rate": 0.597023,
+      "drift_total": 6081.1592,
+      "excess_total": -458.394,
+      "excess_per_leg": -0.064363,
+      "excess_t": -7.0262,
+      "drift_per_leg": 0.853856,
+      "drift_t": 6.6154,
+      "timing_edge_per_leg": -0.064363,
+      "per_side": {
+        "long": {
+          "n": 4829,
+          "gross_per_leg": 1.006724,
+          "fee_per_leg": 0.45275,
+          "gross_per_leg_over_fee": 2.2236,
+          "hit_rate": 0.519776,
+          "edge_pp": 5.0757,
+          "payoff_ratio": 1.1321,
+          "diagnosis": "profitable",
+          "excess_per_leg": -0.041168,
+          "excess_t": -3.5975,
+          "drift_per_leg": 1.047893,
+          "drift_t": 5.7519
+        },
+        "short": {
+          "n": 2293,
+          "gross_per_leg": 0.332008,
+          "fee_per_leg": 0.496395,
+          "gross_per_leg_over_fee": 0.6688,
+          "hit_rate": 0.759703,
+          "edge_pp": 4.2909,
+          "payoff_ratio": 0.3951,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.113211,
+          "excess_t": -7.5093,
+          "drift_per_leg": 0.445218,
+          "drift_t": 3.8434
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 2006,
+          "gross": 24748.135
+        },
+        "sl": {
+          "n": 2665,
+          "gross": -24509.9655
+        },
+        "contra_close": {
+          "n": 811,
+          "gross": 2393.4284
+        },
+        "trail_stop": {
+          "n": 1640,
+          "gross": 2991.1674
+        }
+      },
+      "verdict": "gross edge $0.7895/leg covers the $0.4668 measured round trip (1.69x)"
+    },
+    "paired": {
+      "n": 6659,
+      "diff_total": 1289.7752822194525,
+      "diff_mean": 0.19368903472284915,
+      "t": 1.620265040021754,
+      "n_better": 1950,
+      "n_worse": 1801,
+      "n_same": 2908
+    },
+    "welch": {
+      "diff": 0.4018018101079605,
+      "se": 0.14342386095196774,
+      "t": 2.8014990493284992,
+      "mean_a": 0.38769063974912515,
+      "mean_b": 0.7894924498570857
+    },
+    "join": {
+      "n_common": 6561,
+      "n_only_canonical": 0,
+      "n_only_variant": 0,
+      "n_paired": 6659,
+      "n_ambiguous_groups": 275,
+      "n_unmatched_canonical": 4,
+      "n_unmatched_variant": 463
+    },
+    "halves": {
+      "canonical": {
+        "H1": {
+          "n": 2518,
+          "gross": 559.27,
+          "fees": 908.3157,
+          "net": -349.0458,
+          "gross_per_leg": 0.222109,
+          "fee_per_leg": 0.360729,
+          "gross_per_leg_over_fee": 0.6157,
+          "excess_per_leg": -0.029767,
+          "excess_t": -4.5293,
+          "drift_per_leg": 0.251876,
+          "drift_t": 4.1815
+        },
+        "H2": {
+          "n": 4145,
+          "gross": 2023.9128,
+          "fees": 2416.0278,
+          "net": -392.115,
+          "gross_per_leg": 0.488278,
+          "fee_per_leg": 0.582878,
+          "gross_per_leg_over_fee": 0.8377,
+          "excess_per_leg": -0.104718,
+          "excess_t": -7.5019,
+          "drift_per_leg": 0.592996,
+          "drift_t": 5.9379
+        }
+      },
+      "variant": {
+        "H1": {
+          "n": 2607,
+          "gross": 1554.4401,
+          "fees": 908.3872,
+          "net": 646.0529,
+          "gross_per_leg": 0.596256,
+          "fee_per_leg": 0.348442,
+          "gross_per_leg_over_fee": 1.7112,
+          "excess_per_leg": -0.028553,
+          "excess_t": -3.8066,
+          "drift_per_leg": 0.62481,
+          "drift_t": 4.676
+        },
+        "H2": {
+          "n": 4515,
+          "gross": 4068.3252,
+          "fees": 2416.1771,
+          "net": 1652.148,
+          "gross_per_leg": 0.901069,
+          "fee_per_leg": 0.535144,
+          "gross_per_leg_over_fee": 1.6838,
+          "excess_per_leg": -0.08504,
+          "excess_t": -6.1728,
+          "drift_per_leg": 0.986109,
+          "drift_t": 5.2342
+        }
+      }
+    },
+    "wins_both": {
+      "net": true,
+      "gross_per_leg": true
+    },
+    "beta_regression": {
+      "canonical": {
+        "n_months": 31,
+        "beta_usd_per_pct": 0.3283703741515835,
+        "alpha_usd_per_month": 82.5530745464387,
+        "r2": 0.00025934793823190194,
+        "corr": 0.016104283226268307,
+        "verdict": "timing"
+      },
+      "variant": {
+        "n_months": 31,
+        "beta_usd_per_pct": 22.942329773228067,
+        "alpha_usd_per_month": 127.20442130075992,
+        "r2": 0.1137587606466034,
+        "corr": 0.33728142647736087,
+        "verdict": "timing"
+      }
+    }
+  }
+}

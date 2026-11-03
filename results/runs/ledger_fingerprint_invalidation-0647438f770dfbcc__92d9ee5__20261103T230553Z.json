@@ -1,0 +1,42 @@
+{
+  "schema": "results-run/1",
+  "run_id": "ledger_fingerprint_invalidation-0647438f770dfbcc__92d9ee5__20261103T230553Z",
+  "kind": "ledger_fingerprint_invalidation",
+  "config_fp": "0647438f770dfbcc",
+  "ts_utc": "2026-11-03T23:05:53Z",
+  "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+  "commit_short": "92d9ee5",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "7b4816127f62c97c",
+  "params": {
+    "event": "source_hash source-list change (commit 5b38b82)",
+    "affected": "leg_ledger_expand_{0,0.7,0.85,1,1.1,1.2,1.3}.json",
+    "built_utc_range": [
+      "2026-11-03T19:47:51Z",
+      "2026-11-03T20:01:32Z"
+    ],
+    "commit_utc": "2026-11-03T22:35:12Z",
+    "cause": "bt/_engine/vol_state.py added to _source_hash() rels; hash switched to AST-normalised"
+  },
+  "summary": {
+    "stale_by_fingerprint": 7,
+    "canonical_stale": false,
+    "numbers_changed": false,
+    "cross_check": "leg_ledger_expand_1 vs canonical: 6663 legs, gross sum 2583.1827326484 both, np.array_equal=True",
+    "lesson": "a fingerprint change is a CACHE-KEY event: it invalidates every artifact built under the old key, including untouched ones. Verify old artifacts against a fresh one before trusting them."
+  },
+  "path": "results/runs/ledger_fingerprint_invalidation-0647438f770dfbcc__92d9ee5__20261103T230553Z.json",
+  "parent_fp": "0647438f770dfbcc",
+  "payload": {
+    "stale_files": [
+      "leg_ledger_expand_0.json",
+      "leg_ledger_expand_0.7.json",
+      "leg_ledger_expand_0.85.json",
+      "leg_ledger_expand_1.json",
+      "leg_ledger_expand_1.1.json",
+      "leg_ledger_expand_1.2.json",
+      "leg_ledger_expand_1.3.json"
+    ]
+  }
+}

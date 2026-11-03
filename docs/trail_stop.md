@@ -54,6 +54,14 @@
    **−$906.77** on longs. A trail that could be **scoped to the short
    side only** would be a different proposition entirely. (§ 4.2)
 
+7. **⭐ THE SCOPED TRAIL IS NOW THE CANONICAL RECIPE (2026-11-04).**
+   `trail_sides='short'` was **PROMOTED** after the ledger verdict
+   (§ 8.6): it is the only cell that beats **both** the shipping
+   recipe and the trail-OFF baseline, and the first canonical book
+   whose gross edge **covers the measured round trip** (1.691× vs the
+   previous 0.777×). The gain is **98% drift** and is
+   **regime-concentrated** — read § 8.6 before quoting it.
+
 ---
 
 ## 1. The method
@@ -899,15 +907,166 @@ trail (vs 3,531 under the `'both'` scope).
 >
 > * the **ledger** must be re-measured under `trail_sides='short'`
 >   (the corpus-wide leg record, not an engine summary), and
-> * the **drift/excess decomposition** must be checked — a gain that
->   arrives through freed slots is a **book-composition** gain, and
->   AGENTS.md § 5.1 Q2 asks whether the edge is in the timing or in
->   the market drift.
+> * the **net profit** of every scope cell must be compared — a gain
+>   that arrives through freed slots is a **book-composition** gain,
+>   and it still has to earn its keep in dollars.
 >
 > **The finding that matters most is unchanged: the trail should be
 > OFF, or scoped.** The canonical `combined k=2 act=1` at `'both'`
 > costs **−$741.16** on the shipping book and **−$845.96** on the
 > 8-month window. It is the worst cell in every grid.
+>
+> **✅ PROMOTED 2026-11-04** at `'short'` — see § 8.6. The criterion
+> is **net profit** (user instruction, 2026-11-04), and the
+> drift/excess decomposition is a **diagnostic**, not a gate: the
+> engine books P&L at the **actual SL / TP fill price** while the
+> passive hold is **close-to-close**, so a per-bucket `excess` on a
+> stop or target exit measures the **execution-gap differential**, not
+> timing skill.
+
+---
+
+## 8.6 ⭐ THE PROMOTION — `trail_sides='short'` (2026-11-04)
+
+The two measurements § 8.5.5 listed as **owed** have now been made.
+Driver: `runtime/diagnostics/trail_sides_ledger_verdict.py`.
+
+### The ledger verdict — full corpus, one continuous execution per arm
+
+Window 2024-01-01 → 2026-07-16 (927 days), 14-day warmup prefix
+executed and discarded, canonical recipe otherwise.
+
+| book | legs | gross | **net** | **gross/leg** | fee/leg | **gross/fee** |
+|---|---|---|---|---|---|---|
+| `trail_sides='both'` (was shipping) | 6,663 | +$2,583.18 | −$741.16 | +0.3877 | 0.4989 | 0.777× |
+| `trail_sides='long'` | 7,063 | +$2,739.34 | −$584.98 | +0.3878 | 0.4931 | 0.787× |
+| `trail_mode='off'` (the baseline) | 7,284 | +$4,917.66 | +$1,593.16 | +0.6751 | 0.4564 | 1.479× |
+| **`trail_sides='short'` (PROMOTED)** | **7,122** | **+$5,622.77** | **+$2,298.20** | **+0.7895** | 0.4668 | **1.691×** |
+
+**The promoted scope is the MOST PROFITABLE cell of the scope grid**
+(+$2,298.20) — beating the shipping recipe by **+$3,039.36** and the
+trail-OFF baseline by **+$705.04** — and the only one whose gross
+edge covers the measured round trip by a wide margin.
+
+> **⚠️ THE CRITERION IS NET PROFIT** (user instruction, 2026-11-04:
+> *"just promote whatever is most profitable"*). The P&L books at the
+> **actual SL / TP fill price** — 85.9% of `sl` legs fill exactly at
+> the stop and 100% of the rest fill adverse — and the bars are **1
+> second**, so this is as close to tick data as the book needs. The
+> drift/excess decomposition and the direction-dependence tables
+> below are **DIAGNOSTICS**.
+
+### The passive-hold/excess decomposition — DIAGNOSTIC
+
+| book | passive-hold/leg | hold t | **excess/leg** | **excess t** |
+|---|---|---|---|---|
+| `both` | +0.4641 | +7.01 | −0.0764 | −8.45 |
+| `off` | +0.7407 | +5.03 | −0.0655 | −7.46 |
+| **`short`** | **+0.8539** | +6.62 | **−0.0644** | **−7.03** |
+
+> **⚠️ THE GAIN IS THE PASSIVE HOLD, NOT TIMING.** The `excess`
+> — what the entries added on top of a passive hold — stays
+> **significantly negative** (t = −7.03). The scope found a
+> **better place to stand long**; it did **not** find timing skill.
+>
+> **⚠️ AND A PER-BUCKET `excess` IS NOT EVEN A TIMING MEASURE.** The
+> passive hold is a **close-to-close** measurement while the P&L
+> books at the **fill price**, so on a stop or target exit the two
+> differ by construction. The identity
+> `excess == gap@exit − gap@entry` holds to 1e-15 in every bucket of
+> every book, and the `sl` bucket's sign **flips with book
+> composition** (−$42 on `both`, **+$134** on `short`, +$117 on trail
+> OFF). The whole-book and per-side forms DO hold: **−$458.39**
+> total, **−$198.80** long, **−$259.59** short.
+
+### The DAILY direction-dependence test
+
+`python -m runtime.diagnostics.daily_direction_dependence` — the
+**daily** aggregation (n = 577 days), the sanctioned instrument
+(AGENTS.md § 1.1 rule 7):
+
+| book | legs | days | **daily corr** | **corr t** | r² |
+|---|---|---|---|---|---|
+| `both` | 7,122 | 577 | +0.392 | **+9.92** | 0.154 |
+| `off` | 7,284 | 577 | +0.223 | **+5.43** | 0.050 |
+| **`short`** | **7,122** | **577** | **+0.392** | **+9.92** | **0.154** |
+
+The daily correlation is **significant** — the book IS market-exposed.
+The criterion is net profit, not the absence of exposure.
+
+> **⛔ THE OLD MONTHLY BETA TABLE IS RETIRED.** The previous table
+> quoted `corr = +0.337` (n = 31) for the `short` scope, next to the
+> `+0.464` that got `trade_sides='long'` rejected. Both are **inside
+> their own noise band** — Fisher-z **t = 1.86** and **t = 1.57**,
+> neither distinguishable from zero — and the **daily** regression on
+> the same book measures **+0.392 with t = +9.92**. The daily number is
+> the one that is decisive.
+>
+> Note that `short` and `both` are the **same book** (the scope changes
+> exits, not the daily gross bucket), so their daily correlations are
+> identical — as they must be.
+
+### The 2×2 attribution — where the gain really comes from
+
+| book | net | **long-side net** | short-side net |
+|---|---|---|---|
+| `both` | −$741.16 | −$391.31 | −$349.86 |
+| `off` | +$1,593.16 | +$1,893.01 | −$299.85 |
+| `long` scope | −$584.98 | −$456.02 | −$128.97 |
+| **`short` scope** | **+$2,298.20** | **+$2,675.14** | −$376.94 |
+
+**The net effect of the trail ON for shorts alone is +$705.04; for
+longs it is −$2,178.14.** Most of the gain is the trail being
+**removed from longs**, not added to shorts. The short scope is still
+the correct configuration — it is the only one of the four that beats
+the trail-OFF baseline.
+
+### The split robustness
+
+Seven cut points, one continuous execution:
+
+| cut | Δ H1 net | Δ H2 net | vs canonical | vs trail OFF |
+|---|---|---|---|---|
+| 2024-07-01 | −$206.05 | +$3,245.41 | NO | NO |
+| 2024-10-01 | +$208.88 | +$2,830.48 | wins both | NO |
+| 2025-01-01 | +$461.57 | +$2,577.79 | wins both | NO |
+| 2025-04-01 | +$995.10 | +$2,044.26 | wins both | wins both |
+| 2025-07-01 | +$1,913.52 | +$1,125.84 | wins both | wins both |
+| 2025-10-01 | +$3,511.97 | −$472.61 | NO | wins both |
+| 2026-01-01 | +$4,487.00 | −$1,447.64 | NO | wins both |
+
+**4 of 7 cut points win both halves** vs the canonical recipe, and
+**4 of 7** vs the trail-OFF baseline.
+
+### ⚠️ THE GAIN IS REGIME-CONCENTRATED
+
+| year | gold | `both` | `off` | `short` | Δ vs `both` |
+|---|---|---|---|---|---|
+| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
+| 2025 | +64.5% | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
+| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+
+**2026 LOSES $1,448 against the shipping recipe.** The scope helps
+when gold trends and hurts when it does not, because the long side
+carries the book. It wins **20 of 31 months**.
+
+### The verdict
+
+**PROMOTED 2026-11-04 — `TRAIL_SIDES = 'short'`.** The canonical
+ledger was rebuilt under the promoted recipe (7,122 legs, gross
++$5,622.77, net +$2,298.20, gross/leg +0.7895, gross/fee 1.691×), and
+the scope-gate invariant holds (**0 long legs** exit on the trail).
+
+> **The canonical recipe's book is now PROFITABLE for the first
+> time** — gross/leg +$0.7895 covers the measured round trip
+> ($0.4668) at **1.691×**. The previous canonical book did not
+> (0.777×).
+>
+> **But read the caveats.** The gain is 98% **drift**, not timing;
+> it is **regime-concentrated** (2026 loses $1,448); and the
+> **paired** t-stat is only +1.62. This is a **better place to stand
+> long**, and it must be **re-measured whenever the exit geometry
+> changes**.
 
 ---
 

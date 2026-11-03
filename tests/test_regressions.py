@@ -2830,3 +2830,156 @@ def test_trail_sides_is_not_the_entry_side_gate():
         "trail_sides must not be wired into the ENTRY path -- it is an "
         "exit-scope knob, not an entry gate"
     )
+
+
+def test_canonical_trail_sides_is_short():
+    """The PROMOTED canonical scope must stay ``'short'``.
+
+    AGENTS.md § 3.9b: the short-scoped trail was promoted on
+    2026-11-04 after the ledger verdict
+    (``runtime/diagnostics/trail_sides_ledger_verdict.py``). It is the
+    only cell of the scope grid that beats BOTH the shipping recipe
+    (net -$741.16) and the trail-OFF baseline (net +$1,593.16), and
+    the first canonical book whose gross edge covers the measured
+    round trip (1.691x vs the previous 0.777x).
+
+    This test exists so that a future edit to the constant cannot
+    silently revert the scope -- and so that a DELIBERATE change has
+    to update this test and re-run the ledger verdict, rather than
+    changing the number and moving on.
+    """
+    from bt.optimal_config import TRAIL_SIDES, build_engine_kwargs
+
+    assert TRAIL_SIDES == "short", (
+        f"the canonical trail scope is {TRAIL_SIDES!r}, expected 'short'. "
+        "Changing it requires re-running "
+        "runtime.diagnostics.trail_sides_ledger_verdict and updating "
+        "AGENTS.md § 3.9b + docs/promotions.md."
+    )
+
+    # The builder must forward the PROMOTED value, not a hard-coded
+    # one -- a builder that emitted a different scope would make the
+    # constant a decoy (AGENTS.md § 1.5: a knob that looks sweepable
+    # but measures nothing).
+    assert build_engine_kwargs()["trail_sides"] == "short"
+
+
+def test_canonical_trail_scope_has_zero_long_legs_on_the_trail():
+    """The scope-gate invariant, as a STRUCTURAL check.
+
+    Under ``trail_sides='short'`` the trail must never fire on a LONG
+    position. This is measured end-to-end in
+    ``trail_sides_ledger_verdict`` (0 long legs on the trail in the
+    promoted canonical book), but that is a corpus measurement.
+
+    The ENGINE-side guarantee is that the trail gate is selected by the
+    position's direction. If a future edit changed the selection to a
+    global boolean, ``'short'`` and ``'both'`` would become
+    indistinguishable -- and the corpus measurement would be the only
+    thing standing between that edit and a silently wrong book.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
+
+    src = inspect.getsource(run_vp_sniper_backtest)
+
+    # The per-side flags must be DERIVED from trail_sides, and the bar
+    # loop must pick between them by the position's direction.
+    assert "_trail_on_short" in src and "_trail_on_long" in src, (
+        "the engine must compute a per-side trail flag for each side"
+    )
+    assert "ot.direction > 0 else _trail_on_short" in src, (
+        "the trail gate must select the flag by the position's direction -- "
+        "a global boolean would make 'short' and 'both' identical"
+    )
+
+
+def test_the_promotion_criterion_is_net_profit():
+    """A promotion is judged on NET PROFIT, not on a decomposition.
+
+    The user instruction (2026-11-04) is explicit: *"just promote
+    whatever is most profitable. monthly aggs are meaningless for this
+    high freq strat"*.
+
+    The drift/excess decomposition and the monthly beta regression are
+    DIAGNOSTICS. They explain WHY a book makes money; they do not gate
+    whether it ships. The measured reason the per-bucket `excess` CANNOT
+    gate anything is the **fill geometry**: the engine books P&L at the
+    actual SL / TP fill price while `drift` is a close-to-close passive
+    hold, so on a stop or target exit the two differ by construction.
+    """
+
+    from runtime.diagnostics import trail_sides_ledger_verdict as v
+
+    # The driver's arms must be EXPLICIT OVERRIDES. After the
+    # promotion the canonical recipe IS 'short', so a driver that took
+    # its "canonical" arm from the no-overrides path would compare the
+    # book against ITSELF.
+    assert v.VARIANT_OVERRIDES == {"trail_sides": "short"}
+    assert v.TRAIL_BOTH_OVERRIDES == {"trail_sides": "both"}
+    assert v.TRAIL_LONG_OVERRIDES == {"trail_sides": "long"}
+    assert v.TRAIL_OFF_OVERRIDES == {"trail_mode": "off"}
+
+    # Every arm must be reachable by an EXPLICIT scope -- none of them
+    # may be "whatever the config currently is".
+    for overrides in (v.VARIANT_OVERRIDES, v.TRAIL_BOTH_OVERRIDES,
+                      v.TRAIL_LONG_OVERRIDES):
+        assert "trail_sides" in overrides, (
+            "a scope arm must name its scope explicitly -- an arm that "
+            "reads the canonical value is a self-comparison the moment "
+            "the canonical value changes"
+        )
+
+
+def test_the_scope_grid_is_ranked_on_net_profit():
+    """The promoted scope must be the MOST PROFITABLE cell of the grid.
+
+    Measured on the corpus (2024-01-01 -> 2026-07-16, one continuous
+    execution per arm):
+
+        scope 'short'   net = +$2,298.20   <-- most profitable
+        trail OFF       net = +$1,593.16
+        scope 'long'    net =  -$584.98
+        scope 'both'    net =  -$741.16
+
+    This is the actual promotion criterion, so it is asserted against
+    the ledgers on disk rather than against a hard-coded literal.
+    """
+    import json
+    import pathlib
+
+    reports = pathlib.Path("runtime") / "diagnostics" / "_reports"
+    legs_by_arm = {
+        "scope 'short'": "leg_ledger.json",
+        "scope 'both'": "leg_ledger_trail_both.json",
+        "scope 'long'": "leg_ledger_trail_long.json",
+        "trail OFF": "leg_ledger_trail_off.json",
+    }
+
+    nets = {}
+    for label, fname in legs_by_arm.items():
+        path = reports / fname
+        if not path.exists():
+            pytest.skip(f"{fname} is missing -- run the verdict driver")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        gross = sum(payload["legs"]["gross"])
+        fee = sum(payload["legs"]["fee"])
+        nets[label] = gross - fee
+
+    best = max(nets, key=lambda k: nets[k])
+    short_net = nets["scope 'short'"]
+    off_net = nets["trail OFF"]
+    assert best == "scope 'short'", (
+        f"the most profitable scope is {best!r} (net ${nets[best]:,.2f}), "
+        f"not 'short' (net ${short_net:,.2f}). Re-measure "
+        "the scope grid before changing the canonical value."
+    )
+
+    # And the promoted scope must beat the trail-OFF baseline -- that
+    # is the bar a promotion has to clear (beating only the shipping
+    # recipe is an improvement on a recipe that does not ship).
+    assert short_net > off_net, (
+        f"'short' (${short_net:,.2f}) no longer beats the "
+        f"trail-OFF baseline (${off_net:,.2f})"
+    )

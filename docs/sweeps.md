@@ -39,10 +39,29 @@ ahead.**
 | step | command | cost | what it tells you |
 |---|---|---|---|
 | **1. one month** | `python -m runtime.sweeps.cached_sweep --knob X --grid ...` | **~6 s** | is the knob **live**? does the metric move at all? |
-| **2. the ledger** | `python -m runtime.diagnostics.leg_ledger` then `leg_buckets` | **~90 s** cold, **~1 s** cached | the **real** verdict: buckets, drift/excess, payoff geometry |
+| **2. the ledger** | `python -m runtime.diagnostics.leg_ledger` then `leg_buckets` | **~90 s** cold, **~1 s** cached | the **real** verdict: **net profit**, buckets, payoff geometry |
 | **3. the trade count** | `python -m runtime.diagnostics.volgate_trade_count` | ~15 min (6 cells) | does the book land in the **30-70 trades/day** band? |
 | **4. the placebo** | `python -m runtime.diagnostics.zone_shuffle_placebo` | ~10 min | is the edge in the **level** or the **timing**? **⚠️ ONLY WHEN THE USER PROMPTS FOR IT** — see rule 5 |
 | **5. the full corpus** | `--i-know` + explicit go-ahead | **~3 min/cell** | only for a candidate that survived 1–4 |
+
+> **⚠️ THE PROMOTION CRITERION IS NET PROFIT** (user instruction,
+> 2026-11-04: *"just promote whatever is most profitable. monthly aggs
+> are meaningless for this high freq strat"*).
+>
+> The ledger's **drift/excess** decomposition and the monthly
+> **beta** regression are **DIAGNOSTICS** — they explain WHY a book
+> makes money, they do not gate whether it ships. Two measured reasons:
+>
+> * **The `excess` benchmark is not exchangeable with the execution
+>   model.** The engine books P&L at the **actual SL / TP fill
+>   price**; `drift` is a **close-to-close** passive hold. On a stop
+>   or target exit the two differ by construction, so a per-bucket
+>   `excess` there is the **execution-gap differential**, and its sign
+>   flips with book composition. See
+>   [`docs/engine_history.md`](engine_history.md) → *The per-bucket
+>   `excess` was measuring fill geometry*.
+> * **A month is n=31 draws** at ~7 legs/day. It is a REPORTING
+>   dimension (AGENTS.md § 1.1), never an evaluation boundary.
 
 > **⚠️ Step 4 (the placebo) is PROMPT-ONLY.** Never launch it
 > unprompted: it costs ~10 minutes, it **rewrites
@@ -167,6 +186,105 @@ work, but the **paired** re-measurement with `vol_state_min_range_norm`
 knob that looks sweepable but was never swept. Until the pair is
 measured together, the ceiling is an **assumption**, and the test now
 says so in its own failure message.
+
+> **⚠️ OPERATIONAL TRAP (measured 2026-11-04): A FINGERPRINT CHANGE
+> SILENTLY INVALIDATES EVERY EXISTING LEDGER.**
+>
+> The seven `leg_ledger_expand_*.json` ledgers were built at
+> 19:47–20:01 UTC. Commit `5b38b82` (06:35 +0800 = **22:35 UTC**)
+> then added `bt/_engine/vol_state.py` to `_source_hash()`'s source
+> list and switched the hash to AST-normalisation. **Every ledger
+> built before that commit is now STALE by fingerprint** — not because
+> its numbers are wrong, but because the cache key changed.
+>
+> **The numbers are still valid, and this was verified rather than
+> assumed:** `leg_ledger_expand_1.json` (built 19:55) and the
+> canonical `leg_ledger.json` (built 22:50) agree **element-wise
+> identical** on all 6,663 legs (`gross` sum `2583.1827326484` both,
+> `np.array_equal` → `True`). So the staleness is a **cache-key**
+> event, not a **data** event.
+>
+> **The lesson:** the fingerprint is a CACHE KEY, and a change to the
+> key invalidates every artifact built under the old key — including
+> the ones you did not touch. When the key changes, expect a full
+> rebuild, and **verify the old artifacts against a fresh one before
+> trusting the numbers they already produced.** A stale fingerprint
+> and a wrong measurement look identical until you diff them.
+
+#### ✅ PARTIALLY DISCHARGED — the one-month screen (2026-11-04)
+
+A **40-cell one-month screen** of the tier-3 #6 pair was run
+(2025-01; `runtime/results` → kind `sl_ceiling_paired_1m`):
+
+| rn \ sl | 2.5 | 4 | 6 | 8 | 12 | 15 |
+|---|---|---|---|---|---|---|
+| 0.5 | 0.057 | 0.078 | −0.018 | −0.090 | 0.139 | 0.115 |
+| **1.0** | 0.292 | 0.249 | 0.138 | 0.106 | **0.386** | **0.386** |
+| 1.5 | 0.429 | 0.461 | 0.484 | 0.552 | 0.683 | 0.683 |
+| 2.0 | 0.629 | 0.767 | 0.708 | 0.903 | 0.903 | 0.903 |
+
+(gross/leg — the promotion criterion)
+
+**What the screen established:**
+
+1. **The ceiling is LIVE** — the EV spread across the `sl` axis is
+   0.28 at `rn=1.0`.
+2. **`$15.00` is already the best ceiling at the canonical gate**
+   (0.386 vs 0.106 at `$8.00`) — there is no case for *lowering* it
+   on this evidence.
+3. **At `rn=1.0`, `$12` and `$15` are IDENTICAL** — the ceiling
+   cannot bind past $12 on that month.
+4. **`range_norm` CANNOT reach the 30-70/day band.** Even with the
+   gate fully OFF (`rn=0.0`) the book is **7.01 trades/day** — the
+   knob is **at its floor**. The trade-rate lever is the sequence
+   whitelist's K-curve or `expand_prev_day` OFF (12.20/day), not this
+   knob. **The user then waived the band generally** (*"no, stop
+   sweeps, 7 trade a day is fine"*) and **stopped further sweeps**.
+
+**What it did NOT establish — the debt is NOT fully discharged:**
+
+* **This is ONE MONTH.** The `expand_prev_day` curve (§ 3.7.2) shows
+  the same shape recurring across the corpus: **EV peaks and then
+  falls away.** A screen is a screen (AGENTS.md § 1.2).
+* **The corpus re-measurement of tier 3 #6 is still OWED.** Nothing
+  here discharges it, and nothing claims to.
+
+#### ⚠️ AND THE `$15.00` CEILING IS NOT A BACKSTOP — IT IS THE STOP FOR 71% OF THE BOOK
+
+Measured on the canonical corpus ledger (6,663 legs):
+
+| stop distance | share |
+|---|---|
+| median | **exactly `$15.00`** |
+| p75 / p90 / p95 | **`$15.00`** |
+| **legs AT the `$15.00` cap** | **70.88%** |
+| legs > `$15.00` | 0.09% |
+
+The HVN anchor wants a stop **wider** than `$15` far more often than
+not, so the ceiling **is** the effective stop width for most trades.
+That is why the geometry is a wide 1.105 payoff ratio:
+
+| | value |
+|---|---|
+| win (avg tp/trail) | **+$9.19** |
+| loss (avg sl) | **−$8.31** |
+| payoff ratio | **1.105** |
+| break-even win rate | **47.51%** |
+| actual hit rate | **82.67%** |
+| edge | **+35.2 pp** |
+| gross/leg | **+$0.3877** |
+| fee/leg | **$0.4989** |
+
+The book is **gross-positive** (`+$2,583`) and **net-negative**
+(`−$741`) because the **round trip exceeds the per-leg edge**. The
+wide stop is **not** what loses money — the fee bill is.
+
+**WHERE `$15.00` CAME FROM — it was NOT measured.** It arrived in
+commit `9f29cc8` as a re-interpretation of the knob's purpose ("a
+runaway shelf-anchored stop needs a catastrophic-error backstop") with
+a round number; the `$8.00` measured-optimum table was deleted in the
+same diff. The old `$8.00` WAS a measured optimum (2026-10-25, paired
+with the vol gate). **`$15.00` is an assumption.**
 
 ### The CLI limitation that bites on tiers 2 and 5
 

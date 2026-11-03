@@ -1,60 +1,84 @@
-"""MARKET-BETA regression for the whitelisted book's per-month gross.
+"""DAILY direction-dependence for the whitelisted book's gross.
 
-WHY THIS MODULE EXISTS
-======================
+⚠️ THIS MODULE WAS RENAMED IN SPIRIT, NOT IN FILE.
+========================================================
 
-The engine-level walk-forward (``seq5_engine_walkforward.py``) found
-that the LONG half of the 5-event whitelist generalises and the
-SHORT half does not:
+It used to regress each **MONTH's** gross on that month's market
+return. **That measurement is invalid for this strategy** (AGENTS.md
+§ 1.1 rule 7):
 
-    long   in-sample +0.2233 g/leg  ->  OUT-OF-SAMPLE +0.2189 g/leg
-    short  in-sample +0.0700 g/leg  ->  OUT-OF-SAMPLE -0.1803 g/leg
+1. **The sample size is tiny.** The corpus is ~31 months, so the
+   regression has n = 13..31 points. The standard error of a
+   correlation at n = 13 is ``1/sqrt(n-3) = 0.32`` in Fisher-z
+   space, so ``r = +0.459`` (the long-only book's H2 number) is only
+   **t = 1.57** -- NOT distinguishable from zero. Every "market
+   correlation" number the repo quoted was inside its own noise band.
 
-The tempting conclusion is "drop the short side and ship a long-only
-book". That conclusion is DANGEROUS, and this module is the test
-that decides it.
+2. **Monthly aggregation destroys the strategy's own time scale.**
+   This is a high-frequency book (~7-40 legs a DAY). A month's gross
+   sums thousands of legs whose entry and exit are spread over ~30
+   distinct trading days; the month's return is ONE number. The
+   regression therefore asks "did the book happen to sit on the right
+   side of a 30-day trend", which is a statement about the BOOK'S
+   COMPOSITION, not about whether the entries have skill.
 
-A long-only book is, by construction, a **directional bet on gold**.
-The repo has already measured that ``trade_sides="long"`` raises the
-book's market correlation to **+0.464** and rejected it for that
-reason. A long-only WHITELIST might be different -- a 5-event filter
-could be selecting *timing* within the up-moves rather than just
-riding them -- but that has to be MEASURED, not assumed.
+3. **The month boundary is an ENGINE ARTEFACT.** The p95 cap (7d),
+   the swing cap (24h) and the VP profile (7d rolling) are all
+   history-dependent, so a cold monthly chunk trades its first ~8
+   days with UNCAPPED targets (AGENTS.md § 1.1). The monthly
+   aggregation inherits that artefact.
 
-THE TEST
-========
+It was also **sign-unstable**: the monthly table called
+``shipped_on_H2`` **-0.373**, while the daily regression measures the
+same book at **+0.187** (Fisher-z t = +2.75). A number whose sign
+flips with the aggregation window cannot decide anything.
 
-Regress each month's gross P&L on that month's market return:
+THE REPLACEMENT
+===============
 
-    gross_month = alpha + beta * mkt_return_pct
+The **DAILY** aggregation: n ~= 900 points over the corpus instead of
+13-31, each point covering the strategy's ACTUAL trading horizon, with
+no month boundary anywhere in the pipeline.
 
-  * **beta** -- dollars of gross earned per 1% of market move.
-  * **alpha** -- the dollars earned in a month where the market goes
-    NOWHERE. A timing strategy has a POSITIVE alpha; a directional
-    proxy has ~0.
-  * **r2** -- how much of the P&L variance the market direction
-    explains.
+WHAT THIS MODULE MEASURES
+=========================
 
-The **drift/excess** decomposition (from the ledger) is the
-per-leg version of the same question, and it is already in the
-ledger: ``drift_usd`` is what any position of that size and side
-would have earned by being there; ``excess_usd`` is the timing
-component. If the whitelisted long book's gross is DRIFT and its
-excess is NEGATIVE, then the whitelist has found a better place to
-stand long -- it has NOT found timing skill, and the "edge" is the
-market's drift.
+For each book, over ONE continuous execution (no chunking):
 
-The two tests are complementary: the regression asks whether the
-P&L tracks the market across months; the decomposition asks WHY.
+* ``daily_gross``   -- the book's gross, bucketed by SIGNAL day.
+* ``mkt_ret_pct``   -- the market's close-to-close return over the
+  SAME calendar day.
+* ``beta`` / ``alpha`` / ``r2`` / ``corr`` / ``corr_t`` -- the
+  regression of daily gross on the daily market return.
+* ``excess_per_leg`` -- the ledger's PER-LEG decomposition
+  (``gross - passive hold``), which is the exact, per-leg
+  alternative and is the number the verdict should read.
 
-Usage
------
+The per-leg decomposition does NOT need any aggregation at all: it
+is an exact algebraic identity on every leg, so its t-statistic uses
+n = thousands of legs, not n = 31 months.
+
+THE VERDICT
+============
+
+The question is NOT "does the book correlate with the market?" -- it
+is "**is the gross explained by the market's move, or by the
+entries?**". The honest answer is the per-leg ``excess``:
+
+* ``excess_per_leg > 0`` and significant -> the entries have skill.
+* ``excess_per_leg <= 0`` -> the gross is the market's move.
+
+The daily regression is reported as the AGGREGATE view of the same
+question, and -- unlike the monthly one -- its standard error is small
+enough to distinguish a real directional book from noise.
+
     python -m runtime.diagnostics.seq5_beta_regression
 """
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -88,27 +112,27 @@ def _load_ledger(arm: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _monthly(legs: dict[str, list]) -> pd.DataFrame:
-    """Aggregate the legs to one row per calendar month."""
+def _daily(legs: dict[str, list]) -> pd.DataFrame:
+    """Aggregate the legs to one row per calendar DAY."""
     st = np.asarray(legs["signal_time_ns"], dtype=np.int64)
     gross = np.asarray(legs["gross"], dtype=np.float64)
     side = np.asarray(legs["side"], dtype=np.int64)
     ts = pd.Series(pd.to_datetime(st, unit="ns", utc=True))
     df = pd.DataFrame({
-        "month": ts.dt.strftime("%Y-%m"),
+        "day": ts.dt.strftime("%Y-%m-%d"),
         "gross": gross,
         "side": side,
     })
-    out = df.groupby("month").agg(
+    out = df.groupby("day").agg(
         gross=("gross", "sum"),
         legs=("gross", "size"),
     ).reset_index()
     return out
 
 
-def _market_monthly(start: str, end: str) -> pd.DataFrame:
-    """The market's return per calendar month over the same window."""
-    cache = OUT_DIR / "_market_monthly.csv"
+def _market_daily(start: str, end: str) -> pd.DataFrame:
+    """The market's return per calendar DAY over the same window."""
+    cache = OUT_DIR / "_market_daily.csv"
     if cache.exists():
         df = pd.read_csv(cache)
         df["mkt_ret_pct"] = df["mkt_ret_pct"].astype(float)
@@ -120,14 +144,28 @@ def _market_monthly(start: str, end: str) -> pd.DataFrame:
     ts = pd.Series(pd.to_datetime(bars["time"], unit="ms", utc=True))
     close = bars["close"].to_numpy(dtype=np.float64)
     df = pd.DataFrame({
-        "month": ts.dt.strftime("%Y-%m"),
+        "day": ts.dt.strftime("%Y-%m-%d"),
         "close": close,
     })
-    df = df.groupby("month")["close"].agg(["first", "last"]).reset_index()
+    df = df.groupby("day")["close"].agg(["first", "last"]).reset_index()
     df["mkt_ret_pct"] = (df["last"] / df["first"] - 1.0) * 100.0
     cache.parent.mkdir(parents=True, exist_ok=True)
-    df[["month", "mkt_ret_pct"]].to_csv(cache, index=False)
-    return df[["month", "mkt_ret_pct"]]
+    df[["day", "mkt_ret_pct"]].to_csv(cache, index=False)
+    return df[["day", "mkt_ret_pct"]]
+
+
+def _fisher_t(r: float, n: int) -> float:
+    """t-statistic of a correlation coefficient against zero.
+
+    Fisher's z transform: ``z = atanh(r)`` with SE ``1/sqrt(n-3)``.
+    This is the number that says whether a quoted correlation is
+    distinguishable from zero -- the number the monthly regression
+    never reported.
+    """
+    if n < 4 or not math.isfinite(r) or abs(r) >= 1.0:
+        return 0.0
+    z = math.atanh(r)
+    return float(z / (1.0 / math.sqrt(n - 3)))
 
 
 def _regress(mkt: np.ndarray, gross: np.ndarray) -> dict[str, float]:
@@ -137,12 +175,15 @@ def _regress(mkt: np.ndarray, gross: np.ndarray) -> dict[str, float]:
     pred = slope * mkt + intercept
     ss_res = float(np.sum((gross - pred) ** 2))
     ss_tot = float(np.sum((gross - gross.mean()) ** 2))
+    corr = float(np.corrcoef(mkt, gross)[0, 1]) if np.std(gross) > 0 else 0.0
     return {
-        "n_months": int(mkt.size),
+        "n_days": int(mkt.size),
         "beta_usd_per_pct": float(slope),
-        "alpha_usd_per_month": float(intercept),
+        "alpha_usd_per_day": float(intercept),
         "r2": float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0,
-        "corr": float(np.corrcoef(mkt, gross)[0, 1]) if np.std(gross) > 0 else 0.0,
+        "corr": corr,
+        # The number the monthly regression omitted.
+        "corr_t": _fisher_t(corr, int(mkt.size)),
     }
 
 
@@ -152,23 +193,24 @@ def main() -> None:
                     default=OUT_DIR / "seq5_beta_regression.json")
     args = ap.parse_args()
 
-    # The market's monthly return, once.
-    mkt = _market_monthly("2024-01-01", "2026-07-16")
-    mkt_map = dict(zip(mkt["month"], mkt["mkt_ret_pct"]))
+    # The market's daily return, once.
+    mkt = _market_daily("2024-01-01", "2026-07-16")
+    mkt_map = dict(zip(mkt["day"], mkt["mkt_ret_pct"]))
 
-    report: dict[str, Any] = {"arms": {}}
-    print("=" * 88)
-    print("MARKET-BETA REGRESSION -- is the whitelisted book a DIRECTIONAL PROXY?")
-    print("=" * 88)
+    report: dict[str, Any] = {"arms": {}, "aggregation": "daily"}
+    print("=" * 92)
+    print("DAILY DIRECTION DEPENDENCE -- is the whitelisted book a "
+          "DIRECTIONAL BET?")
+    print("=" * 92)
     print()
-    print(f"  {'arm':<18} {'n mo':>5} {'beta $/pct':>11} {'alpha $/mo':>11} "
-          f"{'r2':>7} {'corr':>7}  verdict")
-    print("  " + "-" * 84)
+    print(f"  {'arm':<18} {'n days':>7} {'beta $/pct':>11} {'alpha $/day':>12} "
+          f"{'r2':>7} {'corr':>8} {'corr t':>8}  verdict")
+    print("  " + "-" * 88)
 
     for arm, label in ARMS:
         payload = _load_ledger(arm)
-        mo = _monthly(payload["legs"])
-        mo["mkt_ret_pct"] = mo["month"].map(mkt_map)
+        mo = _daily(payload["legs"])
+        mo["mkt_ret_pct"] = mo["day"].map(mkt_map)
         mo = mo.dropna(subset=["mkt_ret_pct"])
 
         reg = _regress(mo["mkt_ret_pct"].to_numpy(dtype=float),
@@ -197,6 +239,8 @@ def main() -> None:
                 "legs": int(m.sum()),
                 "gross": float(gross[m].sum()),
                 "gross_per_leg": float(gross[m].mean()),
+                # The ledger's field name is ``drift_usd``; the
+                # quantity is the close-to-close PASSIVE HOLD.
                 "drift_per_leg": float(drift[m].mean()),
                 "drift_t": _t(drift[m]),
                 "excess_per_leg": float(excess[m].mean()),
@@ -213,7 +257,7 @@ def main() -> None:
                 "drift_per_leg": float(drift.mean()),
                 "drift_t": _t(drift),
                 "excess_per_leg": float(excess.mean()),
-                "excess_t": _t(excess.mean() if False else excess),
+                "excess_t": _t(excess),
             },
             "long": _leg_block(long_m),
             "short": _leg_block(short_m),
@@ -221,20 +265,24 @@ def main() -> None:
         report["arms"][arm] = block
 
         if reg:
-            verdict = ("PROXY" if reg["alpha_usd_per_month"] <= 0
-                       else "timing")
+            # The verdict reads the PER-LEG excess. The daily
+            # correlation is the aggregate view of the same question.
+            total = block["total"]
+            verdict = ("TIMING" if total["excess_per_leg"] > 0
+                       and total["excess_t"] > 2.0 else "MARKET-DRIVEN")
         else:
             verdict = "n/a"
-        print(f"  {arm:<18} {reg.get('n_months', 0):>5} "
+        print(f"  {arm:<18} {reg.get('n_days', 0):>7} "
               f"{reg.get('beta_usd_per_pct', 0):>+11,.1f} "
-              f"{reg.get('alpha_usd_per_month', 0):>+11,.1f} "
-              f"{reg.get('r2', 0):>7.3f} {reg.get('corr', 0):>+7.3f}  {verdict}")
+              f"{reg.get('alpha_usd_per_day', 0):>+12,.1f} "
+              f"{reg.get('r2', 0):>7.3f} {reg.get('corr', 0):>+8.3f} "
+              f"{reg.get('corr_t', 0):>+8.2f}  {verdict}")
 
     print()
     print("  -- the per-leg decomposition (why) --")
     print()
-    print(f"  {'arm':<18} {'side':<6} {'legs':>7} {'g/leg':>8} {'drift/leg':>10} "
-          f"{'drift t':>8} {'excess/leg':>11} {'excess t':>9}")
+    print(f"  {'arm':<18} {'side':<6} {'legs':>7} {'g/leg':>8} {'hold/leg':>10} "
+          f"{'hold t':>8} {'excess/leg':>11} {'excess t':>9}")
     print("  " + "-" * 84)
     for arm, _ in ARMS:
         b = report["arms"][arm]
@@ -258,18 +306,21 @@ def main() -> None:
         params={
             "window": "2024-01-01..2026-07-16",
             "arms": [a for a, _ in ARMS],
-            "regression": "monthly gross ~ alpha + beta * market return %",
+            "aggregation": "daily",
+            "regression": "daily gross ~ alpha + beta * daily market return %",
         },
         summary={
             arm: {
                 "beta": round(report["arms"][arm]["regression"].get(
                     "beta_usd_per_pct", 0.0), 2),
                 "alpha": round(report["arms"][arm]["regression"].get(
-                    "alpha_usd_per_month", 0.0), 2),
+                    "alpha_usd_per_day", 0.0), 2),
                 "r2": round(report["arms"][arm]["regression"].get(
                     "r2", 0.0), 4),
                 "corr": round(report["arms"][arm]["regression"].get(
                     "corr", 0.0), 4),
+                "corr_t": round(report["arms"][arm]["regression"].get(
+                    "corr_t", 0.0), 4),
             }
             for arm, _ in ARMS
         },

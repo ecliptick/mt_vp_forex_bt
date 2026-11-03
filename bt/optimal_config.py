@@ -174,6 +174,29 @@ SL_NTH_HVN_N = 1
 # payment labelled a loss (floor), and a runaway shelf-anchored stop
 # needs a catastrophic-error backstop (ceiling). No ATR scaling — the
 # ATR array belongs to the trailing stop only.
+#
+# ⚠️ SL_MAX_USD = 15.00 IS **UNMEASURED** (2026-11-04).
+#
+# It arrived in commit 9f29cc8 as a re-interpretation of the knob's
+# purpose ("a catastrophic-error backstop") with a round number — the
+# $8.00 measured-optimum table was deleted in the same diff. The old
+# $8.00 WAS a measured optimum (2026-10-25, paired with the vol gate).
+#
+# AND IT IS NOT A BACKSTOP IN PRACTICE: measured on the canonical
+# corpus ledger, the median stop distance is EXACTLY $15.00 and
+# **70.88%** of legs are capped there. The HVN anchor wants a wider
+# stop far more often than not, so this ceiling IS the effective stop
+# width for most of the book. The payoff geometry follows: win
+# +$9.19, loss -$8.31, payoff ratio 1.105, break-even win rate 47.51%
+# against an actual 82.67% -> edge +35.2 pp, and a gross-POSITIVE
+# book (+$2,583) that is net-negative only because the round trip is
+# $0.4989/leg against $0.3877/leg of gross.
+#
+# A one-month screen of the PAIRED pair (range_norm x sl_max_usd, 40
+# cells, 2025-01) puts $15.00 AHEAD of $8.00 at the canonical gate
+# (gross/leg 0.386 vs 0.106), but a screen is not a verdict: the
+# corpus re-measurement of tier-3 #6 is still OWED. See AGENTS.md
+# § 4.1 tier 3 #6.
 SL_MIN_USD = 0.94
 SL_MAX_USD = 15.00
 
@@ -319,11 +342,54 @@ TRAIL_GIVEBACK_FRAC = 0.5     # f: exit after giving back f of peak MFE
 # the population a trailing stop rescues. The long side runs 8.36 ATR of
 # MFE, so truncating its winners destroys more than the trail captures.
 #
-# CANONICAL IS 'both' — the scope is MEASURED, not assumed. The
-# 'short'-scoped arm is a CANDIDATE until its end-to-end engine A/B
-# exists (the replay number above is a screen, not a verdict: the trail
-# changes the BOOK, so it must be re-measured through the engine).
-TRAIL_SIDES = 'both'
+# CANONICAL IS 'short' — PROMOTED 2026-11-04.
+#
+# The scope is MEASURED, not assumed. The corpus MFE/MFA analysis
+# (``docs/trail_stop.md`` § 8.4) measured the trail PER SIDE on the
+# 8-month corpus (2,539 legs):
+#
+#   side   n      baseline gross   canonical trail delta
+#   long   1,685  +$1,073.50       -$906.77   (753 TPs cut)
+#   short    854   -$245.05        +$533.38   (290 SLs rescued)
+#
+# The trail helps the side that is LOSING money and hurts the side that
+# is making it. The short side's MFA p50 ($3.716) sits close to its MFE
+# p50 ($4.380) -- shorts go against the trade FIRST, which is exactly
+# the population a trailing stop rescues. The long side runs 8.36 ATR of
+# MFE, so truncating its winners destroys more than the trail captures.
+#
+# The end-to-end ENGINE A/B (the verdict — a replay is only a screen)
+# was then run over the full corpus by
+# ``runtime/diagnostics/trail_sides_ledger_verdict.py``:
+#
+#   book              legs     gross        net    g/leg   g/fee
+#   both  (old)      6,663  +$2,583.18   -$741.16  +0.3877  0.777x
+#   off   (baseline)  7,284  +$4,917.66 +$1,593.16  +0.6751  1.479x
+#   short (SHIPPED)   7,122  +$5,622.77 +$2,298.20  +0.7895  1.691x
+#
+# The shipped scope is the ONLY cell that beats the trail-OFF baseline
+# AND the shipping recipe. See ``docs/promotions.md`` for the full
+# evidence, the honest limits, and the 2x2 attribution.
+#
+# ⚠️ WHAT THE PROMOTION IS **NOT**:
+#   * It is NOT timing skill. The book's ``excess`` (gross minus the
+#     close-to-close passive hold) is still SIGNIFICANTLY NEGATIVE
+#     (t = -7.03), and 98% of the gain over the shipping recipe is
+#     the passive hold (a better place to stand long), not timing.
+#   * It is NOT uniform. The gain is concentrated in the 2024H2-2025
+#     gold uptrend; 2026H1 (gold -7.4%) LOSES $1,878 on the long
+#     book. The variant wins both halves at 4 of 7 tested cut points.
+#   * It does NOT remove the book's market exposure. The DAILY
+#     direction-dependence test (n = 577 days, ``runtime/diagnostics/
+#     daily_direction_dependence.py``) measures corr = +0.392 with
+#     Fisher-z t = +9.92 -- significant. That is the context, not the
+#     verdict; the promotion criterion is NET PROFIT.
+#
+# ⛔ The OLD monthly market-correlation number (+0.337, n = 31) that
+# appeared here is RETIRED -- its Fisher-z t was 1.86, i.e. inside its
+# own noise band. Monthly regressions are not a verdict for this
+# high-frequency book (AGENTS.md § 1.1 rule 7).
+TRAIL_SIDES = 'short'
 
 # ─── Signal gates ───────────────────────────────────────────────
 #
@@ -447,7 +513,7 @@ VOL_STATE_MAX_WICK_RATIO = 0.0
 # executed and discarded) via
 # ``runtime/diagnostics/expand_prev_day_corpus_ab.py``:
 #
-#   thr   legs   legs/day   EV(gross/leg)  drift/leg  excess/leg  fee/leg      net
+#   thr   legs   legs/day   EV(gross/leg)  hold/leg  excess/leg  fee/leg      net
 #   0.0   11305      12.20         0.1720    +0.2704     -0.0984   0.5034  -3745.96
 #   0.7    9117       9.83         0.2666    +0.3512     -0.0846   0.4997  -2125.11
 #   0.85   7822       8.44         0.2978    +0.3740     -0.0762   0.5000  -1581.14
@@ -463,9 +529,10 @@ VOL_STATE_MAX_WICK_RATIO = 0.0
 # +0.0847 vs 1.2, +0.0818 vs 1.3) and lifts EV over gate-off by
 # dEV +0.2157 (t = +2.60 -- statistically significant).
 #
-# The peak is a DRIFT peak, not a timing peak: drift peaks at 1.0
-# (+0.4641) while excess (timing) is flat at -0.07..-0.10 across
-# the whole range. The gate selects on directional drift.
+# The peak is a PASSIVE-HOLD peak, not a timing peak: the passive
+# hold peaks at 1.0 (+0.4641) while the excess (what the entries
+# added on top of it) is flat at -0.07..-0.10 across the whole
+# range. The gate selects on the market's move, not on timing skill.
 #
 # ⚠️ HONEST LIMITS (recorded, not hidden):
 #   * The EV lift over gate-off IS statistically significant
@@ -476,10 +543,10 @@ VOL_STATE_MAX_WICK_RATIO = 0.0
 #     REDUCES a loss ($-3,746 -> $-741); it does not make the book
 #     profitable. EV/leg (0.3877) remains below the measured round
 #     trip (0.4989), so the strategy is still fee-limited.
-#   * ``excess`` (the timing component, as opposed to drift) remains
-#     NEGATIVE and significant at every threshold (t = -8.45 at
-#     1.0). The gross is dominated by drift -- the market going the
-#     way the position already pointed.
+#   * ``excess`` (the entries' contribution, as opposed to the
+#     passive hold) remains NEGATIVE and significant at every
+#     threshold (t = -8.45 at 1.0). The gross is dominated by the
+#     market going the way the position already pointed.
 #   * 7.19 legs/day sits FAR BELOW the 30-70/day target band, and
 #     93.6% of days fall under 30 legs. The instruction to promote
 #     on EV overrides the trade-count preference -- a deliberate
@@ -495,10 +562,11 @@ VOL_STATE_MAX_EXPAND_PREV_DAY = 0.0
 
 # BoS/CHoCH structure gate. Ships OFF.
 #
-# It was MEASURED and NOT promoted: it improves gross but leaves the
-# market-beta correlation untouched (long +0.968 -> +0.970), and
-# promoting it would break every call site that builds no
-# ``StructureState``. Locked by
+# It was MEASURED and NOT promoted: on the current recipe it loses
+# -$1,215 of NET against the canonical book (+$1,082.85 vs
+# +$2,298.20) and its per-leg ``excess`` stays significantly negative
+# on both sides. Promoting it would also break every call site that
+# builds no ``StructureState``. Locked by
 # ``tests/test_regressions.py::test_structure_gate_stays_off_until_its_plumbing_is_safe``.
 STRUCTURE_GATE = False
 # 300 bars = 5 min on the 1s canonical feed.
@@ -506,12 +574,24 @@ STRUCTURE_MAX_AGE_BARS = 300
 
 # Which sides may open. "both" = long and short; "long" = long only.
 #
-# NOT PROMOTED, deliberately two-sided. "long" was measured on
-# 2026-10-24 (8 slices): it turns -$74 into +$161, but its market
-# correlation rises to +0.464 against the two-sided recipe's aggregate
-# +0.315 — a long-only account IS a directional bet, and it has no
-# hedge for a gold sell-off. The short side's negative alpha is
-# attacked with a per-side sequence filter instead.
+# NOT PROMOTED, deliberately two-sided. On the current recipe the
+# long-only book measures net +$2,731.05 (4,371 legs, gross/leg
+# +1.1250) against the canonical +$2,298.20 -- i.e. it is BETTER on
+# net, because the short side is net-negative. It stays OFF as a
+# deliberate RISK choice: a long-only gold account has no hedge in a
+# sell-off, and its DAILY market correlation is higher (+0.437,
+# Fisher-z t = +10.74) than the two-sided recipe's (+0.392, t =
+# +9.92). See ``runtime/diagnostics/daily_direction_dependence.py``.
+#
+# The negative short alpha is a REAL finding and it is attacked where
+# it is safe to attack it -- by gating the short side on market
+# structure sequences, so the side stays alive but only trades its own
+# profitable sequences.
+#
+# ⛔ The OLD justification ("market correlation rises to +0.464") is
+# RETIRED -- that was a MONTHLY regression (n = 13..31) whose Fisher-z
+# t was 1.86, i.e. inside its own noise band. Monthly regressions are
+# not a verdict for this high-frequency book (AGENTS.md § 1.1 rule 7).
 TRADE_SIDES = 'both'
 
 # ─── Per-side sequence drop set — REMOVED 2026-11-04 ─────────────

@@ -3,6 +3,13 @@
 **Date:** 2026-10-25
 **Status:** measured, negative result, with a new control that the repo did not have
 
+> **⚠️ ARCHIVED MEASUREMENT (2026-11-04).** Kept as the record of the
+> 2026-10-25 result, on a recipe that has since changed materially. Its
+> numbers are **not comparable** to the current book. Its vocabulary is
+> historical: "drift" here means the ledger's `drift_usd` field — the
+> **close-to-close passive hold**. See AGENTS.md § 1.1 rule 7 (a monthly
+> aggregation is never a verdict) and § 5.1 Q2 (the current framing).
+
 ---
 
 ## 1. What was built

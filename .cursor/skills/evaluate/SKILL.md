@@ -3,9 +3,10 @@ name: evaluate
 description: >-
   Measure and judge the SNIPER XAUUSD strategy at the LEG level using the
   corpus-wide ledger, the four (side x outcome) buckets, and the
-  drift/excess decomposition. Use when asked to evaluate the recipe, score a
-  variant, check whether a change helped, read the buckets, compute the payoff
-  geometry, or answer "is there an edge?" — and before promoting any knob.
+  per-leg passive-hold/excess decomposition. Use when asked to evaluate the
+  recipe, score a variant, check whether a change helped, read the buckets,
+  compute the payoff geometry, or answer "is there an edge?" — and before
+  promoting any knob.
 disable-model-invocation: true
 ---
 
@@ -23,6 +24,29 @@ in-month distribution the strategy experienced. Worse, the month boundary is an
 (7d rolling) are history-dependent, so a cold chunk trades its first ~8 days
 with UNCAPPED targets. Chunked execution silently discards ~10% of the trade
 universe.
+
+## The promotion criterion is NET PROFIT
+
+> **A promotion is judged on the NET.** (User instruction, 2026-11-04:
+> *"just promote whatever is most profitable. monthly aggs are meaningless for
+> this high freq strat"*.)
+>
+> The passive-hold/excess decomposition (Q2) and the market-beta regression
+> are **DIAGNOSTICS** — they explain WHY a book makes money. Neither may
+> **block** a promotion on a positive net.
+>
+> Two measured reasons:
+>
+> 1. **The `excess` benchmark is not exchangeable with the execution model.**
+>    The engine books P&L at the **actual SL / TP fill price** (85.9% of `sl`
+>    legs fill exactly at the stop; 100% of the rest fill adverse), while
+>    `passive_hold` is a **close-to-close** measurement. On a stop or target
+>    exit the two differ BY CONSTRUCTION, so a per-bucket `excess` there is
+>    the **execution-gap differential**, not a timing measure — and its sign
+>    flips with book composition. Read the WHOLE-BOOK and PER-SIDE excess
+>    (which do hold) for the diagnostic, never the per-bucket sign.
+> 2. **A month is n=31 draws** at ~7 legs/day. The month is a REPORTING
+>    dimension, never an evaluation boundary.
 
 ## The workflow
 
@@ -66,27 +90,47 @@ report prints `gross_per_leg / fee_per_leg` so the comparison is explicit.
 > A gross edge that does not cover the round trip is **not an edge**.
 
 **Q2 — is the edge direction-independent?**
-The drift/excess decomposition:
+The per-leg passive-hold/excess decomposition:
 
 ```
-drift  = (close[exit_bar] - close[entry_bar]) * direction * qty
-excess = gross - drift
+passive_hold = (close[exit_bar] - close[entry_bar]) * direction * qty
+excess       = gross - passive_hold
 ```
 
-`drift` is the directional/beta component — what any position of that size and
-side would have earned by being there. `excess` is the timing component, which
-a directional proxy cannot have.
+`passive_hold` is what any position of that size and side would have earned by
+merely BEING there, over the same bars. `excess` is what the entries added on
+top of that — the part a purely directional book cannot have.
 
 This is an **exact algebraic identity**, not an estimate. No regression, no
-monthly aggregation, no regime label.
+monthly aggregation, no regime label, and its standard error uses
+n = thousands of legs rather than n = 13..31 months.
 
-Current reading: excess is **negative on both books** (narrow: −$155.00,
-t = −2.96; wide: −$4,080.07, t = −15.63) and negative for **every** exit
-reason. The realised P&L is market drift.
+> **⚠️ `excess` is a DIAGNOSTIC, not a promotion gate.** The ledger
+> benchmarks a leg's realised P&L against a **close-to-close** passive hold,
+> but the engine books P&L at the **actual SL / TP fill price**. Those are
+> not exchangeable, so a stop or target bucket's `excess` is the
+> **execution-gap differential**, not a timing measure — and its sign FLIPS
+> with book composition. Read the **whole-book** and **per-side** excess for
+> the diagnostic. See `tests/test_signal_bar_completeness.py` and AGENTS.md
+> § 5.1.
 
 **Q3 — is the loss concentrated?**
 A strategy whose losses are all the same size is a **geometry** problem; a fat
 loss tail is a **risk** problem.
+
+### Step 4b — the daily direction-dependence view
+
+When the question is specifically "is this book a directional bet on gold?",
+use the **daily** aggregation — never a monthly one:
+
+```bash
+python -m runtime.diagnostics.daily_direction_dependence
+```
+
+It regresses **daily** gross on the **daily** market return (n ~= 577 days,
+so the correlation's t-statistic is decisive) and reports the per-leg
+decomposition alongside it. The verdict reads the **per-leg** `excess`; the
+daily correlation is the aggregate view of the same question.
 
 ### Step 5 — the payoff geometry
 
@@ -128,10 +172,16 @@ overstates the edge by ~7%.
 ## What the leg view does NOT claim
 
 - A positive per-leg EV that does not cover the round trip is not an edge.
-- `excess` is the timing component of the **realised** P&L. It does not by
-  itself make the strategy tradeable — the fee bill still has to be paid.
-- A near-zero gross total makes any gross *ratio* (e.g. `drift_share_of_gross`)
-  meaningless. Read the **absolute totals**.
+- `excess` is what the entries added on top of a passive hold. It does not by
+  itself make the strategy tradeable — the fee bill still has to be paid, and
+  it is not exchangeable with the engine's fill-price P&L.
+- A near-zero gross total makes any gross *ratio* (e.g. the passive-hold
+  share of gross) meaningless. Read the **absolute totals**.
+- **A monthly correlation is never a verdict.** A monthly regression of gross
+  on market return has n = 13..31, whose correlation standard error is ~0.32
+  in Fisher-z space — every quoted monthly correlation in this repo's history
+  sat inside its own noise band. Use the per-leg decomposition, or the
+  **daily** aggregation (`daily_direction_dependence`).
 
 ## Reference
 

@@ -1147,6 +1147,16 @@ direction-independent test.
 
 ## 10. Validation — the gate, not the P&L
 
+> **⚠️ HISTORICAL SPEC (2026-11-04).** This section is the *v2
+> rebuild spec* as it was written; the strategy it describes never
+> shipped. Its **monthly-slice** validation protocol is **RETIRED**
+> for the reasons in AGENTS.md § 1.1 rule 7 — a monthly correlation has
+> n = 13..31, so its standard error is ~0.32 in Fisher-z space and the
+> quoted `|corr| < 0.5` thresholds could not distinguish anything from
+> noise. The **daily** aggregation is the sanctioned instrument:
+> `python -m runtime.diagnostics.daily_direction_dependence`. Read this
+> section for the *intent* of the gates, not for their thresholds.
+
 A v2 config is not accepted on net P&L. It must clear, in order:
 
 1. **Flat-market slices.** `|market move| < 3%`. Gross P&L > 0. This is

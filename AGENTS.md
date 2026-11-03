@@ -22,7 +22,7 @@ dependencies, and no re-export wrappers under `bt/`.
 > | [`docs/sweeps.md`](docs/sweeps.md) | Sweep policy, the measured cost model, the `--i-know` gate, the output contract, **the sweep queue** |
 > | [`docs/engine_history.md`](docs/engine_history.md) | Every bug found and fixed — leaks, detector bugs, perf, dead knobs, operational traps |
 > | [`docs/promotions.md`](docs/promotions.md) | What shipped, what was measured and rejected, the NB lineage |
-> | [`docs/trail_stop.md`](docs/trail_stop.md) | The trailing stop: MFE/MFA analysis, the 1m ATR basis, and why the trail does not ship |
+> | [`docs/trail_stop.md`](docs/trail_stop.md) | The trailing stop: MFE/MFA analysis, the 1m ATR basis, and why the trail is now **scoped to shorts** |
 > | [`docs/repo_map.md`](docs/repo_map.md) | Every file and what it is for |
 >
 > **Rule: measured evidence lives in `docs/`, not in this file.** This
@@ -32,7 +32,15 @@ dependencies, and no re-export wrappers under `bt/`.
 
 ---
 
-## ⚡ THE ONE-LINE VERDICT (as of 2026-10-25)
+## ⚡ THE ONE-LINE VERDICT (as of 2026-11-04)
+
+> **The canonical book is PROFITABLE and covers its round trip.**
+> The `trail_sides='short'` promotion (2026-11-04) took the corpus
+> book from **gross/leg +0.3877 (0.777× the round trip, net −$741)**
+> to **+0.7895 (1.691×, net +$2,298)** — and it is the **most
+> profitable cell of the scope grid** (`both` −$741, `long` −$585,
+> trail OFF +$1,593, **`short` +$2,298**). **The criterion is NET
+> PROFIT.** See § 3.9b.
 
 > **The edge is in the LEVEL, not the TIMING.** Shuffling the FVG
 > zones' prices while keeping their trigger bars turns **+$510.58**
@@ -43,12 +51,35 @@ dependencies, and no re-export wrappers under `bt/`.
 >
 > ⚠️ **These figures are from the NARROW book** (vol gate 3.0, 1,692
 > legs). The canonical recipe is the WIDE book (vol gate 1.0, 51,075
-> legs). The finding is **robust**: the wide book's `excess` is also
-> negative (−$4,080.07, t = −15.63), for every exit reason. But the
-> level-not-timing **placebo** was only ever run on the narrow book,
-> and it is **prompt-only** — do not re-run it unprompted.
+> legs). The level-not-timing **placebo** was only ever run on the
+> narrow book, and it is **prompt-only** — do not re-run it unprompted.
 >
 > Full evidence: [`docs/evaluation.md`](docs/evaluation.md).
+
+> **⚠️ `excess` IS NOT A PROMOTION GATE (2026-11-04).** The ledger's
+> `excess = gross − passive_hold` benchmarks a leg's realised P&L against a
+> **close-to-close** passive hold, but the engine books P&L at the
+> **actual SL / TP fill price**. Those are **not exchangeable**:
+> 85.9% of `sl` legs fill exactly at the stop and 100% of the rest
+> fill adverse, and on **71.6%** of `sl` legs the exit bar's close is
+> BEYOND the stop. The identity
+>
+> ```text
+> excess == gap@exit − gap@entry      (gap = (fill − bar_close)·side·qty)
+> ```
+>
+> holds to **1e-15** in every bucket of every book. So a stop or
+> target bucket's `excess` is the **EXECUTION-GAP DIFFERENTIAL**, not
+> a timing measure — the same confound class as the random-entry
+> control's limit-vs-market comparison (§ 5.1 rule 4). The `sl`
+> bucket's sign **flips with book composition** (both −$42, short
+> +$134, trail OFF +$117), which is what a noise quantity does.
+>
+> **A promotion is judged on NET PROFIT.** The passive-hold/excess
+> decomposition is retained as a DIAGNOSTIC, and the per-bucket sign
+> assertion was replaced by the whole-book and per-side forms, which
+> DO hold (−$198.80 long, −$259.59 short). Guard:
+> `tests/test_signal_bar_completeness.py`.
 
 ---
 
@@ -79,8 +110,8 @@ window, bucketed by `(side, outcome)`.
    Chunked execution is a harness bug — not a rounding error.
 2. **The "flip" is a tautology.** `gross = (exit − entry) × direction ×
    qty`, so `flip = −gross` **EXACTLY**. It carries zero information.
-   The direction question is answered by the **drift/excess**
-   decomposition, which depends on the market.
+   The direction question is answered by the **per-leg passive-hold /
+   excess** decomposition, which depends on the market.
 3. **A positive per-leg EV that does not cover the round trip is not
    an edge**, and a near-zero gross makes every gross *ratio*
    meaningless.
@@ -96,15 +127,51 @@ window, bucketed by `(side, outcome)`.
 6. **The trade-count target is 30-70 trades per day.** It is set by
    `vol_state_min_range_norm`, and that knob is **PAIRED with
    `sl_max_usd`** — the two must always be re-measured together.
+7. **⛔ NEVER draw a direction-dependence verdict from a MONTHLY
+   regression.** A monthly regression of gross on market return has
+   **n = 13..31** points. The correlation's standard error at n = 13
+   is `1/√(n−3) = 0.32` in Fisher-z space, so the repo's historical
+   monthly correlations (**r = +0.459** at n = 13 → **t = 1.57**;
+   **r = +0.337** at n = 31 → **t = 1.86**) were **inside their own
+   noise band** and carried no information. Worse, monthly
+   aggregation destroys the strategy's own time scale: a month's gross
+   sums thousands of legs spread over ~30 trading days, so the
+   regression asks "did the book happen to sit on the right side of a
+   30-day trend" — a statement about the book's COMPOSITION, not
+   about whether the entries have skill. **This strategy trades at
+   ~7–55 legs a DAY**, so it must be aggregated at the frequency it
+   trades at.
+   **The sanctioned instruments are:**
+   * the **per-leg** decomposition — an exact algebraic identity on
+     every leg, so its t-statistic uses **n = thousands of legs**;
+   * the **DAILY** aggregation — `python -m
+     runtime.diagnostics.daily_direction_dependence` (n ≈ 577 days,
+     corr **t = +9.92** on the canonical book — decisive).
 
-   > **⚠️ ONE DOCUMENTED EXCEPTION (2026-11-04).** The 5-event
+   **A monthly correlation is a REPORTING artefact, never a
+   verdict.** If a decision in this repo cites a monthly `r`, it is
+   re-grounded on the per-leg decomposition before it may ship.
+
+   > **⚠️ THE BAND IS WAIVED, GENERALLY (2026-11-04).** The 5-event
    > sequence whitelist (§ 3.10) trades **7.19 legs/calendar-day** —
-   > far below the band. The user explicitly waived it for that knob
-   > (*"dont need to be too strict on trade count for this"*). The
-   > band remains the general target; the waiver is recorded, not
-   > generalised. To stay inside the band the whitelist would have to
-   > keep 48 of 64 signatures per side — i.e. barely filter at all
-   > (`runtime/diagnostics/seq5_ksweep.py`).
+   > far below the band. The user waived it for that knob
+   > (*"dont need to be too strict on trade count for this"*), and
+   > then waived it **again, generally**, when the tier-3 #6 screen
+   > showed that **no** `vol_state_min_range_norm` value can reach the
+   > band (*"no, stop sweeps, 7 trade a day is fine"*).
+   >
+   > **The measured reason the band is unreachable:** even with the
+   > gate **fully OFF** (`range_norm=0.0`) the book is **7.01
+   > trades/day** on 2025-01 — the knob is **at its floor** and cannot
+   > widen the book at all. The whitelist's K-curve is the real
+   > trade-rate lever (K=16 → 10.44/day, K=17 → 11.25/day,
+   > post-hoc), but § 3.10.2 measured end to end that the ranked
+   > top-48 variant is **worse on every axis that matters**
+   > (gross/leg 0.0458 vs 0.3877, net −$12,561 vs −$741).
+   >
+   > **The band remains a documented TARGET, not a shipping
+   > constraint.** Do not sweep to reach it. The waiver is recorded,
+   > and so is the reason it was granted.
 
 ### 1.2 The measurement WORKFLOW — cheap first, expensive last
 
@@ -113,7 +180,7 @@ window, bucketed by `(side, outcome)`.
 | step | command | cost | what it tells you |
 |---|---|---|---|
 | **1. one month** | `python -m runtime.sweeps.cached_sweep --knob X --grid ...` | **~6 s** | is the knob **live**? does the metric move at all? |
-| **2. the ledger** | `python -m runtime.diagnostics.leg_ledger` then `leg_buckets` | **~5 min** cold / **~1 s** cached | the **real** verdict: buckets, drift/excess, payoff geometry |
+| **2. the ledger** | `python -m runtime.diagnostics.leg_ledger` then `leg_buckets` | **~5 min** cold / **~1 s** cached | the **real** verdict: buckets, per-leg passive-hold/excess, payoff geometry |
 | **3. the trade count** | `python -m runtime.diagnostics.volgate_trade_count` | ~15-30 min | does the book land in the **30-70 trades/day** band? |
 | **4. the placebo** | `python -m runtime.diagnostics.zone_shuffle_placebo` | ~10 min | is the edge in the **level** or the **timing**? **⚠️ ONLY WHEN THE USER PROMPTS FOR IT** |
 | **5. the full corpus** | `--i-know` + explicit go-ahead | **~5 min/cell** | only for a candidate that survived 1-4 |
@@ -435,8 +502,8 @@ All values live in `bt/optimal_config.py`.
 | `sl_buffer_usd` | `0.05` | engine | |
 | `sl_mode` | `hvn_lvn` | engine | Stop anchors on the Nth HVN shelf behind entry |
 | `sl_nth_hvn_n` | `1` | engine | Separate from the TP's `nth_hvn_n` |
-| `sl_min_usd` | `2.50` | engine | Hard floor. Can only ever **loosen** a too-tight stop |
-| `sl_max_usd` | `8.00` | engine | Hard CEILING. **PAIRED with the vol gate** |
+| `sl_min_usd` | `0.94` | engine | Hard floor. Can only ever **loosen** a too-tight stop |
+| `sl_max_usd` | `15.00` | engine | Hard CEILING. **PAIRED with the vol gate.** ⚠️ **UNMEASURED** — see § 4.1 tier 3 #6 |
 | `sl_hvn_max_distance_usd` | `0.0` | engine | `0.0` = DERIVE the search radius per bar |
 | `nth_hvn_n` | `3` | engine | TP reaches for the 3rd shelf ahead |
 | `tp_zone_mult_fallback` | `200.0` | engine | NB75 remainder leg |
@@ -458,7 +525,7 @@ All values live in `bt/optimal_config.py`.
 | `structure_gate` | `False` | engine | **NOT PROMOTED** |
 | `trade_sides` | `"both"` | engine | **NOT PROMOTED** — deliberately two-sided |
 | `trail_mode` | `'combined'` | engine | The trailing stop. k=2 act=1 gb=0.5. **The worst full-book cell under the `'both'` scope** — see § 3.9b |
-| `trail_sides` | `'both'` | engine | **NEW 2026-11-04.** Which sides the trail exits. **NOT the entry gate** — `trade_sides` opens, `trail_sides` exits. `'short'` measured **+$332.60** vs the trail-OFF baseline. See § 3.9b |
+| `trail_sides` | `'short'` | engine | **PROMOTED 2026-11-04.** Which sides the trail exits. **NOT the entry gate** — `trade_sides` opens, `trail_sides` exits. The only scope that beats BOTH the shipping recipe (−$741) and the trail-OFF baseline (+$1,593). See § 3.9b |
 | `contra_close` | `True` | engine | **PROMOTED 2026-10-25** |
 | `contra_close_spread_usd` | `5.0` | engine | Price spread threshold. Fires only on WIDE locks |
 | `swing_cap_pct` | `0.25` | engine | NB72 daily-swing TP cap |
@@ -549,7 +616,16 @@ corpus** (2024-01-01 → 2026-07-16, 927 days, 14-day warmup executed
 and discarded), canonical recipe otherwise, via
 `runtime/diagnostics/expand_prev_day_corpus_ab.py`:
 
-| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | drift/leg | excess/leg | fee/leg |
+> **⚠️ THE RECIPE THIS TABLE WAS MEASURED ON IS NOT THE SHIPPING
+> RECIPE.** It predates the `trail_sides='short'` promotion
+> (2026-11-04), so it was measured with `trail_sides='both'` and the
+> 21-key whitelist. The **SHAPE** of the curve (a peak at 1.0, with
+> the EV falling away on both sides) is the finding; the **LEVELS** are
+> not comparable to the promoted book (§ 3.9b), and the knob must be
+> **re-measured** under the promoted recipe before its threshold is
+> treated as settled.
+
+| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | passive-hold/leg | excess/leg | fee/leg |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0.0 (off) | 11,305 | 12.20 | $1,944.53 | $5,690.49 | −$3,745.96 | 0.1720 | +0.2704 | −0.0984 | 0.5034 |
 | 0.7 | 9,117 | 9.83 | $2,430.97 | $4,556.08 | −$2,125.11 | 0.2666 | +0.3512 | −0.0846 | 0.4997 |
@@ -571,14 +647,15 @@ peak and not a point on a still-rising slope:
   (−$3,746 → −$741) because the fee bill falls faster than the
   gross.
 
-> **The peak is a DRIFT peak, not a timing peak.** At `1.0` the
-> drift component peaks too (+0.4641) while `excess` (timing) is
-> essentially flat at −0.07 to −0.10 across the whole range. The
-> higher thresholds actually have a *slightly better* timing
-> component (−0.0680 at 1.1) but a **worse** drift component
-> (+0.3866), and the EV is the sum. So the gate is selecting on
-> **directional drift**, not on timing skill — consistent with the
-> repo-wide finding that the gross is drift-dominated.
+> **The peak is a PASSIVE-HOLD peak, not a timing peak.** At `1.0` the
+> passive-hold component peaks too (+0.4641) while `excess` (what the
+> entries added on top of a passive hold) is essentially flat at
+> −0.07 to −0.10 across the whole range. The higher thresholds
+> actually have a *slightly better* excess (−0.0680 at 1.1) but a
+> **worse** passive-hold component (+0.3866), and the EV is the sum.
+> So the gate is selecting on **the market's move**, not on timing
+> skill — consistent with the repo-wide finding that the gross is
+> dominated by the passive hold.
 
 > **⚠️ HONEST LIMITS (recorded, not hidden):**
 > * The EV lift over gate-off **is statistically significant**
@@ -590,9 +667,9 @@ peak and not a point on a still-rising slope:
 >   loss**; it does not make the book profitable. EV/leg ($0.3877)
 >   remains **below** the measured round trip ($0.4989), so the
 >   strategy is still **fee-limited** by the § 5.2 test.
-> * **`excess` (timing, not drift) stays NEGATIVE** at every
+> * **`excess` (the entries' contribution) stays NEGATIVE** at every
 >   threshold (t = −8.45 at 1.0). The gross is still dominated by
->   drift.
+>   the passive hold.
 > * **Trade count is far below target**: 7.19 legs/calendar-day, and
 >   **93.6% of days trade fewer than 30 legs**. The 30–70/day band
 >   (§ 1.1 rule 6) is **not** met. The user instruction to promote on
@@ -733,7 +810,11 @@ sweepable for the `multi_target` A/B.
 
 ---
 
-## 3.9b THE `trail_sides` KNOB — the per-side trailing scope (2026-11-04)
+## 3.9b THE `trail_sides` KNOB — the per-side trailing scope (PROMOTED 2026-11-04)
+
+**PROMOTED at `'short'` on 2026-11-04.** The canonical value is
+`'short'`: the trailing stop applies to the **short** positions only,
+and the long positions exit via TP/SL as before.
 
 `trail_sides` scopes the **trailing stop** to one side of the book:
 `'both'` | `'long'` | `'short'`. The engine raises `ValueError` on
@@ -854,22 +935,133 @@ the scope gate holds (0 long legs on the trail).
    being binding.
 5. **One split point.** A different cut could give a different answer.
 
-> **⚠️ NOT PROMOTED YET. `TRAIL_SIDES` STAYS `'both'`.**
+### ⭐ THE LEDGER VERDICT — the promotion gate (2026-11-04)
+
+The two things § 3.9b listed as owed before promotion have now been
+MEASURED. Driver: `runtime/diagnostics/trail_sides_ledger_verdict.py`
+— full corpus (2024-01-01 → 2026-07-16, 927 days), 14d warmup, **one
+continuous execution per arm**, canonical recipe otherwise.
+
+> **⚠️ THE CRITERION IS NET PROFIT** (user instruction,
+> 2026-11-04: *"just promote whatever is most profitable"*). Every
+> arm below is an **EXPLICIT override** — the driver's arms must never
+> be taken from the no-overrides canonical path, because after the
+> promotion that path IS the `'short'` book and the comparison would
+> be the book against itself.
+
+| book | legs | gross | **net** | gross/leg | fee/leg | gross/fee |
+|---|---|---|---|---|---|---|
+| `trail_sides='both'` (was shipping) | 6,663 | +$2,583.18 | −$741.16 | +0.3877 | 0.4989 | 0.777× |
+| `trail_sides='long'` | 7,063 | +$2,739.34 | −$584.98 | +0.3878 | 0.4931 | 0.787× |
+| **`trail_mode='off'` (the baseline)** | 7,284 | +$4,917.66 | +$1,593.16 | +0.6751 | 0.4564 | 1.479× |
+| **`trail_sides='short'` (PROMOTED)** | **7,122** | **+$5,622.77** | **+$2,298.20** | **+0.7895** | 0.4668 | **1.691×** |
+
+**`short` is the MOST PROFITABLE cell of the grid** (+$2,298.20). It
+beats the shipping recipe by **+$3,039.36** and the trail-OFF
+baseline by **+$705.04**, and it is the only cell whose gross edge
+covers the measured round trip by a wide margin.
+
+#### The passive-hold / excess decomposition (DIAGNOSTIC — not a gate)
+
+| book | passive-hold/leg | hold t | **excess/leg** | **excess t** |
+|---|---|---|---|---|
+| `both` | +0.4641 | +7.01 | −0.0764 | −8.45 |
+| `off` | +0.7407 | +5.03 | −0.0655 | −7.46 |
+| **`short`** | **+0.8539** | +6.62 | **−0.0644** | **−7.03** |
+
+> **⚠️ READ THIS BEFORE QUOTING ANY `excess` NUMBER.**
+> `excess` benchmarks the realised P&L against a **close-to-close**
+> passive hold, but the engine books P&L at the **actual SL / TP fill
+> price**. Those are not exchangeable — see the one-line verdict.
+> The per-bucket `excess` of a stop or target bucket is the
+> **execution-gap differential**, and its SIGN FLIPS with book
+> composition (`both` −$42, `short` +$134, trail OFF +$117 on the
+> `sl` bucket). The whole-book and per-side forms DO hold:
+> **−$458.39** total, **−$198.80** long, **−$259.59** short.
 >
-> The knob ships as **infrastructure** — real, tested, sweepable,
-> engine-read — with the canonical value unchanged. Before promotion:
+> So the honest statement is: the book captures **less** than a
+> passive hold of the same positions, and the `short` scope is a
+> **better place to stand long**, not a timing edge. That remains
+> true — but it is a DIAGNOSTIC, not the promotion criterion.
+
+#### The DAILY direction-dependence test (DIAGNOSTIC — not a gate)
+
+`python -m runtime.diagnostics.daily_direction_dependence` — the
+**daily** aggregation (n = 577 days), the sanctioned instrument
+(§ 1.1 rule 7):
+
+| book | legs | days | **daily corr** | **corr t** | r² | verdict |
+|---|---|---|---|---|---|---|
+| `both` | 7,122 | 577 | +0.392 | **+9.92** | 0.154 | market-exposed |
+| `off` | 7,284 | 577 | +0.223 | **+5.43** | 0.050 | market-exposed |
+| **`short`** | **7,122** | **577** | **+0.392** | **+9.92** | **0.154** | market-exposed |
+
+> **⚠️ THIS IS CONTEXT, NOT A VERDICT.** The criterion is net
+> profit. Note that the `short` scope and `both` are the **same
+> book** (the scope changes exits, not the daily gross bucket), so
+> their daily correlations are identical — as they must be.
 >
-> * the **LEDGER** must be re-measured under `trail_sides='short'`
->   (the corpus-wide leg record, not an engine summary), and
-> * the **drift/excess decomposition** must be checked — a gain
->   arriving through freed slots is a **book-composition** gain, and
->   § 5.1 Q2 asks whether the edge is in the timing or in the market
->   drift.
+> **⛔ THE OLD MONTHLY BETA TABLE IS RETIRED.** The repo previously
+> regressed gross on the **monthly** market return and quoted
+> `corr = +0.337` (n = 31) for the `short` scope. That number is
+> **inside its own noise band** — Fisher-z **t = 1.86**, not
+> distinguishable from zero — and the **daily** regression on the
+> same book measures **+0.392 with t = +9.92**. The daily number is
+> the one that is decisive; the monthly one was not.
+
+#### The 2×2 attribution — where the gain comes from
+
+| book | net | **long-side net** | short-side net |
+|---|---|---|---|
+| `both` | −$741.16 | −$391.31 | −$349.86 |
+| `off` | +$1,593.16 | +$1,893.01 | −$299.85 |
+| `long` scope | −$584.98 | −$456.02 | −$128.97 |
+| **`short` scope** | **+$2,298.20** | **+$2,675.14** | −$376.94 |
+
+The net effect of turning the trail ON for **shorts alone** is
+**+$705.04**; for **longs** it is **−$2,178.14**.
+
+> **⚠️ MOST OF THE GAIN IS THE TRAIL BEING *REMOVED* FROM LONGS.**
+> The long side's net goes from −$391 to +$2,675 — a **+$3,066** swing
+> on a side whose trail was simply switched OFF. The short side, whose
+> trail was switched ON, gets **−$27 WORSE**.
 >
-> **The finding that matters most is unchanged: the trail should be
-> OFF or scoped.** The canonical `combined k=2 act=1` at `'both'` costs
-> **−$741.16** on the shipping book and **−$845.96** on the 8-month
-> window. It is the worst cell in every grid.
+> The short scope is nevertheless the **correct** configuration: it is
+> the only one of the four that beats the trail-OFF baseline, because
+> the trail's damage on longs outweighs its benefit on shorts. The
+> mechanism is "the trail is a bad exit for this book".
+
+#### The split robustness (7 cut points, one execution)
+
+The § 3.9b honest-limits list named "one split point" as a weakness.
+It is now measured: the scope wins both halves at **4 of 7** cut
+points vs the canonical recipe and **4 of 7** vs the trail-OFF
+baseline. The two failures vs the canonical recipe are the two
+EXTREME cuts (2024-07-01 and 2026-01-01), where one half is very
+short.
+
+#### ⚠️ THE GAIN IS REGIME-CONCENTRATED
+
+| year | gold | `both` | `off` | `short` | Δ vs `both` |
+|---|---|---|---|---|---|
+| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
+| 2025 | +64.5% | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
+| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+
+**2026 LOSES $1,448 against the shipping recipe.** The scope helps
+when gold trends and hurts when it does not, because the long side
+carries the book. The variant wins **20 of 31 months**.
+
+> **✅ PROMOTED 2026-11-04. `TRAIL_SIDES = 'short'`.**
+> The canonical ledger was rebuilt under the promoted recipe (7,122
+> legs, gross +$5,622.77, net +$2,298.20, gross/leg +0.7895,
+> gross/fee 1.691×). The scope-gate invariant holds — **0 long legs**
+> exit on the trail.
+>
+> **Re-measure it whenever the exit geometry changes**, and treat the
+> regime concentration as a live caveat: this is a **better place to
+> stand long**, and it earns its keep by the NET, not by a timing
+> decomposition.
 
 ---
 
@@ -946,6 +1138,14 @@ than chance, and that is recorded rather than smoothed over.
 The shipped set beats the old set on **both** gross per leg
 (+0.3877 vs +0.3279) and net (−$741 vs −$1,367).
 
+> **⚠️ THIS TABLE PREDATES THE `trail_sides='short'` PROMOTION**
+> (2026-11-04). It was measured with `trail_sides='both'`. The
+> whitelist's **shape** (21 keys beat the old 25) is the finding; the
+> **levels** are not comparable to the promoted book (§ 3.9b). The
+> whitelist itself has **not** been re-fitted under the promoted
+> recipe — a re-fit is a separate, expensive measurement and is **not
+> implied** by the trail promotion.
+
 ### 3.10.0 THE ENGINE-LEVEL WALK-FORWARD — the decisive test (2026-11-04)
 
 `runtime/diagnostics/seq5_engine_walkforward.py` — this is the test
@@ -1004,39 +1204,61 @@ This is the **same lesson the post-hoc walk-forward already taught**
 (§ 3.10) — but measured END TO END this time, where the contra-close
 netting and the same-direction cap are re-evaluated.
 
-#### ⚠️ BUT THE LONG-ONLY BOOK IS A DIRECTIONAL PROXY
+#### ⚠️ BUT THE LONG-ONLY BOOK IS A DIRECTIONAL BET
 
-`runtime/diagnostics/seq5_beta_regression.py` — regress each month's
-gross on that month's market return:
+The per-leg decomposition, at the leg level, is the decisive number:
 
-| arm | months | beta $/pct | **alpha $/mo** | r² | corr | verdict |
-|---|---|---|---|---|---|---|
-| unfiltered H1 | 19 | −11.4 | −65.5 | 0.051 | −0.227 | proxy |
-| unfiltered H2 | 13 | +6.4 | −164.6 | 0.045 | +0.211 | proxy |
-| shipped on H1 | 19 | +6.2 | +41.4 | 0.078 | +0.279 | timing |
-| shipped on H2 | 13 | −4.2 | −19.0 | 0.139 | −0.373 | proxy |
-| long-only H1 | 19 | +5.3 | +27.0 | 0.119 | +0.344 | timing |
-| **long-only H2** | 13 | +3.0 | **+2.9** | 0.211 | **+0.459** | timing |
-
-The per-leg decomposition says the same thing more bluntly:
-
-| arm | side | gross/leg | drift/leg | drift t | excess/leg | excess t |
+| arm | side | gross/leg | passive-hold/leg | hold t | **excess/leg** | **excess t** |
 |---|---|---|---|---|---|---|
 | long-only H1 | long | +0.3569 | +0.3884 | +5.32 | **−0.0315** | **−2.87** |
 | long-only H2 | long | +0.0553 | +0.1569 | +1.00 | **−0.1016** | **−3.47** |
 
-**The long-only book's gross is DRIFT, and its timing component
-(`excess`) is significantly NEGATIVE in both halves.** The whitelist
-has found a better place to stand long — it has **not** found timing
-skill. And its market correlation on H2 (**+0.459**) is the same
-number that got `trade_sides="long"` **REJECTED** (§ 6).
+**The long-only book's gross is the market's passive hold, and its
+`excess` — what the entries added on top of it — is significantly
+NEGATIVE in both halves.** The whitelist has found a better place to
+stand long; it has **not** found timing skill.
+
+The **daily** direction-dependence regression agrees, and it is the
+sanctioned instrument (§ 1.1 rule 7) —
+`python -m runtime.diagnostics.daily_direction_dependence`:
+
+| arm | legs | days | **daily corr** | **corr t** | r² | excess/leg | excess t |
+|---|---|---|---|---|---|---|---|
+| unfiltered H1 | 18,640 | 418 | +0.040 | +0.82 | 0.002 | −0.0574 | −12.17 |
+| unfiltered H2 | 18,350 | 275 | −0.003 | −0.06 | 0.000 | −0.1415 | −15.86 |
+| shipped on H1 | 3,329 | 344 | +0.047 | +0.87 | 0.002 | −0.0441 | −4.84 |
+| shipped on H2 | 3,024 | 214 | +0.187 | **+2.75** | 0.035 | −0.1299 | −5.62 |
+| **long-only H1** | 2,157 | 309 | +0.208 | **+3.69** | 0.043 | −0.0315 | **−2.87** |
+| **long-only H2** | 1,997 | 198 | +0.247 | **+3.53** | 0.061 | −0.1016 | **−3.47** |
+
+The long-only book is **significantly long-correlated in BOTH halves**
+(t = +3.69 and +3.53), while the unfiltered book is **not correlated at
+all** (t = +0.82 / −0.06). The whitelist does not create the
+directional exposure — **concentrating** it does.
+
+> **⛔ THE OLD MONTHLY BETA TABLE IS RETIRED.** The repo used to
+> regress **monthly** gross on the **monthly** market return. That
+> measurement is invalid here: n = 13..31 points, so the correlation's
+> standard error is ~0.32 in Fisher-z space and every quoted monthly
+> `r` sat inside its own noise band (**r = +0.459** at n = 13 →
+> **t = 1.57**; **r = +0.337** at n = 31 → **t = 1.86**). It was also
+> **sign-unstable**: the monthly table called `shipped on H2`
+> **−0.373**, while the daily regression measures the same book at
+> **+0.187** (t = +2.75). A number whose sign flips with the
+> aggregation window cannot decide anything.
+>
+> The historical monthly table and its driver
+> (`runtime/diagnostics/seq5_beta_regression.py`) are **superseded by
+> `runtime/diagnostics/daily_direction_dependence.py`**.
 
 > **⚠️ THIS IS WHY THE SHIPPED SET KEEPS ALL 21 KEYS.** The
 > long-only variant has the better gross/leg (+0.2119 vs +0.1156) and
 > the better net (−$1,124 vs −$2,314) — and it is **not** shipped,
 > because it is a directional bet on gold wearing a sequence filter
-> as a hat. Dropping the short side does not remove the beta; it
-> **concentrates** it.
+> as a hat. Dropping the short side does not remove the market
+> exposure; it **concentrates** it — the daily correlation is
+> significant in both halves for long-only (+3.69, +3.53) and
+> insignificant for the two-sided shipped book on H1 (+0.87).
 
 ### ⚠️ The honest limits — a QUALITY knob, not an EDGE knob
 
@@ -1063,12 +1285,13 @@ number that got `trade_sides="long"` **REJECTED** (§ 6).
    gross/leg is **+0.1033** against the in-sample **+0.1770** — a 58%
    retention. The **long** half generalises cleanly; the **short**
    half **sign-flips** and is fit noise. And the long-only variant
-   that the short half would have enabled is a **directional proxy**
-   (excess significantly negative, market correlation +0.459) — the
-   same beta that got `trade_sides="long"` rejected. So all 21 keys
-   ship: the short keys are the honest cost of keeping the book
-   two-sided, and removing them would not remove the beta, it would
-   concentrate it.
+   that the short half would have enabled is a **directional bet**
+   (per-leg excess significantly negative in both halves, daily
+   correlation significant in both halves: t = +3.69 and +3.53) — the
+   same market exposure that got `trade_sides="long"` rejected. So all
+   21 keys ship: the short keys are the honest cost of keeping the
+   book two-sided, and removing them would not remove the market
+   exposure, it would concentrate it.
 4. **Post-hoc is not the book.** The table is a leg filter; the
    engine-side whitelist re-runs the book, so the conflict policy,
    the same-direction cap and the `contra_close` netting are all
@@ -1235,8 +1458,58 @@ python -m runtime.sweeps.cached_sweep \
 
 | # | knob | grid | note |
 | --- | --- | --- | --- |
-| 6 | `vol_state_min_range_norm` × `sl_max_usd` | `0.5,1.0,1.5,2.0` × `2.5,4,6,8,12` | **PAIRED.** The gate and the ceiling were never independent. The `hvn_single` change moved the payoff geometry, so this pair **must** be re-measured. ⚠️ **OWED:** the ceiling moved `$8.00 → $15.00` on 2026-11-04 and this pair has **not** been re-measured at the new ceiling — `$15.00` is UNMEASURED, not promoted |
+| 6 | `vol_state_min_range_norm` × `sl_max_usd` | `0.5,1.0,1.5,2.0` × `2.5,4,6,8,12,15` | **PAIRED.** The gate and the ceiling were never independent. The `hvn_single` change moved the payoff geometry, so this pair **must** be re-measured. ⚠️ **OWED:** the ceiling moved `$8.00 → $15.00` on 2026-11-04 and this pair has **not** been re-measured on the corpus — `$15.00` is UNMEASURED, not promoted. **A one-month screen WAS run 2026-11-04** (40 cells, `runtime/results` → `sl_ceiling_paired_1m`) — see the note below |
 | 7 | `vol_state_min_range_norm` × `vol_state_min_expand_prev_day` | `0.5,1.0,1.5` × `0,0.9,1.1` | **Two vol gates at once** — are they redundant? Both ask "is the market moving" |
+
+> **📌 WHAT THE 2026-11-04 ONE-MONTH SCREEN OF TIER 3 #6 SHOWED**
+> (2025-01, 40 cells, gross/leg — the promotion criterion):
+>
+> | rn \ sl | 2.5 | 4 | 6 | 8 | 12 | 15 |
+> |---|---|---|---|---|---|---|
+> | 0.5 | 0.057 | 0.078 | −0.018 | −0.090 | 0.139 | 0.115 |
+> | **1.0** | 0.292 | 0.249 | 0.138 | 0.106 | **0.386** | **0.386** |
+> | 1.5 | 0.429 | 0.461 | 0.484 | 0.552 | 0.683 | 0.683 |
+> | 2.0 | 0.629 | 0.767 | 0.708 | 0.903 | 0.903 | 0.903 |
+>
+> **Three things this established, none of which need the corpus:**
+>
+> 1. **At the canonical gate (`range_norm=1.0`), `$12` and `$15` are
+>    IDENTICAL** — the ceiling cannot bind past $12 on that month, so
+>    `$15.00` and `$12.00` are the same cell there. **The ceiling is
+>    LIVE** (the EV spread across the `sl` axis is 0.28 at `rn=1.0`).
+> 2. **`$15.00` is already the best ceiling at the canonical gate**
+>    (0.386 vs 0.106 at `$8.00`) — so there is no case for *lowering*
+>    it on this evidence.
+> 3. **`range_norm` cannot reach the 30-70/day band.** Even with the
+>    gate fully OFF (`rn=0.0`) the book is **7.01 trades/day** on
+>    2025-01 — the knob is **at its floor** and cannot widen the book.
+>    The trade-rate lever is the **sequence whitelist** (K-curve) or
+>    `vol_state_min_expand_prev_day` OFF (12.20/day), not this knob.
+>
+> ⚠️ **THIS IS A SCREEN, NOT A VERDICT** (AGENTS.md § 1.2). One month
+> is one draw, and the `expand_prev_day` curve (AGENTS.md § 3.7.2)
+> shows the same shape recurring: **EV peaks and then falls away.**
+> The corpus re-measurement of tier 3 #6 is **still OWED** — this
+> screen does not discharge it.
+>
+> **⚠️ AND THE `$15.00` CEILING IS NOT A BACKSTOP — IT IS THE STOP
+> FOR 71% OF THE BOOK.** Measured on the canonical corpus ledger:
+> the median stop distance is **exactly `$15.00`**, and **70.88%** of
+> legs are capped there. The HVN anchor wants a stop wider than `$15`
+> far more often than not, so the ceiling **is** the effective stop
+> width for most trades. That is why the payoff geometry is a wide
+> 1.105 ratio (win `+$9.19`, loss `−$8.31`, break-even win rate
+> **47.51%** against an actual **82.67%** → edge **+35.2 pp**) and why
+> the book is **gross-positive** (`+$2,583`, `+$0.3877/leg`) while
+> **net-negative** (fee `0.4989/leg`).
+>
+> **WHERE `$15.00` CAME FROM — it was NOT measured.** It arrived in
+> commit `9f29cc8` as a re-interpretation of the knob's purpose
+> ("a runaway shelf-anchored stop needs a catastrophic-error
+> backstop") with a round number; the `$8.00` measured-optimum table
+> was deleted in the same diff. The old `$8.00` WAS a measured
+> optimum (2026-10-25, paired with the vol gate). **`$15.00` is an
+> assumption.**
 
 > **✅ The test suite is GREEN: 435 passed, 1 skipped.** (Was
 > 17 failed / 413 passed before the 2026-11-04 fingerprint work; the
@@ -1313,8 +1586,8 @@ none has ever been swept:
 | `commission_per_lot_usd`, `spread_per_oz_usd` | stripped by the forex wrapper — the engine reads `taker_fee_bps` only |
 | `sl_atr_mult` | removed from the engine |
 | `poc_buffer_usd` | only read under `sl_mode='fvg_or_poc'` |
-| `structure_gate` | measured and **NOT PROMOTED**; the market-beta correlation is unchanged |
-| `trade_sides="long"` | measured and **NOT PROMOTED**; raises market correlation to +0.464 |
+| `structure_gate` | measured and **NOT PROMOTED**; it loses **−$1,215 of net** against the canonical book and its per-leg `excess` stays significantly negative on both sides |
+| `trade_sides="long"` | measured and **NOT PROMOTED**; a long-only book has no hedge in a sell-off, and its daily market correlation is **higher** (+0.437, t = +10.74) than the two-sided recipe's. ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the rejection is a deliberate **risk** choice, not a measured-worse one |
 | any HVN/LVN VP knob | the VP profile is **INERT** on this corpus — do not promote on the strength of that finding |
 
 ---
@@ -1326,9 +1599,10 @@ These are the tools. Use these; do not roll your own.
 | command | what it does |
 |---|---|
 | `python -m runtime.diagnostics.leg_ledger` | Build/reuse the corpus-wide per-LEG record (continuous run) |
-| `python -m runtime.diagnostics.leg_buckets` | The four buckets `(side × outcome)` + drift/excess + payoff geometry |
+| `python -m runtime.diagnostics.leg_buckets` | The four buckets `(side × outcome)` + passive-hold/excess + payoff geometry |
 | `python -m runtime.diagnostics.leg_random_entry` | The random-entry control — **CONFOUNDED**, see `docs/evaluation.md` |
 | `python -m runtime.diagnostics.zone_shuffle_placebo` | The decisive level-vs-timing test — **⚠️ PROMPT-ONLY** |
+| `python -m runtime.diagnostics.daily_direction_dependence` | The **daily** direction-dependence test (n ≈ 577 days) + the per-leg decomposition. **⛔ NEVER use a monthly regression** (§ 1.1 rule 7) |
 | `python -m runtime.diagnostics.volgate_trade_count` | The trade-count ladder (30-70/day target) |
 | `python -m runtime.sweeps.cached_sweep` | **THE** sweep driver (single + multi-knob grid) |
 | `python -m runtime.sweeps.cost_estimate` | The pre-flight cost estimate + the `--i-know` gate |
@@ -1345,25 +1619,56 @@ Full file map: [`docs/repo_map.md`](docs/repo_map.md).
 | `short_win` | short, gross > 0 |
 | `short_loss` | short, gross ≤ 0 |
 
+> **⚠️ THE PROMOTION CRITERION IS NET PROFIT** (user instruction,
+> 2026-11-04: *"just promote whatever is most profitable. monthly aggs
+> are meaningless for this high freq strat"*). Q1 below tells you
+> whether the book is profitable; Q2 and Q3 are **diagnostics** that
+> explain WHY. Neither `excess` nor the daily direction-dependence
+> regression may **block** a promotion on a positive net.
+>
+> Two reasons, both measured:
+>
+> 1. **The `excess` benchmark is not exchangeable with the execution
+>    model.** The engine books P&L at the **actual SL / TP fill
+>    price**; `passive_hold` is a **close-to-close** hold. The
+>    identity `excess == gap@exit − gap@entry` holds to 1e-15 in
+>    every bucket of every book, so a stop or target bucket's excess
+>    is the **execution-gap differential**, not timing skill. Its sign
+>    flips with book composition (the `sl` bucket: −$42 on `both`,
+>    +$134 on `short`, +$117 on trail OFF). The whole-book and
+>    per-side forms DO hold and are still reported.
+> 2. **Monthly aggregation is n=31 draws** from a high-variance
+>    distribution at ~7 legs/day. The month is a REPORTING dimension
+>    (§ 1.1), never an evaluation boundary.
+
 **Q1 — is there an edge at all?** Compare the per-leg gross EV against
 the **measured** round trip. The report prints `gross_per_leg /
 fee_per_leg` so the comparison is explicit. A gross edge that does not
 cover the round trip is **not** an edge.
 
-**Q2 — is the edge direction-independent?** The **drift / excess**
-decomposition, at the leg level:
+**Q2 — is the edge direction-independent?** The **per-leg passive-hold /
+excess** decomposition:
 
 \[
-\text{drift} = (close_{\text{exit bar}} - close_{\text{entry bar}})
+\text{passive\_hold} = (close_{\text{exit bar}} - close_{\text{entry bar}})
 \cdot \text{direction} \cdot \text{qty}
 \qquad
-\text{excess} = \text{gross} - \text{drift}
+\text{excess} = \text{gross} - \text{passive\_hold}
 \]
 
-`drift` is the directional/beta component — what any position of that
-size and side would have earned by being there. `excess` is the
-timing component. **This is an exact algebraic identity**, not an
-estimate.
+`passive_hold` is what any position of that size and side would have earned
+by merely being there over the same bars. `excess` is what the entries added
+on top of it. **This is an exact algebraic identity**, not an estimate, and
+its standard error uses **n = thousands of legs** — not n = 13..31 months.
+⚠️ Read the criterion note above before using a PER-BUCKET `excess`: for a
+stop or target bucket it is the execution-gap differential, not a timing
+measure.
+
+> **⛔ NEVER regress monthly gross on monthly market return** (§ 1.1
+> rule 7). The sanctioned direction-dependence instrument is
+> `python -m runtime.diagnostics.daily_direction_dependence` — the
+> **daily** aggregation (n ≈ 577 days, corr t = +9.92) plus the
+> per-leg decomposition.
 
 **Q3 — is the loss concentrated?** A strategy whose losses are all the
 same size is a **geometry** problem; one with a fat loss tail is a
@@ -1427,8 +1732,10 @@ assumed. Details in [`docs/promotions.md`](docs/promotions.md).
 | The **1-event** sequence drop set (`structure_seq_drop_set`) | **REMOVED 2026-11-04** — not measured wrong, but **redundant with and contradictory to** the 5-event whitelist: it vetoed 3 of the 8 whitelisted short shapes, including the best one. End-to-end it cost $226 of gross to save $274 of net. See § 3.10.1 |
 | The coarse **polarity** whitelist (bull/bear/mixed buckets) | **DEAD** — held-out kept trades have aggregate t = −2.15 (significantly loss-making). **A coarse polarity bucket does NOT carry the signal — the specific 5-event shape does.** |
 | The sequence flip | **DEAD** — "does NOT generalise, −$8 on held-out slices" |
-| `structure_gate` | **NOT PROMOTED** — improves gross but leaves market correlation untouched |
-| `trade_sides = "long"` | **NOT PROMOTED** — raises market correlation to +0.464 |
+| `structure_gate` | **NOT PROMOTED** — loses **−$1,215 of net** vs the canonical book; its per-leg `excess` stays significantly negative on both sides |
+| `trade_sides = "long"` | **NOT PROMOTED** — a long-only book has no hedge in a sell-off, and its daily market correlation is **higher** (+0.437, t = +10.74) than the two-sided recipe's. ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the rejection is a deliberate **risk** choice, not a measured-worse one |
+| **`trail_sides = "both"`** (the trail on longs) | **SUPERSEDED 2026-11-04** — the trail on the LONG side costs **−$2,178** on the corpus; scoping it to shorts is the only cell that beats the trail-OFF baseline. See § 3.9b |
+| **The trailing stop at ANY setting, unscoped** | **MEASURED, then SCOPED.** The trail's total damage is nearly independent of its tightness (k=2 → −$373; k=4 → −$379; k=8 → −$355) — it is a **geometry** change, not a risk knob, so there was no setting to find. It ships **scoped to shorts only** (`trail_sides='short'`), which is the one scope that beats the trail-OFF baseline. See [`docs/trail_stop.md`](docs/trail_stop.md) |
 | HVN/LVN volume profile | **INERT** — the placebo (shuffled volume) lands INSIDE the real profiles' band. Two blockers stand: the TP is the swing cap (89.0% of legs), and LVN is never read |
 | NB91 rolling p95 TP cap | **SHADOWED** by NB72 on 100% of trade probes — currently measures nothing |
 | `partial_close_pct` / `tp2_mode` / `tp2_nth_hvn_n` / `tp2_swing_cap` | **INERT under the canonical `tp_mode='hvn_single'`** — there is no partial and no runner leg. Live only for the `multi_target` A/B |
@@ -1481,7 +1788,7 @@ invoked** (`disable-model-invocation: true`) — ask for one by name.
 
 | Skill | Use it when |
 |---|---|
-| **`evaluate`** | Judging a run: the ledger, the four buckets, drift/excess, the payoff geometry. **Before any promotion.** |
+| **`evaluate`** | Judging a run: the ledger, the four buckets, the per-leg passive-hold/excess decomposition, the payoff geometry. **Before any promotion.** |
 | **`sweep`** | Sweeping a knob: the one-month default, the `--i-know` gate, the output contract, the cost model |
 | **`results-registry`** | Saving a measurement, looking up a previous one, or diffing a run before/after a bug fix |
 | **`promote`** | Deciding whether a measured change ships, and then changing it in one place |
@@ -1507,7 +1814,7 @@ invoked** (`disable-model-invocation: true`) — ask for one by name.
 
 | Skill | Use it when |
 |---|---|
-| **`evaluate`** | Judging a run: the ledger, the four buckets, drift/excess, the payoff geometry. **Before any promotion.** |
+| **`evaluate`** | Judging a run: the ledger, the four buckets, the per-leg passive-hold/excess decomposition, the payoff geometry. **Before any promotion.** |
 | **`sweep`** | Sweeping a knob: the one-month default, the `--i-know` gate, the output contract, the cost model |
 | **`results-registry`** | Saving a measurement, looking up a previous one, or diffing a run before/after a bug fix |
 | **`promote`** | Deciding whether a measured change ships, and then changing it in one place |

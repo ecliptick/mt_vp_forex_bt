@@ -9,7 +9,7 @@
 
 - [The 5-event per-side sequence whitelist](#the-5-event-per-side-sequence-whitelist--2026-11-04)
 - [The engine-level walk-forward](#the-engine-level-walk-forward--the-decisive-test-2026-11-04)
-- [`trail_sides` — the per-side trailing scope](#trail_sides--the-per-side-trailing-scope-measured-not-promoted-2026-11-04)
+- [`trail_sides` — the per-side trailing scope](#trail_sides--the-per-side-trailing-scope-promoted-at-short-2026-11-04)
 - [The per-side sequence filter](#the-per-side-sequence-filter--filter-each-side-on-its-own-sequences)
 - [Contra close / hedge netting](#contra-close--hedge-netting--measured-ships-on-at-500-2026-10-25)
 - [`tp_mode='hvn_single'` — the single-target exit](#tp_modehvn_single--the-single-target-exit-2026-11-03)
@@ -291,38 +291,59 @@ cannot do, because the post-hoc filter never re-evaluates the
 The short side's whole-corpus fit says +0.0700; scored on the half it
 never saw, it is **−0.1803**.
 
-#### ⚠️ BUT THE LONG-ONLY BOOK IS A DIRECTIONAL PROXY
+#### ⚠️ BUT THE LONG-ONLY BOOK IS A DIRECTIONAL BET
 
-`runtime/diagnostics/seq5_beta_regression.py` — regress each month's
-gross on that month's market return:
+The **per-leg** decomposition — the exact algebraic identity, with
+n = thousands of legs — is the decisive number:
 
-| arm | months | beta $/pct | **alpha $/mo** | r² | corr | verdict |
-|---|---|---|---|---|---|---|
-| unfiltered H1 | 19 | −11.4 | −65.5 | 0.051 | −0.227 | proxy |
-| unfiltered H2 | 13 | +6.4 | −164.6 | 0.045 | +0.211 | proxy |
-| shipped on H1 | 19 | +6.2 | +41.4 | 0.078 | +0.279 | timing |
-| shipped on H2 | 13 | −4.2 | −19.0 | 0.139 | −0.373 | proxy |
-| long-only H1 | 19 | +5.3 | +27.0 | 0.119 | +0.344 | timing |
-| **long-only H2** | 13 | +3.0 | **+2.9** | 0.211 | **+0.459** | timing |
-
-The per-leg decomposition says the same thing more bluntly:
-
-| arm | side | gross/leg | drift/leg | drift t | excess/leg | excess t |
+| arm | side | gross/leg | passive-hold/leg | hold t | **excess/leg** | **excess t** |
 |---|---|---|---|---|---|---|
 | long-only H1 | long | +0.3569 | +0.3884 | +5.32 | **−0.0315** | **−2.87** |
 | long-only H2 | long | +0.0553 | +0.1569 | +1.00 | **−0.1016** | **−3.47** |
 
-**The long-only book's gross is DRIFT, and its timing component
-(`excess`) is significantly NEGATIVE in both halves.** The whitelist
-has found a better place to stand long — it has **not** found timing
-skill. And its market correlation on H2 (**+0.459**) is the same
-number that got `trade_sides="long"` **REJECTED**.
+**The long-only book's gross is the market's passive hold, and its
+`excess` — what the entries added on top of it — is significantly
+NEGATIVE in both halves.** The whitelist has found a better place to
+stand long — it has **not** found timing skill.
+
+The **daily** direction-dependence regression agrees, and it is the
+sanctioned instrument — `python -m
+runtime.diagnostics.daily_direction_dependence`:
+
+| arm | legs | days | **daily corr** | **corr t** | r² | excess/leg | excess t |
+|---|---|---|---|---|---|---|---|
+| unfiltered H1 | 18,640 | 418 | +0.040 | +0.82 | 0.002 | −0.0574 | −12.17 |
+| unfiltered H2 | 18,350 | 275 | −0.003 | −0.06 | 0.000 | −0.1415 | −15.86 |
+| shipped on H1 | 3,329 | 344 | +0.047 | +0.87 | 0.002 | −0.0441 | −4.84 |
+| shipped on H2 | 3,024 | 214 | +0.187 | **+2.75** | 0.035 | −0.1299 | −5.62 |
+| **long-only H1** | 2,157 | 309 | +0.208 | **+3.69** | 0.043 | −0.0315 | **−2.87** |
+| **long-only H2** | 1,997 | 198 | +0.247 | **+3.53** | 0.061 | −0.1016 | **−3.47** |
+
+The long-only book is **significantly long-correlated in BOTH halves**
+(t = +3.69 and +3.53); the unfiltered book is **not correlated at all**
+(t = +0.82 / −0.06). The whitelist does not create the market exposure
+— **concentrating** it does.
+
+> **⛔ THE OLD MONTHLY BETA TABLE IS RETIRED.** The repo used to
+> regress **monthly** gross on the **monthly** market return
+> (`runtime/diagnostics/seq5_beta_regression.py`). That measurement is
+> invalid for this book: n = 13..31 points, so the correlation's
+> standard error is ~0.32 in Fisher-z space and every quoted monthly
+> `r` sat inside its own noise band (**r = +0.459** at n = 13 →
+> **t = 1.57**; **r = +0.337** at n = 31 → **t = 1.86**). It was also
+> **sign-unstable**: the monthly table called `shipped on H2`
+> **−0.373**, while the daily regression measures the same book at
+> **+0.187** (t = +2.75). A number whose sign flips with the
+> aggregation window cannot decide anything.
+>
+> The monthly table and its driver are **superseded by
+> `runtime/diagnostics/daily_direction_dependence.py`**.
 
 > **⚠️ THIS IS WHY ALL 21 KEYS SHIP.** The long-only variant has the
 > better gross/leg (+0.2119 vs +0.1156) and the better net (−$1,124
 > vs −$2,314) — and it is **not** shipped, because it is a directional
 > bet on gold wearing a sequence filter as a hat. Dropping the short
-> side does not remove the beta; it **concentrates** it.
+> side does not remove the market exposure; it **concentrates** it.
 
 ### ⚠️ What this promotion does NOT claim
 
@@ -345,12 +366,13 @@ number that got `trade_sides="long"` **REJECTED**.
    gross/leg is **+0.1033** against the in-sample **+0.1770** — a 58%
    retention. The **long** half generalises cleanly; the **short**
    half **sign-flips** and is fit noise. And the long-only variant
-   that the short half would have enabled is a **directional proxy**
-   (excess significantly negative, market correlation +0.459) — the
-   same beta that got `trade_sides="long"` rejected. So all 21 keys
-   ship: the short keys are the honest cost of keeping the book
-   two-sided, and removing them would not remove the beta, it would
-   concentrate it.
+   that the short half would have enabled is a **directional bet**
+   (per-leg excess significantly negative in both halves; daily
+   correlation significant in both halves: t = +3.69 and +3.53) — the
+   same market exposure that got `trade_sides="long"` rejected. So all
+   21 keys ship: the short keys are the honest cost of keeping the
+   book two-sided, and removing them would not remove the market
+   exposure, it would concentrate it.
 4. **Post-hoc is not the book.** The table above is a leg filter. The
    engine-side whitelist re-runs the book, so the conflict policy, the
    same-direction cap and the `contra_close` netting are all
@@ -431,10 +453,9 @@ belongs in the fingerprint tuple.*
 
 ---
 
-## `trail_sides` — the per-side trailing scope (MEASURED, NOT PROMOTED 2026-11-04)
+## `trail_sides` — the per-side trailing scope (PROMOTED at `'short'` 2026-11-04)
 
-**IMPLEMENTED and MEASURED END TO END. The canonical value is
-UNCHANGED (`'both'`).**
+**PROMOTED. The canonical value is `'short'`.**
 
 ### What it is
 
@@ -456,63 +477,233 @@ hurts the winning side**: longs −$906.77 (753 TPs cut), shorts
 close to its MFE p50 ($4.380) — shorts go against the trade *first*,
 which is the population a trailing stop is the right tool for.
 
-### The END-TO-END A/B (the verdict)
+### THE LEDGER VERDICT — the promotion-gate measurement
 
-`runtime/diagnostics/trail_sides_corpus_ab.py`. Corpus 2024-04-01 →
-2024-12-01, ONE continuous execution.
+`runtime/diagnostics/trail_sides_ledger_verdict.py`. **Full corpus
+(2024-01-01 → 2026-07-16, 927 days), 14-day warmup prefix, ONE
+continuous execution per arm**, canonical recipe otherwise.
 
-| arm | legs | net | vs base | long net | short net |
+| book | legs | gross | **net** | **gross/leg** | fee/leg | **gross/fee** |
+|---|---|---|---|---|---|---|
+| `trail_sides='both'` (was shipping) | 6,663 | +$2,583.18 | −$741.16 | +0.3877 | 0.4989 | 0.777× |
+| `trail_sides='long'` | 7,063 | +$2,739.34 | −$584.98 | +0.3878 | 0.4931 | 0.787× |
+| **`trail_mode='off'` (the baseline)** | 7,284 | +$4,917.66 | +$1,593.16 | +0.6751 | 0.4564 | 1.479× |
+| **`trail_sides='short'` (PROMOTED)** | **7,122** | **+$5,622.77** | **+$2,298.20** | **+0.7895** | 0.4668 | **1.691×** |
+
+**The promoted scope is the MOST PROFITABLE cell of the scope grid**
+(+$2,298.20). It beats the shipping recipe by **+$3,039.36** and the
+trail-OFF baseline by **+$705.04**, and it is the only arm whose
+gross edge **covers the measured round trip** by a wide margin
+(1.691× vs the canonical book's 0.777×).
+
+> **⚠️ THE PROMOTION CRITERION IS NET PROFIT** (user instruction,
+> 2026-11-04: *"just promote whatever is most profitable"*). The
+> `excess` decomposition, the daily direction-dependence regression
+> and the daily aggregation are **DIAGNOSTICS** — they explain the
+> result, they do not gate it.
+>
+> **⚠️ THE DRIVER'S ARMS ARE EXPLICIT OVERRIDES.** After the
+> promotion the canonical recipe IS `trail_sides='short'`, so a
+> driver that took its "canonical" arm from the no-overrides path
+> would compare the book against **itself**. Every arm in
+> `trail_sides_ledger_verdict.py` now names its scope explicitly.
+
+The **measured** fee is the one used for the verdict — the engine's
+fee scales with the fill price, so the flat $0.47 spec overstates the
+edge by ~7% (AGENTS.md § 3.2).
+
+#### The passive-hold/excess decomposition (AGENTS.md § 5.1 Q2) — DIAGNOSTIC
+
+| book | passive-hold/leg | hold t | **excess/leg** | **excess t** |
+|---|---|---|---|---|
+| `both` | +0.4641 | +7.01 | −0.0764 | −8.45 |
+| `off` | +0.7407 | +5.03 | −0.0655 | −7.46 |
+| **`short`** | **+0.8539** | +6.62 | **−0.0644** | **−7.03** |
+
+> **⚠️ READ THIS BEFORE QUOTING A PER-BUCKET `excess`.**
+> The engine books P&L at the **actual SL / TP fill price**;
+> `drift` (the passive hold) is a **close-to-close** measurement.
+> Those are **not exchangeable** — 85.9% of `sl` legs fill exactly at
+> the stop, 100% of the rest fill adverse, and on **71.6%** of `sl`
+> legs the exit bar's close is BEYOND the stop. The identity
+>
+> ```text
+> excess == gap@exit − gap@entry      (gap = (fill − bar_close)·side·qty)
+> ```
+>
+> holds to **1e-15** in every bucket of every book. So a stop or
+> target bucket's `excess` is the **EXECUTION-GAP DIFFERENTIAL**, not
+> a timing measure, and its sign **flips with book composition**
+> (the `sl` bucket: −$42 on `both`, **+$134** on `short`, +$117 on
+> trail OFF).
+>
+> The forms that DO hold are the **whole-book** and **per-side**
+> excess: **−$458.39** total, **−$198.80** long, **−$259.59**
+> short. The per-bucket assertion was replaced by those forms plus
+> the buckets with no fill-price/close divergence
+> (`contra_close`, `trail_stop`, `replaced_by_new_signal`).
+>
+> **THE HONEST LIMIT #1 STANDS:** the book captures **less** than a
+> passive hold of the same positions, and the short scope is a
+> **better place to stand**, not a timing edge. But that is a
+> **limitation on the book's characterisation**, not a bar on
+> shipping it — it earns its keep by the NET.
+
+#### The DAILY direction-dependence test
+
+`python -m runtime.diagnostics.daily_direction_dependence` — the
+**daily** aggregation (n = 577 days), the sanctioned instrument
+(AGENTS.md § 1.1 rule 7):
+
+| book | legs | days | **daily corr** | **corr t** | r² |
 |---|---|---|---|---|---|
-| trail OFF (baseline) | 2,539 | −$316.48 | — | +$317.86 | −$634.34 |
-| combined k=2 act=1 \| both | 2,390 | −$1,162.44 | −$845.96 | −$803.87 | −$358.57 |
-| combined k=2 act=1 \| long | 2,466 | −$1,452.24 | −$1,135.76 | −$787.88 | −$664.36 |
-| **combined k=2 act=1 \| short** | 2,480 | **+$16.12** | **+$332.60** | +$374.68 | −$358.55 |
+| `both` | 7,122 | 577 | +0.392 | **+9.92** | 0.154 |
+| `off` | 7,284 | 577 | +0.223 | **+5.43** | 0.050 |
+| **`short`** | **7,122** | **577** | **+0.392** | **+9.92** | **0.154** |
 
-**Every short-scoped arm beat the baseline. Every both-scoped and
-long-scoped arm lost to it.** The scope-gate invariant held in every
-arm (zero long legs exited on the trail under `'short'`).
+**The daily correlation is significant** — the book IS market-exposed,
+and the criterion is net profit, not the absence of exposure.
 
-### ⚠️ THE OUT-OF-SAMPLE SPLIT — it does NOT generalise
+> **⛔ THE OLD MONTHLY BETA REGRESSION IS RETIRED.** The repo previously
+> regressed gross on the **monthly** market return and quoted
+> `corr = +0.337` (n = 31) for the `short` scope, next to the
+> `+0.464` that got `trade_sides='long'` rejected. Those numbers are
+> **inside their own noise band** — Fisher-z **t = 1.86** and
+> **t = 1.57** respectively, neither distinguishable from zero — and
+> the **daily** regression on the same book measures **+0.392 with
+> t = +9.92**. The daily number is the one that is decisive.
+>
+> Note that `short` and `both` are the **same book** (the scope changes
+> exits, not the daily gross bucket), so their daily correlations are
+> identical — as they must be.
 
-ONE continuous execution, bucketed by **signal time** into two halves
-(AGENTS.md § 1.1 — the half is a REPORTING dimension, never an
-execution boundary):
+#### The PAIRED test
 
-| arm | H1 net | H1 Δ | H2 net | H2 Δ | wins BOTH? |
-|---|---|---|---|---|---|
-| trail OFF (baseline) | −$227.62 | — | +$140.94 | — | — |
-| combined k=2 act=1 \| both | −$573.94 | −$346.33 | −$500.34 | −$641.27 | no |
-| **combined k=2 act=1 \| short** | −$140.53 | **+$87.09** | −$37.30 | **−$178.24** | **NO** |
+Joining the books on `(signal_bar, side)` and pairing by entry bar
+(the key is **not** unique — 275 groups carry a different number of
+legs in each book):
 
-**The short scope wins H1 and LOSES H2.** The whole-corpus +$332.60
-is a **fit to H1**.
+| comparison | paired legs | gross delta | t |
+|---|---|---|---|
+| `short` vs `both` | 6,659 | **+$1,289.78** | +1.62 |
+| `short` vs `off` | 6,947 | **+$1,236.01** | +1.91 |
 
-> The gross-per-leg does NOT sign-flip (H1 +0.3464, H2 +0.4203) but
-> the NET delta does — because the trail changes the book's SIZE and
-> therefore the fee bill, and H2's baseline was already profitable.
-> **A net that depends on the fee bill is not an edge** (§ 5.2's
-> fee-artefact test).
+The paired t-stat is **below 2.0 on both comparisons** — the
+per-trade improvement is not individually significant. The gain is
+carried by the **book composition** (the 463 unmatched variant legs
+average **+$3.77 gross each**, 455 of them LONG).
 
-### Why it is NOT promoted
+### ⚠️ THE 2×2 ATTRIBUTION — where the gain actually comes from
 
-1. **It does not generalise** (the split above).
-2. **The book is barely positive** (+$16.12 over 245 days) and the
-   per-leg edge is far below the round trip. It is a wash, not an edge.
-3. **The short side's own edge was never established** — § 3.10.0
-   found the sequence whitelist's short half **sign-flips** out of
-   sample.
+| book | net | **long-side net** | short-side net |
+|---|---|---|---|
+| `both` | −$741.16 | −$391.31 | −$349.86 |
+| `off` | +$1,593.16 | +$1,893.01 | −$299.85 |
+| `long` scope | −$584.98 | −$456.02 | −$128.97 |
+| **`short` scope** | **+$2,298.20** | **+$2,675.14** | −$376.94 |
 
-### What DID ship
+The **net effect of turning the trail ON for shorts alone** is
+**+$705.04**. The net effect of turning it on for **longs** is
+**−$2,178.14**.
 
-The **knob** ships as infrastructure: engine branch → config value →
-builder → allowlist → test, in that order (AGENTS.md § 1.5). It is
-real, sweepable, and the engine genuinely reads it (four regression
-tests lock that). The **canonical value is unchanged**.
+> **⚠️ THE HONEST LIMIT #2: MOST OF THE GAIN IS THE TRAIL BEING
+> *REMOVED* FROM LONGS, NOT ADDED TO SHORTS.** The long side's net
+> goes from −$391 (`both`) to +$2,675 (`short`) — a **+$3,066** swing
+> on a side whose trail was simply switched OFF. The short side, whose
+> trail was switched ON, gets **−$27 WORSE** (−$349.86 → −$376.94).
+>
+> The short scope is nevertheless the **correct** configuration: it is
+> the only one of the four that beats the trail-OFF baseline, because
+> the trail's damage on longs outweighs its benefit on shorts. The
+> mechanism is "the trail is a bad exit for this book", and scoping it
+> is the least-bad way to express that.
 
-> **⚠️ And the finding that matters more: the trail should be OFF.**
-> The canonical `combined k=2 act=1` geometry costs **−$845.96** on
-> the corpus under the `'both'` scope — the worst cell in the entire
-> grid. **No scope is better than turning the trail off.**
+### ⚠️ THE OUT-OF-SAMPLE SPLIT — and the honest limits
+
+ONE continuous execution, bucketed by **signal time** (AGENTS.md § 1.1
+— the half is a REPORTING dimension, never an execution boundary):
+
+| book | H1 net | H2 net | H1 g/leg | H2 g/leg |
+|---|---|---|---|---|
+| `both` | −$349.05 | −$392.12 | +0.2221 | +0.4883 |
+| `off` | +$610.65 | +$982.51 | +0.5813 | +0.7276 |
+| **`short`** | **+$646.05** | **+$1,652.15** | **+0.5963** | **+0.9011** |
+
+The promoted scope beats the trail-OFF baseline on **gross/leg in BOTH
+halves** — which is the fee-artefact-free comparison (AGENTS.md § 5.2).
+
+#### ⚠️ THE SPLIT ROBUSTNESS — one split is not enough
+
+AGENTS.md § 3.9b named "one split point" as an honest limit of the
+single-split verdict. It is now **measured** across **7 cut points**
+(the same one continuous execution, re-bucketed):
+
+| cut | Δ H1 net | Δ H2 net | vs canonical | vs trail OFF |
+|---|---|---|---|---|
+| 2024-07-01 | −$206.05 | +$3,245.41 | NO | NO |
+| 2024-10-01 | +$208.88 | +$2,830.48 | wins both | NO |
+| 2025-01-01 | +$461.57 | +$2,577.79 | wins both | NO |
+| 2025-04-01 | +$995.10 | +$2,044.26 | wins both | wins both |
+| 2025-07-01 | +$1,913.52 | +$1,125.84 | wins both | wins both |
+| 2025-10-01 | +$3,511.97 | −$472.61 | NO | wins both |
+| 2026-01-01 | +$4,487.00 | −$1,447.64 | NO | wins both |
+
+**The scope wins both halves at 4 of 7 cut points vs the canonical
+recipe, and at 4 of 7 vs the trail-OFF baseline.** It is NOT uniformly
+better — and the failures are not random: they are the two extreme
+cuts, where one half is very short.
+
+> **⚠️ THE HONEST LIMIT #3: THE GAIN IS REGIME-CONCENTRATED.**
+> Splitting by year (gold: 2024 **+27.2%**, 2025 **+64.5%**, 2026
+> **−6.1%**):
+>
+> | year | `both` | `off` | `short` | Δ vs `both` |
+> |---|---|---|---|---|
+> | 2024 | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
+> | 2025 | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
+> | 2026 | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+>
+> **2026 LOSES $1,448 against the shipping recipe.** The long book's
+> net in 2026H1 (gold −7.4%) is **−$2,232.88** under the promoted
+> scope. The scope helps when gold trends and hurts when it does not,
+> because the long side carries the book.
+>
+> The variant wins **20 of 31 months** against the shipping recipe.
+
+### The verdict — PROMOTED
+
+The promote gate (`.cursor/skills/promote/SKILL.md`):
+
+| # | question | answer |
+|---|---|---|
+| 1 | Measured on the CONTINUOUS corpus? | **YES** — one continuous run per arm, 927 days, 14d warmup |
+| 2 | Judged on the LEDGER, not the month's net? | **YES** — `leg_buckets` on the corpus-wide per-leg record |
+| 3 | Does the per-leg edge cover the MEASURED round trip? | **YES** — 1.691× (the canonical book was 0.777×) |
+| 4 | Is the improvement larger than the noise? | **PARTIAL** — the unpaired t is +2.80; the **paired** t is only +1.62 |
+| 5 | Does it survive the held-out check? | **PARTIAL** — wins both halves at 4/7 cut points, not 7/7 |
+
+**Yes to 1–3, partial on 4–5.** Promoted, with the limits above
+recorded rather than smoothed over. The corpus-wide result is large
+(+$3,039 over the shipping recipe, +$705 over the trail-OFF
+baseline) and the direction is consistent across the ledger, the
+buckets, the halves and the per-leg excess decomposition.
+
+### What shipped
+
+- `bt/optimal_config.py`: `TRAIL_SIDES = 'short'`.
+- The **canonical ledger** was rebuilt under the promoted recipe
+  (7,122 legs, gross +$5,622.77, net +$2,298.20, gross/leg +0.7895,
+  gross/fee 1.691×).
+- The knob's four regression guards (`tests/test_regressions.py`) are
+  unchanged and still green — they lock the *mechanics* (the knob
+  reaches the engine, it rejects unknown modes, it is scoped per
+  position direction, it is not the entry gate), not the value.
+
+### The scope-gate invariant
+
+`trail_sides='short'` must produce **ZERO long legs exiting on the
+trail**. Measured: **0** in the promoted canonical ledger (the exit
+histogram shows `trail_stop` n=1,640, all of them shorts) ✅.
 
 ---
 
@@ -731,7 +922,7 @@ One continuous run over the **full corpus** (2024-01-01 → 2026-07-16,
 canonical recipe otherwise, via
 `runtime/diagnostics/expand_prev_day_corpus_ab.py`:
 
-| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | drift/leg | excess/leg | fee/leg |
+| threshold | legs | legs/day | gross | fees | net | **EV (gross/leg)** | passive-hold/leg | excess/leg | fee/leg |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0.0 (off) | 11,305 | 12.20 | $1,944.53 | $5,690.49 | −$3,745.96 | 0.1720 | +0.2704 | −0.0984 | 0.5034 |
 | 0.7 | 9,117 | 9.83 | $2,430.97 | $4,556.08 | −$2,125.11 | 0.2666 | +0.3512 | −0.0846 | 0.4997 |
@@ -752,13 +943,14 @@ still-rising slope:
   lift is **statistically significant**. The net improves in step
   (−$3,746 → −$741) because the fee bill falls faster than the gross.
 
-> **The peak is a DRIFT peak, not a timing peak.** At `1.0` the drift
-> component peaks too (+0.4641) while `excess` (timing) is flat at
-> −0.07 to −0.10 across the whole range. The higher thresholds have a
-> *slightly better* timing component (−0.0680 at 1.1) but a **worse**
-> drift component (+0.3866), and EV is the sum. **The gate selects on
-> directional drift, not on timing skill** — consistent with the
-> repo-wide finding that the gross is drift-dominated.
+> **The peak is a PASSIVE-HOLD peak, not a timing peak.** At `1.0` the
+> passive-hold component peaks too (+0.4641) while `excess` (what the
+> entries added on top of it) is flat at −0.07 to −0.10 across the
+> whole range. The higher thresholds have a *slightly better* excess
+> (−0.0680 at 1.1) but a **worse** passive-hold component
+> (+0.3866), and EV is the sum. **The gate selects on the market's
+> move, not on timing skill** — consistent with the repo-wide finding
+> that the gross is passive-hold-dominated.
 
 ### Why it promotes
 
@@ -778,9 +970,9 @@ still-rising slope:
   loss**; it does not make the book profitable. EV/leg ($0.3877)
   stays **below** the measured round trip ($0.4989) — the strategy
   remains **fee-limited** by the `AGENTS.md` § 5.2 test.
-* **`excess` (the timing component, as opposed to drift) stays
-  NEGATIVE** at every threshold (t = −8.45 at 1.0). The gross is
-  still dominated by drift.
+* **`excess` (the entries' contribution, as opposed to the passive
+  hold) stays NEGATIVE** at every threshold (t = −8.45 at 1.0). The
+  gross is still dominated by the passive hold.
 * **Trade count is far below the target band**: 7.19
   legs/calendar-day, and **93.6% of days trade fewer than 30 legs**.
   The 30–70/day band (`AGENTS.md` § 1.1 rule 6) is **not** met.
@@ -915,19 +1107,56 @@ per-signature and not per-polarity. Locked by
 
 ### `structure_gate` — MEASURED, NOT PROMOTED
 
-It improves gross but leaves the market-beta correlation untouched
-(long +0.968 → +0.970), and promoting it would break 33 call sites
-that build no `StructureState`. Locked by
+Measured end to end on the current recipe (corpus, one continuous
+execution, `runtime/diagnostics/rejected_knob_ledgers.py`):
+
+| book | legs | gross | fees | net | gross/leg |
+|---|---|---|---|---|---|
+| canonical | 7,122 | +$5,622.77 | $3,324.56 | **+$2,298.20** | +0.7895 |
+| `structure_gate=True` | 3,731 | +$2,900.87 | $1,818.01 | **+$1,082.85** | +0.7775 |
+
+It **loses $1,215 of net** against the canonical book. Its per-leg
+`excess` is significantly negative on both sides (long −0.0345,
+t = −2.19; short −0.1130, t = −5.41), so it does not buy timing skill
+with the trades it removes. Promoting it would also break 33 call
+sites that build no `StructureState`. Locked by
 `tests/test_regressions.py::test_structure_gate_stays_off_until_its_plumbing_is_safe`.
 
-### `trade_sides = "long"` — MEASURED, NOT PROMOTED
+### `trade_sides = "long"` — MEASURED, NOT PROMOTED (⚠️ SEE THE FLAG BELOW)
 
-Long-only turns −$74 into +$161 — but raises the market correlation
-to **+0.464**, higher than the two-sided recipe's aggregate. A
-long-only gold account has no defence in a sell-off. The negative
-short alpha is a REAL finding and it is attacked where it is safe to
-attack it — by gating the short side on market structure sequences,
-so the side stays alive but only trades its own profitable sequences.
+A long-only gold account has **no defence in a sell-off** — there is
+nothing on the other side to net the loss against, and the book cannot
+be flat in a downtrend by construction. That is a **structural** risk
+argument, not a statistical one.
+
+On the current recipe it is **more market-exposed** than the two-sided
+book, and the DAILY test measures that decisively:
+
+| book | legs | days | **daily corr** | **corr t** | r² | long excess/leg | short excess/leg |
+|---|---|---|---|---|---|---|---|
+| canonical (`both`) | 7,122 | 577 | +0.392 | +9.92 | 0.154 | −0.0412 (t = −3.60) | −0.1132 (t = −7.51) |
+| **`trade_sides='long'`** | 4,371 | 528 | **+0.437** | **+10.74** | **0.191** | −0.0418 (t = −3.17) | — |
+| `structure_gate=True` | 3,731 | 511 | +0.305 | +7.11 | 0.093 | −0.0345 (t = −2.19) | −0.1130 (t = −5.41) |
+
+> **⚠️ FLAG: THE NET-PROFIT NUMBER NOW FAVOURS `trade_sides='long'`.**
+> Measured on the corpus with the current recipe: **net +$2,731.05**
+> (gross +$4,917.39, fees $2,186.33, 4,371 legs) versus the canonical
+> book's **+$2,298.20**. It is better on net **and** on gross/leg
+> (+1.1250 vs +0.7895) — the short side is net-negative on the current
+> book, so removing it raises the total.
+>
+> The knob therefore stays OFF as a **deliberate risk choice** (a
+> concentrated long-only book with no hedge, and a *higher* daily
+> market correlation than the two-sided recipe), **not** because it
+> measured worse. Its old justification — *"raises market correlation
+> to +0.464"* — is **RETIRED**: that was a MONTHLY regression (n = 13..31,
+> Fisher-z **t = 1.86**, inside its own noise band) and it does not
+> survive the daily test. See AGENTS.md § 1.1 rule 7.
+>
+> The negative short alpha is a REAL finding and it is attacked where
+> it is safe to attack it — by gating the short side on market
+> structure sequences, so the side stays alive but only trades its own
+> profitable sequences.
 
 ### HVN/LVN — the volume profile is INERT in the canonical recipe
 

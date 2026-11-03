@@ -1,0 +1,378 @@
+{
+  "schema": "results-run/1",
+  "run_id": "sl_ceiling_paired_1m-47f3df251ccf4ae2__92d9ee5__20261103T230144Z",
+  "kind": "sl_ceiling_paired_1m",
+  "config_fp": "47f3df251ccf4ae2",
+  "ts_utc": "2026-11-03T23:01:44Z",
+  "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+  "commit_short": "92d9ee5",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "62acccc364395d39",
+  "params": {
+    "knobs": [
+      "vol_state_min_range_norm",
+      "sl_max_usd"
+    ],
+    "grid_range_norm": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "grid_sl_max_usd": [
+      2.5,
+      4.0,
+      6.0,
+      8.0,
+      12.0,
+      15.0,
+      20.0,
+      30.0
+    ],
+    "window": [
+      "2025-01-01",
+      "2025-02-01"
+    ],
+    "scope": "one_month_screen",
+    "criterion": "gross_per_leg"
+  },
+  "summary": {
+    "n_cells": 40,
+    "canonical_cell": "rn=1.0|sl=15.0",
+    "canonical_gross_per_leg": 0.385747,
+    "canonical_net": -10.83,
+    "canonical_trades_per_day": 4.233,
+    "best_cell": "rn=0.75|sl=12.0",
+    "best_gross_per_leg": 0.420849,
+    "best_trades_per_day": 5.778,
+    "note": "ONE MONTH (2025-01) SCREEN ONLY -- a screen, not a verdict. The corpus re-measurement of this pair is still OWED."
+  },
+  "path": "results/runs/sl_ceiling_paired_1m-47f3df251ccf4ae2__92d9ee5__20261103T230144Z.json",
+  "parent_fp": "47f3df251ccf4ae2",
+  "payload": {
+    "grid": {
+      "rn=0.0|sl=2.5": {
+        "n_trades": 208,
+        "gross_per_leg": 0.070213,
+        "net_per_leg": -0.401726,
+        "net": -83.56,
+        "hit_rate": 0.524,
+        "trades_per_day": 7.024
+      },
+      "rn=0.0|sl=4.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.09124,
+        "net_per_leg": -0.3807,
+        "net": -79.19,
+        "hit_rate": 0.5769,
+        "trades_per_day": 7.022
+      },
+      "rn=0.0|sl=6.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.002213,
+        "net_per_leg": -0.469734,
+        "net": -97.7,
+        "hit_rate": 0.5865,
+        "trades_per_day": 7.013
+      },
+      "rn=0.0|sl=8.0": {
+        "n_trades": 208,
+        "gross_per_leg": -0.058705,
+        "net_per_leg": -0.530656,
+        "net": -110.38,
+        "hit_rate": 0.5913,
+        "trades_per_day": 7.013
+      },
+      "rn=0.0|sl=12.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.122259,
+        "net_per_leg": -0.349674,
+        "net": -72.73,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.0|sl=15.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.098797,
+        "net_per_leg": -0.373134,
+        "net": -77.61,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.0|sl=20.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.172644,
+        "net_per_leg": -0.299294,
+        "net": -62.25,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.0|sl=30.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.172644,
+        "net_per_leg": -0.299294,
+        "net": -62.25,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=2.5": {
+        "n_trades": 208,
+        "gross_per_leg": 0.070213,
+        "net_per_leg": -0.401726,
+        "net": -83.56,
+        "hit_rate": 0.524,
+        "trades_per_day": 7.024
+      },
+      "rn=0.25|sl=4.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.09124,
+        "net_per_leg": -0.3807,
+        "net": -79.19,
+        "hit_rate": 0.5769,
+        "trades_per_day": 7.022
+      },
+      "rn=0.25|sl=6.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.002213,
+        "net_per_leg": -0.469734,
+        "net": -97.7,
+        "hit_rate": 0.5865,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=8.0": {
+        "n_trades": 208,
+        "gross_per_leg": -0.058705,
+        "net_per_leg": -0.530656,
+        "net": -110.38,
+        "hit_rate": 0.5913,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=12.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.122259,
+        "net_per_leg": -0.349674,
+        "net": -72.73,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=15.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.098797,
+        "net_per_leg": -0.373134,
+        "net": -77.61,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=20.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.172644,
+        "net_per_leg": -0.299294,
+        "net": -62.25,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.25|sl=30.0": {
+        "n_trades": 208,
+        "gross_per_leg": 0.172644,
+        "net_per_leg": -0.299294,
+        "net": -62.25,
+        "hit_rate": 0.6154,
+        "trades_per_day": 7.013
+      },
+      "rn=0.5|sl=2.5": {
+        "n_trades": 203,
+        "gross_per_leg": 0.056674,
+        "net_per_leg": -0.415363,
+        "net": -84.32,
+        "hit_rate": 0.532,
+        "trades_per_day": 6.856
+      },
+      "rn=0.5|sl=4.0": {
+        "n_trades": 203,
+        "gross_per_leg": 0.078218,
+        "net_per_leg": -0.39382,
+        "net": -79.95,
+        "hit_rate": 0.5862,
+        "trades_per_day": 6.853
+      },
+      "rn=0.5|sl=6.0": {
+        "n_trades": 203,
+        "gross_per_leg": -0.017753,
+        "net_per_leg": -0.489799,
+        "net": -99.43,
+        "hit_rate": 0.5961,
+        "trades_per_day": 6.845
+      },
+      "rn=0.5|sl=8.0": {
+        "n_trades": 203,
+        "gross_per_leg": -0.090023,
+        "net_per_leg": -0.562074,
+        "net": -114.1,
+        "hit_rate": 0.601,
+        "trades_per_day": 6.845
+      },
+      "rn=0.5|sl=12.0": {
+        "n_trades": 203,
+        "gross_per_leg": 0.139297,
+        "net_per_leg": -0.332733,
+        "net": -67.54,
+        "hit_rate": 0.6305,
+        "trades_per_day": 6.845
+      },
+      "rn=0.5|sl=15.0": {
+        "n_trades": 203,
+        "gross_per_leg": 0.115258,
+        "net_per_leg": -0.35677,
+        "net": -72.42,
+        "hit_rate": 0.6305,
+        "trades_per_day": 6.845
+      },
+      "rn=0.5|sl=20.0": {
+        "n_trades": 203,
+        "gross_per_leg": 0.190923,
+        "net_per_leg": -0.281111,
+        "net": -57.07,
+        "hit_rate": 0.6305,
+        "trades_per_day": 6.845
+      },
+      "rn=0.5|sl=30.0": {
+        "n_trades": 203,
+        "gross_per_leg": 0.190923,
+        "net_per_leg": -0.281111,
+        "net": -57.07,
+        "hit_rate": 0.6305,
+        "trades_per_day": 6.845
+      },
+      "rn=0.75|sl=2.5": {
+        "n_trades": 171,
+        "gross_per_leg": 0.204105,
+        "net_per_leg": -0.268429,
+        "net": -45.9,
+        "hit_rate": 0.5614,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=4.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.2182,
+        "net_per_leg": -0.254337,
+        "net": -43.49,
+        "hit_rate": 0.614,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=6.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.132827,
+        "net_per_leg": -0.339721,
+        "net": -58.09,
+        "hit_rate": 0.6199,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=8.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.086422,
+        "net_per_leg": -0.386134,
+        "net": -66.03,
+        "hit_rate": 0.6257,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=12.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.420849,
+        "net_per_leg": -0.051687,
+        "net": -8.84,
+        "hit_rate": 0.6608,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=15.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.420849,
+        "net_per_leg": -0.051687,
+        "net": -8.84,
+        "hit_rate": 0.6608,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=20.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.420849,
+        "net_per_leg": -0.051687,
+        "net": -8.84,
+        "hit_rate": 0.6608,
+        "trades_per_day": 5.778
+      },
+      "rn=0.75|sl=30.0": {
+        "n_trades": 171,
+        "gross_per_leg": 0.420849,
+        "net_per_leg": -0.051687,
+        "net": -8.84,
+        "hit_rate": 0.6608,
+        "trades_per_day": 5.778
+      },
+      "rn=1.0|sl=2.5": {
+        "n_trades": 125,
+        "gross_per_leg": 0.291917,
+        "net_per_leg": -0.180449,
+        "net": -22.56,
+        "hit_rate": 0.576,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=4.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.249355,
+        "net_per_leg": -0.223004,
+        "net": -27.88,
+        "hit_rate": 0.624,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=6.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.137709,
+        "net_per_leg": -0.334658,
+        "net": -41.83,
+        "hit_rate": 0.624,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=8.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.106227,
+        "net_per_leg": -0.366148,
+        "net": -45.77,
+        "hit_rate": 0.632,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=12.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.385747,
+        "net_per_leg": -0.086616,
+        "net": -10.83,
+        "hit_rate": 0.664,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=15.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.385747,
+        "net_per_leg": -0.086616,
+        "net": -10.83,
+        "hit_rate": 0.664,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=20.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.385747,
+        "net_per_leg": -0.086616,
+        "net": -10.83,
+        "hit_rate": 0.664,
+        "trades_per_day": 4.233
+      },
+      "rn=1.0|sl=30.0": {
+        "n_trades": 125,
+        "gross_per_leg": 0.385747,
+        "net_per_leg": -0.086616,
+        "net": -10.83,
+        "hit_rate": 0.664,
+        "trades_per_day": 4.233
+      }
+    }
+  }
+}

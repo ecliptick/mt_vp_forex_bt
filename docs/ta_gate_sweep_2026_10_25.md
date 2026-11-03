@@ -1,5 +1,17 @@
 # TA gate sweep — momentum/trend + mean-reversion gates (2026-10-25)
 
+> **⚠️ ARCHIVED MEASUREMENT (2026-11-04).** This document is kept as
+> the record of what was measured on 2026-10-25, on a recipe that has
+> since changed materially (the trailing stop became canonical,
+> `tp_mode` moved to `hvn_single`, the SL ceiling moved, the
+> prev-day vol gate went live, and the 21-key sequence whitelist
+> shipped). Its numbers are **not comparable** to the current book.
+>
+> Its vocabulary is also historical: "drift" here means the ledger's
+> `drift_usd` field — the **close-to-close passive hold**. See
+> AGENTS.md § 1.1 rule 7 for why a monthly aggregation is never a
+> verdict, and § 5.1 Q2 for the current framing.
+
 **Question asked:** *"try some momentum and trend following TAs. do a
 quick sweep on the MR TAs, where trades must align with the TA's
 signal (gate open) and upon signal change close open trades. tell me

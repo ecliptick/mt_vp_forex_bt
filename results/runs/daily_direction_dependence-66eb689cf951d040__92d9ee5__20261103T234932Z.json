@@ -1,0 +1,446 @@
+{
+  "schema": "results-run/1",
+  "run_id": "daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234932Z",
+  "kind": "daily_direction_dependence",
+  "config_fp": "66eb689cf951d040",
+  "ts_utc": "2026-11-03T23:49:32Z",
+  "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+  "commit_short": "92d9ee5",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "aggregation": "daily",
+    "window": "2024-01-01..2026-07-16",
+    "books": [
+      "canonical",
+      "trail_short",
+      "trail_off",
+      "seqwlf_unfiltered_H1",
+      "seqwlf_unfiltered_H2",
+      "seqwlf_shipped_H1",
+      "seqwlf_shipped_H2",
+      "seqwlf_longonly_H1",
+      "seqwlf_longonly_H2"
+    ],
+    "regression": "daily gross ~ alpha + beta * daily market return %"
+  },
+  "summary": {
+    "canonical": {
+      "n_legs": 7122,
+      "n_days": 577,
+      "corr": 0.3919,
+      "corr_t": 9.9193,
+      "r2": 0.1536,
+      "excess_per_leg": -0.064363,
+      "excess_t": -7.0262,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "trail_short": {
+      "n_legs": 7122,
+      "n_days": 577,
+      "corr": 0.3919,
+      "corr_t": 9.9193,
+      "r2": 0.1536,
+      "excess_per_leg": -0.064363,
+      "excess_t": -7.0262,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "trail_off": {
+      "n_legs": 7284,
+      "n_days": 577,
+      "corr": 0.2229,
+      "corr_t": 5.4314,
+      "r2": 0.0497,
+      "excess_per_leg": -0.06555,
+      "excess_t": -7.4562,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_unfiltered_H1": {
+      "n_legs": 18640,
+      "n_days": 418,
+      "corr": 0.0401,
+      "corr_t": 0.8178,
+      "r2": 0.0016,
+      "excess_per_leg": -0.057409,
+      "excess_t": -12.1714,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_unfiltered_H2": {
+      "n_legs": 18350,
+      "n_days": 275,
+      "corr": -0.0035,
+      "corr_t": -0.0573,
+      "r2": 0.0,
+      "excess_per_leg": -0.141466,
+      "excess_t": -15.8563,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_shipped_H1": {
+      "n_legs": 3329,
+      "n_days": 344,
+      "corr": 0.0472,
+      "corr_t": 0.8729,
+      "r2": 0.0022,
+      "excess_per_leg": -0.044094,
+      "excess_t": -4.8375,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_shipped_H2": {
+      "n_legs": 3024,
+      "n_days": 214,
+      "corr": 0.1868,
+      "corr_t": 2.7455,
+      "r2": 0.0349,
+      "excess_per_leg": -0.129919,
+      "excess_t": -5.6201,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_longonly_H1": {
+      "n_legs": 2157,
+      "n_days": 309,
+      "corr": 0.2081,
+      "corr_t": 3.6935,
+      "r2": 0.0433,
+      "excess_per_leg": -0.031505,
+      "excess_t": -2.8681,
+      "verdict": "MARKET-DRIVEN"
+    },
+    "seqwlf_longonly_H2": {
+      "n_legs": 1997,
+      "n_days": 198,
+      "corr": 0.2473,
+      "corr_t": 3.5271,
+      "r2": 0.0612,
+      "excess_per_leg": -0.101595,
+      "excess_t": -3.4702,
+      "verdict": "MARKET-DRIVEN"
+    }
+  },
+  "path": "results/runs/daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234932Z.json",
+  "parent_fp": "66eb689cf951d040",
+  "payload": {
+    "window": {
+      "start": "2024-01-01",
+      "end": "2026-07-16"
+    },
+    "aggregation": "daily",
+    "why_not_monthly": "n=13..31 monthly points give a correlation standard error of ~0.32 in Fisher-z space, so the repo's quoted monthly market correlations (r=+0.459, +0.337) were inside their own noise band (t=1.57, 1.86). A high-frequency book must be aggregated at the frequency it trades at.",
+    "books": {
+      "canonical": {
+        "n_legs": 7122,
+        "n_days": 577,
+        "daily_regression": {
+          "n_days": 577,
+          "beta_usd_per_pct": 21.085253486103994,
+          "alpha_usd_per_day": 8.707266016271195,
+          "r2": 0.15357368395278426,
+          "corr": 0.39188478402814275,
+          "corr_t": 9.91933040448429
+        },
+        "per_leg": {
+          "gross_per_leg": 0.7894924498570857,
+          "drift_per_leg": 0.8538555436962295,
+          "drift_t": 6.615373087742241,
+          "excess_per_leg": -0.06436309383914379,
+          "excess_t": -7.0262445506805165
+        },
+        "per_leg_long": {
+          "legs": 4829,
+          "gross_per_leg": 1.0067243306423137,
+          "drift_per_leg": 1.0478925965771821,
+          "drift_t": 5.751920992405786,
+          "excess_per_leg": -0.04116826593486843,
+          "excess_t": -3.597534418134609
+        },
+        "per_leg_short": {
+          "legs": 2293,
+          "gross_per_leg": 0.33200760366787213,
+          "drift_per_leg": 0.44521841837476367,
+          "drift_t": 3.8433646948001843,
+          "excess_per_leg": -0.1132108147068916,
+          "excess_t": -7.509278887831183
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "trail_short": {
+        "n_legs": 7122,
+        "n_days": 577,
+        "daily_regression": {
+          "n_days": 577,
+          "beta_usd_per_pct": 21.085253486103994,
+          "alpha_usd_per_day": 8.707266016271195,
+          "r2": 0.15357368395278426,
+          "corr": 0.39188478402814275,
+          "corr_t": 9.91933040448429
+        },
+        "per_leg": {
+          "gross_per_leg": 0.7894924498570857,
+          "drift_per_leg": 0.8538555436962295,
+          "drift_t": 6.615373087742241,
+          "excess_per_leg": -0.06436309383914379,
+          "excess_t": -7.0262445506805165
+        },
+        "per_leg_long": {
+          "legs": 4829,
+          "gross_per_leg": 1.0067243306423137,
+          "drift_per_leg": 1.0478925965771821,
+          "drift_t": 5.751920992405786,
+          "excess_per_leg": -0.04116826593486843,
+          "excess_t": -3.597534418134609
+        },
+        "per_leg_short": {
+          "legs": 2293,
+          "gross_per_leg": 0.33200760366787213,
+          "drift_per_leg": 0.44521841837476367,
+          "drift_t": 3.8433646948001843,
+          "excess_per_leg": -0.1132108147068916,
+          "excess_t": -7.509278887831183
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "trail_off": {
+        "n_legs": 7284,
+        "n_days": 577,
+        "daily_regression": {
+          "n_days": 577,
+          "beta_usd_per_pct": 12.394324058380043,
+          "alpha_usd_per_day": 7.912907544081091,
+          "r2": 0.04968271968541593,
+          "corr": 0.22289620832444834,
+          "corr_t": 5.431386013121005
+        },
+        "per_leg": {
+          "gross_per_leg": 0.6751316841058609,
+          "drift_per_leg": 0.740681394161076,
+          "drift_t": 5.030162882037399,
+          "excess_per_leg": -0.06554971005521518,
+          "excess_t": -7.456195825193037
+        },
+        "per_leg_long": {
+          "legs": 4746,
+          "gross_per_leg": 0.8595199616795622,
+          "drift_per_leg": 0.9025654693868468,
+          "drift_t": 5.066723255870718,
+          "excess_per_leg": -0.043045507707284554,
+          "excess_t": -3.8814227161798684
+        },
+        "per_leg_short": {
+          "legs": 2538,
+          "gross_per_leg": 0.33032996410397486,
+          "drift_per_leg": 0.4379620005355804,
+          "drift_t": 1.6845052183680207,
+          "excess_per_leg": -0.10763203643160552,
+          "excess_t": -7.507611832620028
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_unfiltered_H1": {
+        "n_legs": 18640,
+        "n_days": 418,
+        "daily_regression": {
+          "n_days": 418,
+          "beta_usd_per_pct": 1.2561410875430319,
+          "alpha_usd_per_day": -4.388839092464666,
+          "r2": 0.0016098185612786198,
+          "corr": 0.04012254430215662,
+          "corr_t": 0.8177973924134421
+        },
+        "per_leg": {
+          "gross_per_leg": -0.09612885210171138,
+          "drift_per_leg": -0.03871962625178902,
+          "drift_t": -1.3981783232534395,
+          "excess_per_leg": -0.05740922584992236,
+          "excess_t": -12.171405090665544
+        },
+        "per_leg_long": {
+          "legs": 9377,
+          "gross_per_leg": 0.006496032558117774,
+          "drift_per_leg": 0.05953522804024065,
+          "drift_t": 1.564499116711136,
+          "excess_per_leg": -0.05303919548212289,
+          "excess_t": -6.6146394369278045
+        },
+        "per_leg_short": {
+          "legs": 9263,
+          "gross_per_leg": -0.20001674408651304,
+          "drift_per_leg": -0.13818370578286557,
+          "drift_t": -3.4336866424353216,
+          "excess_per_leg": -0.06183303830364747,
+          "excess_t": -12.568994501553082
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_unfiltered_H2": {
+        "n_legs": 18350,
+        "n_days": 275,
+        "daily_regression": {
+          "n_days": 275,
+          "beta_usd_per_pct": -0.10097028292780796,
+          "alpha_usd_per_day": -7.207288658589897,
+          "r2": 1.2050213644587693e-05,
+          "corr": -0.003471341764320301,
+          "corr_t": -0.05725106499090274
+        },
+        "per_leg": {
+          "gross_per_leg": -0.10803702146235587,
+          "drift_per_leg": 0.03342855404178106,
+          "drift_t": 0.6842253854038058,
+          "excess_per_leg": -0.14146557550413694,
+          "excess_t": -15.856271663480669
+        },
+        "per_leg_long": {
+          "legs": 9550,
+          "gross_per_leg": 0.014051584720537422,
+          "drift_per_leg": 0.13240247469459493,
+          "drift_t": 2.0075665154341658,
+          "excess_per_leg": -0.1183508899740575,
+          "excess_t": -8.638073198194183
+        },
+        "per_leg_short": {
+          "legs": 8800,
+          "gross_per_leg": -0.24053090658129123,
+          "drift_per_leg": -0.0739806439393976,
+          "drift_t": -1.0206289272346583,
+          "excess_per_leg": -0.16655026264189363,
+          "excess_t": -14.902425626057298
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_shipped_H1": {
+        "n_legs": 3329,
+        "n_days": 344,
+        "daily_regression": {
+          "n_days": 344,
+          "beta_usd_per_pct": 0.6784883451020971,
+          "alpha_usd_per_day": 3.104320035220171,
+          "r2": 0.002231156326295114,
+          "corr": 0.047235117511184414,
+          "corr_t": 0.8729020135475268
+        },
+        "per_leg": {
+          "gross_per_leg": 0.32599500301546364,
+          "drift_per_leg": 0.37008876539501845,
+          "drift_t": 6.1341254039652915,
+          "excess_per_leg": -0.0440937623795548,
+          "excess_t": -4.837533493586674
+        },
+        "per_leg_long": {
+          "legs": 2157,
+          "gross_per_leg": 0.3615683584102796,
+          "drift_per_leg": 0.3925136764024181,
+          "drift_t": 5.380918822102719,
+          "excess_per_leg": -0.030945317992138423,
+          "excess_t": -2.8502319582180093
+        },
+        "per_leg_short": {
+          "legs": 1172,
+          "gross_per_leg": 0.2605242456889977,
+          "drift_per_leg": 0.3288169795221848,
+          "drift_t": 3.086201915118483,
+          "excess_per_leg": -0.06829273383318717,
+          "excess_t": -4.15246773584526
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_shipped_H2": {
+        "n_legs": 3024,
+        "n_days": 214,
+        "daily_regression": {
+          "n_days": 214,
+          "beta_usd_per_pct": 2.9350111341488154,
+          "alpha_usd_per_day": -1.5253599698367675,
+          "r2": 0.03489132164775777,
+          "corr": 0.18679218840132972,
+          "corr_t": 2.7455478569687592
+        },
+        "per_leg": {
+          "gross_per_leg": -0.11591343707514244,
+          "drift_per_leg": 0.014005621693126075,
+          "drift_t": 0.11164573856856762,
+          "excess_per_leg": -0.1299190587682685,
+          "excess_t": -5.6200991266361635
+        },
+        "per_leg_long": {
+          "legs": 2000,
+          "gross_per_leg": 0.06351792125550886,
+          "drift_per_leg": 0.16654400000000918,
+          "drift_t": 1.0704215919352134,
+          "excess_per_leg": -0.10302607874450034,
+          "excess_t": -3.53797720041608
+        },
+        "per_leg_short": {
+          "legs": 1024,
+          "gross_per_leg": -0.46636530881469573,
+          "drift_per_leg": -0.283920898437505,
+          "drift_t": -1.341240806904703,
+          "excess_per_leg": -0.18244441037719072,
+          "excess_t": -4.836472017013768
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_longonly_H1": {
+        "n_legs": 2157,
+        "n_days": 309,
+        "daily_regression": {
+          "n_days": 309,
+          "beta_usd_per_pct": 2.6061303513239626,
+          "alpha_usd_per_day": 2.2923391768209385,
+          "r2": 0.043289208702517734,
+          "corr": 0.2080605890180019,
+          "corr_t": 3.693499678920564
+        },
+        "per_leg": {
+          "gross_per_leg": 0.35689334682010776,
+          "drift_per_leg": 0.3883982382939343,
+          "drift_t": 5.31635673789646,
+          "excess_per_leg": -0.03150489147382653,
+          "excess_t": -2.868111194726965
+        },
+        "per_leg_long": {
+          "legs": 2157,
+          "gross_per_leg": 0.35689334682010776,
+          "drift_per_leg": 0.3883982382939343,
+          "drift_t": 5.31635673789646,
+          "excess_per_leg": -0.03150489147382653,
+          "excess_t": -2.868111194726965
+        },
+        "per_leg_short": {
+          "legs": 0
+        },
+        "verdict": "MARKET-DRIVEN"
+      },
+      "seqwlf_longonly_H2": {
+        "n_legs": 1997,
+        "n_days": 198,
+        "daily_regression": {
+          "n_days": 198,
+          "beta_usd_per_pct": 3.0094203442416005,
+          "alpha_usd_per_day": 0.7261575186535008,
+          "r2": 0.06117814884017392,
+          "corr": 0.24734216955499863,
+          "corr_t": 3.5270848606724794
+        },
+        "per_leg": {
+          "gross_per_leg": 0.05526825613955658,
+          "drift_per_leg": 0.15686279419129745,
+          "drift_t": 1.0046422659176293,
+          "excess_per_leg": -0.10159453805174087,
+          "excess_t": -3.470158969482564
+        },
+        "per_leg_long": {
+          "legs": 1997,
+          "gross_per_leg": 0.05526825613955658,
+          "drift_per_leg": 0.15686279419129745,
+          "drift_t": 1.0046422659176293,
+          "excess_per_leg": -0.10159453805174087,
+          "excess_t": -3.470158969482564
+        },
+        "per_leg_short": {
+          "legs": 0
+        },
+        "verdict": "MARKET-DRIVEN"
+      }
+    }
+  }
+}

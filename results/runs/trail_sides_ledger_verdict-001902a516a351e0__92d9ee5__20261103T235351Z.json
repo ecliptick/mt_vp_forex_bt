@@ -1,0 +1,677 @@
+{
+  "schema": "results-run/1",
+  "run_id": "trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235351Z",
+  "kind": "trail_sides_ledger_verdict",
+  "config_fp": "001902a516a351e0",
+  "ts_utc": "2026-11-03T23:53:51Z",
+  "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+  "commit_short": "92d9ee5",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "f47dd77c4338cd2a",
+  "params": {
+    "knob": "trail_sides",
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "split_at": "2025-04-01",
+    "variant_overrides": {
+      "trail_sides": "'short'"
+    },
+    "scope_both_overrides": {
+      "trail_sides": "'both'"
+    },
+    "scope_long_overrides": {
+      "trail_sides": "'long'"
+    },
+    "baseline_overrides": {
+      "trail_mode": "'off'"
+    },
+    "splits": [
+      "2024-07-01",
+      "2024-10-01",
+      "2025-01-01",
+      "2025-04-01",
+      "2025-07-01",
+      "2025-10-01",
+      "2026-01-01"
+    ],
+    "criterion": "net_profit"
+  },
+  "summary": {
+    "criterion": "net_profit",
+    "most_profitable_arm": "scope 'short'",
+    "scope_short_legs": 7122,
+    "scope_short_net": 2298.2009,
+    "scope_short_gross": 5622.7652,
+    "scope_short_gross_per_leg": 0.789492,
+    "scope_short_gross_over_fee": 1.6913,
+    "scope_both_legs": 6663,
+    "scope_both_net": -741.1608,
+    "scope_both_gross": 2583.1827,
+    "scope_long_legs": 7063,
+    "scope_long_net": -584.985,
+    "scope_long_gross": 2739.3381,
+    "delta_net_vs_scope_both": 3039.36,
+    "variant_covers_round_trip": true,
+    "paired_n": 6659,
+    "paired_delta_total": 1289.78,
+    "paired_t": 1.6203,
+    "welch_t": 2.8015,
+    "trail_off_legs": 7284,
+    "trail_off_net": 1593.1562,
+    "trail_off_gross_per_leg": 0.675132,
+    "trail_off_gross_over_fee": 1.4792,
+    "delta_net_vs_trail_off": 705.04,
+    "delta_gross_per_leg_vs_trail_off": 0.11436,
+    "n_split_points": 7,
+    "n_wins_both_vs_scope_both": 4,
+    "n_wins_both_gross_per_leg": 4,
+    "wins_both_net": true,
+    "wins_both_gross_per_leg": true
+  },
+  "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235351Z.json",
+  "parent_fp": "001902a516a351e0",
+  "payload": {
+    "window": {
+      "start": "2024-01-01",
+      "end": "2026-07-16",
+      "split_at": "2025-04-01"
+    },
+    "criterion": "net_profit",
+    "scope_both": {
+      "legs": 6663,
+      "gross": 2583.1827,
+      "fees": 3324.3435,
+      "net": -741.1608,
+      "gross_per_leg": 0.387691,
+      "fee_per_leg": 0.498926,
+      "gross_per_leg_over_fee": 0.7771,
+      "hit_rate": 0.826655,
+      "drift_total": 3092.192,
+      "excess_total": -509.0093,
+      "excess_per_leg": -0.076393,
+      "excess_t": -8.4484,
+      "drift_per_leg": 0.464084,
+      "drift_t": 7.0111,
+      "timing_edge_per_leg": -0.076393,
+      "per_side": {
+        "long": {
+          "n": 4374,
+          "gross_per_leg": 0.410335,
+          "fee_per_leg": 0.499797,
+          "gross_per_leg_over_fee": 0.821,
+          "hit_rate": 0.835848,
+          "edge_pp": 4.1096,
+          "payoff_ratio": 0.2583,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.055471,
+          "excess_t": -5.0008,
+          "drift_per_leg": 0.465806,
+          "drift_t": 5.9371
+        },
+        "short": {
+          "n": 2289,
+          "gross_per_leg": 0.344419,
+          "fee_per_leg": 0.497262,
+          "gross_per_leg_over_fee": 0.6926,
+          "hit_rate": 0.809087,
+          "edge_pp": 3.4927,
+          "payoff_ratio": 0.2917,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.116374,
+          "excess_t": -7.472,
+          "drift_per_leg": 0.460793,
+          "drift_t": 3.8065
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 184,
+          "gross": 1690.1162
+        },
+        "sl": {
+          "n": 1081,
+          "gross": -8987.3555
+        },
+        "contra_close": {
+          "n": 74,
+          "gross": 292.4595
+        },
+        "trail_stop": {
+          "n": 5324,
+          "gross": 9587.9625
+        }
+      },
+      "verdict": "no edge: gross $0.3877/leg does not cover the $0.4989 measured round trip (0.78x)"
+    },
+    "scope_long": {
+      "legs": 7063,
+      "gross": 2739.3381,
+      "fees": 3324.3231,
+      "net": -584.985,
+      "gross_per_leg": 0.387843,
+      "fee_per_leg": 0.470667,
+      "gross_per_leg_over_fee": 0.824,
+      "hit_rate": 0.695455,
+      "drift_total": 3284.0796,
+      "excess_total": -544.7415,
+      "excess_per_leg": -0.077126,
+      "excess_t": -9.0837,
+      "drift_per_leg": 0.46497,
+      "drift_t": 4.2874,
+      "timing_edge_per_leg": -0.077126,
+      "per_side": {
+        "long": {
+          "n": 4395,
+          "gross_per_leg": 0.393649,
+          "fee_per_leg": 0.497408,
+          "gross_per_leg_over_fee": 0.7914,
+          "hit_rate": 0.808191,
+          "edge_pp": 4.6715,
+          "payoff_ratio": 0.3132,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.064266,
+          "excess_t": -5.9786,
+          "drift_per_leg": 0.457915,
+          "drift_t": 6.036
+        },
+        "short": {
+          "n": 2668,
+          "gross_per_leg": 0.378279,
+          "fee_per_leg": 0.426618,
+          "gross_per_leg_over_fee": 0.8867,
+          "hit_rate": 0.509745,
+          "edge_pp": 1.974,
+          "payoff_ratio": 1.0408,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.098311,
+          "excess_t": -7.1048,
+          "drift_per_leg": 0.47659,
+          "drift_t": 1.8436
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 969,
+          "gross": 11933.3309
+        },
+        "sl": {
+          "n": 1936,
+          "gross": -17548.3865
+        },
+        "contra_close": {
+          "n": 770,
+          "gross": 2366.8872
+        },
+        "trail_stop": {
+          "n": 3388,
+          "gross": 5987.5066
+        }
+      },
+      "verdict": "no edge: gross $0.3878/leg does not cover the $0.4707 measured round trip (0.82x)"
+    },
+    "variant": {
+      "legs": 7122,
+      "gross": 5622.7652,
+      "fees": 3324.5643,
+      "net": 2298.2009,
+      "gross_per_leg": 0.789492,
+      "fee_per_leg": 0.466802,
+      "gross_per_leg_over_fee": 1.6913,
+      "hit_rate": 0.597023,
+      "drift_total": 6081.1592,
+      "excess_total": -458.394,
+      "excess_per_leg": -0.064363,
+      "excess_t": -7.0262,
+      "drift_per_leg": 0.853856,
+      "drift_t": 6.6154,
+      "timing_edge_per_leg": -0.064363,
+      "per_side": {
+        "long": {
+          "n": 4829,
+          "gross_per_leg": 1.006724,
+          "fee_per_leg": 0.45275,
+          "gross_per_leg_over_fee": 2.2236,
+          "hit_rate": 0.519776,
+          "edge_pp": 5.0757,
+          "payoff_ratio": 1.1321,
+          "diagnosis": "profitable",
+          "excess_per_leg": -0.041168,
+          "excess_t": -3.5975,
+          "drift_per_leg": 1.047893,
+          "drift_t": 5.7519
+        },
+        "short": {
+          "n": 2293,
+          "gross_per_leg": 0.332008,
+          "fee_per_leg": 0.496395,
+          "gross_per_leg_over_fee": 0.6688,
+          "hit_rate": 0.759703,
+          "edge_pp": 4.2909,
+          "payoff_ratio": 0.3951,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.113211,
+          "excess_t": -7.5093,
+          "drift_per_leg": 0.445218,
+          "drift_t": 3.8434
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 2006,
+          "gross": 24748.135
+        },
+        "sl": {
+          "n": 2665,
+          "gross": -24509.9655
+        },
+        "contra_close": {
+          "n": 811,
+          "gross": 2393.4284
+        },
+        "trail_stop": {
+          "n": 1640,
+          "gross": 2991.1674
+        }
+      },
+      "verdict": "gross edge $0.7895/leg covers the $0.4668 measured round trip (1.69x)"
+    },
+    "trail_off": {
+      "legs": 7284,
+      "gross": 4917.6592,
+      "fees": 3324.503,
+      "net": 1593.1562,
+      "gross_per_leg": 0.675132,
+      "fee_per_leg": 0.456412,
+      "gross_per_leg_over_fee": 1.4792,
+      "hit_rate": 0.482976,
+      "drift_total": 5395.1233,
+      "excess_total": -477.4641,
+      "excess_per_leg": -0.06555,
+      "excess_t": -7.4562,
+      "drift_per_leg": 0.740681,
+      "drift_t": 5.0302,
+      "timing_edge_per_leg": -0.06555,
+      "per_side": {
+        "long": {
+          "n": 4746,
+          "gross_per_leg": 0.85952,
+          "fee_per_leg": 0.460656,
+          "gross_per_leg_over_fee": 1.8659,
+          "hit_rate": 0.492415,
+          "edge_pp": 4.4456,
+          "payoff_ratio": 1.2323,
+          "diagnosis": "profitable",
+          "excess_per_leg": -0.043046,
+          "excess_t": -3.8814,
+          "drift_per_leg": 0.902565,
+          "drift_t": 5.0667
+        },
+        "short": {
+          "n": 2538,
+          "gross_per_leg": 0.33033,
+          "fee_per_leg": 0.448474,
+          "gross_per_leg_over_fee": 0.7366,
+          "hit_rate": 0.465327,
+          "edge_pp": 1.7599,
+          "payoff_ratio": 1.2335,
+          "diagnosis": "fee-limited",
+          "excess_per_leg": -0.107632,
+          "excess_t": -7.5076,
+          "drift_per_leg": 0.437962,
+          "drift_t": 1.6845
+        }
+      },
+      "exit_breakdown": {
+        "tp": {
+          "n": 2695,
+          "gross": 32966.2768
+        },
+        "sl": {
+          "n": 3412,
+          "gross": -31617.7584
+        },
+        "contra_close": {
+          "n": 1177,
+          "gross": 3569.1408
+        }
+      },
+      "verdict": "gross edge $0.6751/leg covers the $0.4564 measured round trip (1.48x)"
+    },
+    "paired": {
+      "n": 6659,
+      "diff_total": 1289.7752822194525,
+      "diff_mean": 0.19368903472284915,
+      "t": 1.620265040021754,
+      "n_better": 1950,
+      "n_worse": 1801,
+      "n_same": 2908
+    },
+    "welch": {
+      "diff": 0.4018018101079605,
+      "se": 0.14342386095196774,
+      "t": 2.8014990493284992,
+      "mean_a": 0.38769063974912515,
+      "mean_b": 0.7894924498570857
+    },
+    "join": {
+      "n_common": 6561,
+      "n_only_canonical": 0,
+      "n_only_variant": 0,
+      "n_paired": 6659,
+      "n_ambiguous_groups": 275,
+      "n_unmatched_canonical": 4,
+      "n_unmatched_variant": 463
+    },
+    "halves": {
+      "scope_both": {
+        "H1": {
+          "n": 2518,
+          "gross": 559.27,
+          "fees": 908.3157,
+          "net": -349.0458,
+          "gross_per_leg": 0.222109,
+          "fee_per_leg": 0.360729,
+          "gross_per_leg_over_fee": 0.6157,
+          "excess_per_leg": -0.029767,
+          "excess_t": -4.5293,
+          "drift_per_leg": 0.251876,
+          "drift_t": 4.1815
+        },
+        "H2": {
+          "n": 4145,
+          "gross": 2023.9128,
+          "fees": 2416.0278,
+          "net": -392.115,
+          "gross_per_leg": 0.488278,
+          "fee_per_leg": 0.582878,
+          "gross_per_leg_over_fee": 0.8377,
+          "excess_per_leg": -0.104718,
+          "excess_t": -7.5019,
+          "drift_per_leg": 0.592996,
+          "drift_t": 5.9379
+        }
+      },
+      "variant": {
+        "H1": {
+          "n": 2607,
+          "gross": 1554.4401,
+          "fees": 908.3872,
+          "net": 646.0529,
+          "gross_per_leg": 0.596256,
+          "fee_per_leg": 0.348442,
+          "gross_per_leg_over_fee": 1.7112,
+          "excess_per_leg": -0.028553,
+          "excess_t": -3.8066,
+          "drift_per_leg": 0.62481,
+          "drift_t": 4.676
+        },
+        "H2": {
+          "n": 4515,
+          "gross": 4068.3252,
+          "fees": 2416.1771,
+          "net": 1652.148,
+          "gross_per_leg": 0.901069,
+          "fee_per_leg": 0.535144,
+          "gross_per_leg_over_fee": 1.6838,
+          "excess_per_leg": -0.08504,
+          "excess_t": -6.1728,
+          "drift_per_leg": 0.986109,
+          "drift_t": 5.2342
+        }
+      }
+    },
+    "wins_both": {
+      "net": true,
+      "gross_per_leg": true
+    },
+    "beta_regression": {
+      "scope_both": {
+        "n_months": 31,
+        "beta_usd_per_pct": 0.3283703741515835,
+        "alpha_usd_per_month": 82.5530745464387,
+        "r2": 0.00025934793823190194,
+        "corr": 0.016104283226268307,
+        "verdict": "timing"
+      },
+      "variant": {
+        "n_months": 31,
+        "beta_usd_per_pct": 22.942329773228067,
+        "alpha_usd_per_month": 127.20442130075992,
+        "r2": 0.1137587606466034,
+        "corr": 0.33728142647736087,
+        "verdict": "timing"
+      }
+    },
+    "split_robustness": {
+      "2024-07-01": {
+        "canonical": {
+          "H1": -243.52620176404434,
+          "H1_gross_per_leg": 0.03662994149988525,
+          "H2": -497.6345668824051,
+          "H2_gross_per_leg": 0.43971755694615183
+        },
+        "variant": {
+          "H1": -449.57519466153906,
+          "H1_gross_per_leg": -0.19859235014094428,
+          "H2": 2747.776096650153,
+          "H2_gross_per_leg": 0.9286125105968371
+        },
+        "trail_off": {
+          "H1": -400.67551672055765,
+          "H1_gross_per_leg": -0.14297450836990877,
+          "H2": 1993.8317108571791,
+          "H2_gross_per_leg": 0.7874057423706853
+        },
+        "delta": {
+          "H1": -206.0489928974947,
+          "H2": 3245.410663532558,
+          "H1_gross_per_leg": -0.23522229164082953,
+          "H2_gross_per_leg": 0.4888949536506853
+        },
+        "wins_both_net": false,
+        "wins_both_gross_per_leg": false
+      },
+      "2024-10-01": {
+        "canonical": {
+          "H1": -287.09383515266074,
+          "H1_gross_per_leg": 0.13498848536078412,
+          "H2": -454.06693349378793,
+          "H2_gross_per_leg": 0.4578560701526377
+        },
+        "variant": {
+          "H1": -78.21364076610041,
+          "H1_gross_per_leg": 0.26585122866824956,
+          "H2": 2376.4145427547146,
+          "H2_gross_per_leg": 0.9316917530936899
+        },
+        "trail_off": {
+          "H1": 49.198618056665964,
+          "H1_gross_per_leg": 0.35472953445149763,
+          "H2": 1543.9575760799562,
+          "H2_gross_per_leg": 0.7581537795824194
+        },
+        "delta": {
+          "H1": 208.88019438656033,
+          "H2": 2830.4814762485025,
+          "H1_gross_per_leg": 0.13086274330746545,
+          "H2_gross_per_leg": 0.4738356829410522
+        },
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "2025-01-01": {
+        "canonical": {
+          "H1": -325.5501683148932,
+          "H1_gross_per_leg": 0.17414063871974933,
+          "H2": -415.61060033155627,
+          "H2_gross_per_leg": 0.4735060199229327
+        },
+        "variant": {
+          "H1": 136.02002113544916,
+          "H1_gross_per_leg": 0.40010746891903537,
+          "H2": 2162.180880853164,
+          "H2_gross_per_leg": 0.939955597056235
+        },
+        "trail_off": {
+          "H1": 209.989337352397,
+          "H1_gross_per_leg": 0.4391263503504164,
+          "H2": 1383.1668567842262,
+          "H2_gross_per_leg": 0.7630500079864929
+        },
+        "delta": {
+          "H1": 461.57018945034235,
+          "H2": 2577.7914811847204,
+          "H1_gross_per_leg": 0.22596683019928604,
+          "H2_gross_per_leg": 0.4664495771333023
+        },
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "2025-04-01": {
+        "canonical": {
+          "H1": -349.0457556679886,
+          "H1_gross_per_leg": 0.22210880022495408,
+          "H2": -392.1150129784603,
+          "H2_gross_per_leg": 0.4882781118653767
+        },
+        "variant": {
+          "H1": 646.0528539380266,
+          "H1_gross_per_leg": 0.5962562605604064,
+          "H2": 1652.1480480505875,
+          "H2_gross_per_leg": 0.9010686947067963
+        },
+        "trail_off": {
+          "H1": 610.6481467492861,
+          "H1_gross_per_leg": 0.5813309024018759,
+          "H2": 982.5080473873372,
+          "H2_gross_per_leg": 0.7276046968638386
+        },
+        "delta": {
+          "H1": 995.0986096060152,
+          "H2": 2044.2630610290478,
+          "H1_gross_per_leg": 0.3741474603354523,
+          "H2_gross_per_leg": 0.4127905828414196
+        },
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "2025-07-01": {
+        "canonical": {
+          "H1": -198.75093272593472,
+          "H1_gross_per_leg": 0.3265242434753264,
+          "H2": -542.4098359205143,
+          "H2_gross_per_leg": 0.4477111891703371
+        },
+        "variant": {
+          "H1": 1714.7715709777892,
+          "H1_gross_per_leg": 0.8595395918507593,
+          "H2": 583.4293310108242,
+          "H2_gross_per_leg": 0.7225610785945968
+        },
+        "trail_off": {
+          "H1": 1699.8400373497068,
+          "H1_gross_per_leg": 0.8474485669879929,
+          "H2": -106.6838432130844,
+          "H2_gross_per_leg": 0.514692423055477
+        },
+        "delta": {
+          "H1": 1913.522503703724,
+          "H2": 1125.8391669313385,
+          "H1_gross_per_leg": 0.533015348375433,
+          "H2_gross_per_leg": 0.27484988942425975
+        },
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "2025-10-01": {
+        "canonical": {
+          "H1": -289.1153307136674,
+          "H1_gross_per_leg": 0.33406235203412715,
+          "H2": -452.04543793278185,
+          "H2_gross_per_leg": 0.4684456845068731
+        },
+        "variant": {
+          "H1": 3222.852748794684,
+          "H1_gross_per_leg": 1.139790644625963,
+          "H2": -924.6518468060708,
+          "H2_gross_per_leg": 0.26960447680456645
+        },
+        "trail_off": {
+          "H1": 3149.6318001509585,
+          "H1_gross_per_leg": 1.119682512696419,
+          "H2": -1556.4756060143363,
+          "H2_gross_per_leg": 0.046750691803899236
+        },
+        "delta": {
+          "H1": 3511.9680795083514,
+          "H2": -472.60640887328896,
+          "H1_gross_per_leg": 0.8057282925918358,
+          "H2_gross_per_leg": -0.19884120770230662
+        },
+        "wins_both_net": false,
+        "wins_both_gross_per_leg": false
+      },
+      "2026-01-01": {
+        "canonical": {
+          "H1": -518.5645748429424,
+          "H1_gross_per_leg": 0.33298768910692034,
+          "H2": -222.5961938035066,
+          "H2_gross_per_leg": 0.535705019545747
+        },
+        "variant": {
+          "H1": 3968.4394730723698,
+          "H1_gross_per_leg": 1.1806138173452392,
+          "H2": -1670.238571083757,
+          "H2_gross_per_leg": -0.24861469945857298
+        },
+        "trail_off": {
+          "H1": 3549.6256231794378,
+          "H1_gross_per_leg": 1.091634810176468,
+          "H2": -1956.4694290428156,
+          "H2_gross_per_leg": -0.3718522956114246
+        },
+        "delta": {
+          "H1": 4487.004047915312,
+          "H2": -1447.6423772802505,
+          "H1_gross_per_leg": 0.8476261282383188,
+          "H2_gross_per_leg": -0.78431971900432
+        },
+        "wins_both_net": false,
+        "wins_both_gross_per_leg": false
+      },
+      "_summary": {
+        "n_splits": 7,
+        "n_wins_both_net": 4,
+        "n_wins_both_gross_per_leg": 4
+      }
+    },
+    "grid_ranked_by_net": [
+      {
+        "arm": "scope 'short'",
+        "net": 2298.2009,
+        "gross": 5622.7652,
+        "legs": 7122
+      },
+      {
+        "arm": "trail OFF",
+        "net": 1593.1562,
+        "gross": 4917.6592,
+        "legs": 7284
+      },
+      {
+        "arm": "scope 'long'",
+        "net": -584.985,
+        "gross": 2739.3381,
+        "legs": 7063
+      },
+      {
+        "arm": "scope 'both'",
+        "net": -741.1608,
+        "gross": 2583.1827,
+        "legs": 6663
+      }
+    ],
+    "most_profitable_arm": "scope 'short'"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schema": "results-index/1",
-  "updated_utc": "2026-11-03T22:50:37Z",
+  "updated_utc": "2026-11-03T23:57:08Z",
   "runs": [
     {
       "run_id": "sweep_cell-a07a61116b961bd3__d558402__20261102T221448Z",
@@ -13068,6 +13068,2908 @@
       },
       "path": "results/runs/leg_ledger-7001e276e44d3370__9de2d94__20261103T225037Z.json",
       "parent_fp": "7001e276e44d3370"
+    },
+    {
+      "run_id": "leg_ledger-64e7add63c34ab5f__92d9ee5__20261103T225403Z",
+      "kind": "leg_ledger",
+      "config_fp": "64e7add63c34ab5f",
+      "ts_utc": "2026-11-03T22:54:03Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f77c7a3064fa11cc",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_sides": "'short'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7122,
+        "gross": 5622.765228,
+        "fees": 3324.564326,
+        "net": 2298.200902,
+        "gross_per_leg": 0.789492,
+        "fee_per_leg": 0.466802,
+        "drift": 6081.159182,
+        "excess": -458.393954,
+        "trades_per_day": 7.6828
+      },
+      "path": "results/runs/leg_ledger-64e7add63c34ab5f__92d9ee5__20261103T225403Z.json",
+      "parent_fp": "64e7add63c34ab5f"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225403Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "3df39553b61b89f2",
+      "ts_utc": "2026-11-03T22:54:03Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "62acccc364395d39",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "criterion": "gross_per_leg vs measured_fee"
+      },
+      "summary": {
+        "canonical_legs": 6663,
+        "variant_legs": 7122,
+        "canonical_net": -741.1608,
+        "variant_net": 2298.2009,
+        "delta_net": 3039.36,
+        "canonical_gross_per_leg": 0.387691,
+        "variant_gross_per_leg": 0.789492,
+        "canonical_gross_over_fee": 0.7771,
+        "variant_gross_over_fee": 1.6913,
+        "variant_covers_round_trip": true,
+        "canonical_excess_per_leg": -0.076393,
+        "variant_excess_per_leg": -0.064363,
+        "canonical_excess_t": -8.4484,
+        "variant_excess_t": -7.0262,
+        "paired_n": 6561,
+        "paired_delta_total": 1223.9,
+        "paired_t": 1.5499,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225403Z.json",
+      "parent_fp": "3df39553b61b89f2"
+    },
+    {
+      "run_id": "sweep_cell-f510429d2591c147__92d9ee5__20261103T225635Z",
+      "kind": "sweep_cell",
+      "config_fp": "f510429d2591c147",
+      "ts_utc": "2026-11-03T22:56:35Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 2.5
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 2.5
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5240384615384616,
+        "gross": 14.604288647454268,
+        "net": -83.55909971836932,
+        "fees": 98.1633883658236,
+        "gross_per_leg": 0.070213,
+        "profit_factor": 0.49405542225085614,
+        "trades_per_day": 7.024439665382261,
+        "max_drawdown_usd": 84.85421823953052,
+        "wall_secs": 1.9
+      },
+      "path": "results/runs/sweep_cell-f510429d2591c147__92d9ee5__20261103T225635Z.json",
+      "parent_fp": "f510429d2591c147"
+    },
+    {
+      "run_id": "sweep_cell-b2cd40d1ca78bd30__92d9ee5__20261103T225637Z",
+      "kind": "sweep_cell",
+      "config_fp": "b2cd40d1ca78bd30",
+      "ts_utc": "2026-11-03T22:56:37Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 4
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 4
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5769230769230769,
+        "gross": 18.977853647453685,
+        "net": -79.18565934057548,
+        "fees": 98.16351298802917,
+        "gross_per_leg": 0.09124,
+        "profit_factor": 0.5227345508861513,
+        "trades_per_day": 7.021711542188409,
+        "max_drawdown_usd": 86.0465359114406,
+        "wall_secs": 1.97
+      },
+      "path": "results/runs/sweep_cell-b2cd40d1ca78bd30__92d9ee5__20261103T225637Z.json",
+      "parent_fp": "b2cd40d1ca78bd30"
+    },
+    {
+      "run_id": "sweep_cell-554726a5bad54e70__92d9ee5__20261103T225639Z",
+      "kind": "sweep_cell",
+      "config_fp": "554726a5bad54e70",
+      "ts_utc": "2026-11-03T22:56:39Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 6
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 6
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5865384615384616,
+        "gross": 0.4602036474552733,
+        "net": -97.7047112236886,
+        "fees": 98.16491487114388,
+        "gross_per_leg": 0.002213,
+        "profit_factor": 0.47351315307331693,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 108.18778010711853,
+        "wall_secs": 1.97
+      },
+      "path": "results/runs/sweep_cell-554726a5bad54e70__92d9ee5__20261103T225639Z.json",
+      "parent_fp": "554726a5bad54e70"
+    },
+    {
+      "run_id": "sweep_cell-534a3796ca833d3d__92d9ee5__20261103T225641Z",
+      "kind": "sweep_cell",
+      "config_fp": "534a3796ca833d3d",
+      "ts_utc": "2026-11-03T22:56:41Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 8
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 8
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5913461538461539,
+        "gross": -12.210646352544245,
+        "net": -110.37635876950257,
+        "fees": 98.16571241695833,
+        "gross_per_leg": -0.058705,
+        "profit_factor": 0.44372739216318713,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 125.54469024738994,
+        "wall_secs": 1.98
+      },
+      "path": "results/runs/sweep_cell-534a3796ca833d3d__92d9ee5__20261103T225641Z.json",
+      "parent_fp": "534a3796ca833d3d"
+    },
+    {
+      "run_id": "sweep_cell-35286b1d9f8da26c__92d9ee5__20261103T225643Z",
+      "kind": "sweep_cell",
+      "config_fp": "35286b1d9f8da26c",
+      "ts_utc": "2026-11-03T22:56:43Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 12
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 12
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 25.42985364745573,
+        "net": -72.73224510375107,
+        "fees": 98.1620987512068,
+        "gross_per_leg": 0.122259,
+        "profit_factor": 0.5637319762315566,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 95.78212394065768,
+        "wall_secs": 2.09
+      },
+      "path": "results/runs/sweep_cell-35286b1d9f8da26c__92d9ee5__20261103T225643Z.json",
+      "parent_fp": "35286b1d9f8da26c"
+    },
+    {
+      "run_id": "sweep_cell-9bbca578306bbe3c__92d9ee5__20261103T225646Z",
+      "kind": "sweep_cell",
+      "config_fp": "9bbca578306bbe3c",
+      "ts_utc": "2026-11-03T22:56:46Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 15
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 15
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 20.549853647447435,
+        "net": -77.611821299939,
+        "fees": 98.16167494738643,
+        "gross_per_leg": 0.098797,
+        "profit_factor": 0.5477012848691589,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 100.66170013684561,
+        "wall_secs": 2.06
+      },
+      "path": "results/runs/sweep_cell-9bbca578306bbe3c__92d9ee5__20261103T225646Z.json",
+      "parent_fp": "9bbca578306bbe3c"
+    },
+    {
+      "run_id": "sweep_cell-8f66916d323aca7f__92d9ee5__20261103T225648Z",
+      "kind": "sweep_cell",
+      "config_fp": "8f66916d323aca7f",
+      "ts_utc": "2026-11-03T22:56:48Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 20
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 20
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 35.90985364744756,
+        "net": -62.25315523983249,
+        "fees": 98.16300888728006,
+        "gross_per_leg": 0.172644,
+        "profit_factor": 0.601542832272947,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 87.9405151386009,
+        "wall_secs": 2.04
+      },
+      "path": "results/runs/sweep_cell-8f66916d323aca7f__92d9ee5__20261103T225648Z.json",
+      "parent_fp": "8f66916d323aca7f"
+    },
+    {
+      "run_id": "sweep_cell-530f0107581aadf0__92d9ee5__20261103T225650Z",
+      "kind": "sweep_cell",
+      "config_fp": "530f0107581aadf0",
+      "ts_utc": "2026-11-03T22:56:50Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 30
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.0,
+          "sl_max_usd": 30
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 35.90985364744756,
+        "net": -62.25315523983249,
+        "fees": 98.16300888728006,
+        "gross_per_leg": 0.172644,
+        "profit_factor": 0.601542832272947,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 87.9405151386009,
+        "wall_secs": 2.02
+      },
+      "path": "results/runs/sweep_cell-530f0107581aadf0__92d9ee5__20261103T225650Z.json",
+      "parent_fp": "530f0107581aadf0"
+    },
+    {
+      "run_id": "sweep_cell-5935b55c37cd3ff6__92d9ee5__20261103T225652Z",
+      "kind": "sweep_cell",
+      "config_fp": "5935b55c37cd3ff6",
+      "ts_utc": "2026-11-03T22:56:52Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 2.5
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 2.5
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5240384615384616,
+        "gross": 14.604288647454268,
+        "net": -83.55909971836932,
+        "fees": 98.1633883658236,
+        "gross_per_leg": 0.070213,
+        "profit_factor": 0.49405542225085614,
+        "trades_per_day": 7.024439665382261,
+        "max_drawdown_usd": 84.85421823953052,
+        "wall_secs": 1.9
+      },
+      "path": "results/runs/sweep_cell-5935b55c37cd3ff6__92d9ee5__20261103T225652Z.json",
+      "parent_fp": "5935b55c37cd3ff6"
+    },
+    {
+      "run_id": "sweep_cell-db8b851df88d0ce1__92d9ee5__20261103T225654Z",
+      "kind": "sweep_cell",
+      "config_fp": "db8b851df88d0ce1",
+      "ts_utc": "2026-11-03T22:56:54Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 4
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 4
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5769230769230769,
+        "gross": 18.977853647453685,
+        "net": -79.18565934057548,
+        "fees": 98.16351298802917,
+        "gross_per_leg": 0.09124,
+        "profit_factor": 0.5227345508861513,
+        "trades_per_day": 7.021711542188409,
+        "max_drawdown_usd": 86.0465359114406,
+        "wall_secs": 1.93
+      },
+      "path": "results/runs/sweep_cell-db8b851df88d0ce1__92d9ee5__20261103T225654Z.json",
+      "parent_fp": "db8b851df88d0ce1"
+    },
+    {
+      "run_id": "sweep_cell-60618528ca5d1639__92d9ee5__20261103T225656Z",
+      "kind": "sweep_cell",
+      "config_fp": "60618528ca5d1639",
+      "ts_utc": "2026-11-03T22:56:56Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 6
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 6
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5865384615384616,
+        "gross": 0.4602036474552733,
+        "net": -97.7047112236886,
+        "fees": 98.16491487114388,
+        "gross_per_leg": 0.002213,
+        "profit_factor": 0.47351315307331693,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 108.18778010711853,
+        "wall_secs": 1.97
+      },
+      "path": "results/runs/sweep_cell-60618528ca5d1639__92d9ee5__20261103T225656Z.json",
+      "parent_fp": "60618528ca5d1639"
+    },
+    {
+      "run_id": "sweep_cell-2f1d6e39a158f131__92d9ee5__20261103T225659Z",
+      "kind": "sweep_cell",
+      "config_fp": "2f1d6e39a158f131",
+      "ts_utc": "2026-11-03T22:56:59Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 8
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 8
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.5913461538461539,
+        "gross": -12.210646352544245,
+        "net": -110.37635876950257,
+        "fees": 98.16571241695833,
+        "gross_per_leg": -0.058705,
+        "profit_factor": 0.44372739216318713,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 125.54469024738994,
+        "wall_secs": 2.03
+      },
+      "path": "results/runs/sweep_cell-2f1d6e39a158f131__92d9ee5__20261103T225659Z.json",
+      "parent_fp": "2f1d6e39a158f131"
+    },
+    {
+      "run_id": "sweep_cell-29a120324be66572__92d9ee5__20261103T225701Z",
+      "kind": "sweep_cell",
+      "config_fp": "29a120324be66572",
+      "ts_utc": "2026-11-03T22:57:01Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 12
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 12
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 25.42985364745573,
+        "net": -72.73224510375107,
+        "fees": 98.1620987512068,
+        "gross_per_leg": 0.122259,
+        "profit_factor": 0.5637319762315566,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 95.78212394065768,
+        "wall_secs": 2.13
+      },
+      "path": "results/runs/sweep_cell-29a120324be66572__92d9ee5__20261103T225701Z.json",
+      "parent_fp": "29a120324be66572"
+    },
+    {
+      "run_id": "sweep_cell-285c524f5a689e60__92d9ee5__20261103T225703Z",
+      "kind": "sweep_cell",
+      "config_fp": "285c524f5a689e60",
+      "ts_utc": "2026-11-03T22:57:03Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 15
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 15
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 20.549853647447435,
+        "net": -77.611821299939,
+        "fees": 98.16167494738643,
+        "gross_per_leg": 0.098797,
+        "profit_factor": 0.5477012848691589,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 100.66170013684561,
+        "wall_secs": 2.08
+      },
+      "path": "results/runs/sweep_cell-285c524f5a689e60__92d9ee5__20261103T225703Z.json",
+      "parent_fp": "285c524f5a689e60"
+    },
+    {
+      "run_id": "sweep_cell-cf97ed822eda0592__92d9ee5__20261103T225705Z",
+      "kind": "sweep_cell",
+      "config_fp": "cf97ed822eda0592",
+      "ts_utc": "2026-11-03T22:57:05Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 20
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 20
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 35.90985364744756,
+        "net": -62.25315523983249,
+        "fees": 98.16300888728006,
+        "gross_per_leg": 0.172644,
+        "profit_factor": 0.601542832272947,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 87.9405151386009,
+        "wall_secs": 2.03
+      },
+      "path": "results/runs/sweep_cell-cf97ed822eda0592__92d9ee5__20261103T225705Z.json",
+      "parent_fp": "cf97ed822eda0592"
+    },
+    {
+      "run_id": "sweep_cell-a8f02d5f7c59104c__92d9ee5__20261103T225708Z",
+      "kind": "sweep_cell",
+      "config_fp": "a8f02d5f7c59104c",
+      "ts_utc": "2026-11-03T22:57:08Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 30
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.25,
+          "sl_max_usd": 30
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 208,
+        "hit_rate": 0.6153846153846154,
+        "gross": 35.90985364744756,
+        "net": -62.25315523983249,
+        "fees": 98.16300888728006,
+        "gross_per_leg": 0.172644,
+        "profit_factor": 0.601542832272947,
+        "trades_per_day": 7.0134221770909395,
+        "max_drawdown_usd": 87.9405151386009,
+        "wall_secs": 2.05
+      },
+      "path": "results/runs/sweep_cell-a8f02d5f7c59104c__92d9ee5__20261103T225708Z.json",
+      "parent_fp": "a8f02d5f7c59104c"
+    },
+    {
+      "run_id": "sweep_cell-4c242946f5905186__92d9ee5__20261103T225710Z",
+      "kind": "sweep_cell",
+      "config_fp": "4c242946f5905186",
+      "ts_utc": "2026-11-03T22:57:10Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 2.5
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 2.5
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.5320197044334976,
+        "gross": 11.504788647454006,
+        "net": -84.31864434656008,
+        "fees": 95.8234329940141,
+        "gross_per_leg": 0.056674,
+        "profit_factor": 0.48735460753145965,
+        "trades_per_day": 6.855582942656726,
+        "max_drawdown_usd": 85.67483513499415,
+        "wall_secs": 1.9
+      },
+      "path": "results/runs/sweep_cell-4c242946f5905186__92d9ee5__20261103T225710Z.json",
+      "parent_fp": "4c242946f5905186"
+    },
+    {
+      "run_id": "sweep_cell-950d8f58a46d2e24__92d9ee5__20261103T225712Z",
+      "kind": "sweep_cell",
+      "config_fp": "950d8f58a46d2e24",
+      "ts_utc": "2026-11-03T22:57:12Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 4
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 4
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.5862068965517241,
+        "gross": 15.878353647453423,
+        "net": -79.94546450390172,
+        "fees": 95.82381815135514,
+        "gross_per_leg": 0.078218,
+        "profit_factor": 0.5161812938905179,
+        "trades_per_day": 6.852920399347341,
+        "max_drawdown_usd": 86.86741334203974,
+        "wall_secs": 2.02
+      },
+      "path": "results/runs/sweep_cell-950d8f58a46d2e24__92d9ee5__20261103T225712Z.json",
+      "parent_fp": "950d8f58a46d2e24"
+    },
+    {
+      "run_id": "sweep_cell-629e5dcc29cf98e4__92d9ee5__20261103T225714Z",
+      "kind": "sweep_cell",
+      "config_fp": "629e5dcc29cf98e4",
+      "ts_utc": "2026-11-03T22:57:14Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 6
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 6
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.5960591133004927,
+        "gross": -3.6037963525450323,
+        "net": -99.42928000514945,
+        "fees": 95.82548365260442,
+        "gross_per_leg": -0.017753,
+        "profit_factor": 0.46505011923320694,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 109.44746043511351,
+        "wall_secs": 2.04
+      },
+      "path": "results/runs/sweep_cell-629e5dcc29cf98e4__92d9ee5__20261103T225714Z.json",
+      "parent_fp": "629e5dcc29cf98e4"
+    },
+    {
+      "run_id": "sweep_cell-cb14e24c791c9a73__92d9ee5__20261103T225716Z",
+      "kind": "sweep_cell",
+      "config_fp": "cb14e24c791c9a73",
+      "ts_utc": "2026-11-03T22:57:16Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 8
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 8
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.6009852216748769,
+        "gross": -18.27464635254455,
+        "net": -114.10110124105374,
+        "fees": 95.82645488850919,
+        "gross_per_leg": -0.090023,
+        "profit_factor": 0.43151096782297754,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 129.33050498621398,
+        "wall_secs": 1.98
+      },
+      "path": "results/runs/sweep_cell-cb14e24c791c9a73__92d9ee5__20261103T225716Z.json",
+      "parent_fp": "cb14e24c791c9a73"
+    },
+    {
+      "run_id": "sweep_cell-a6afa8915fbf3360__92d9ee5__20261103T225718Z",
+      "kind": "sweep_cell",
+      "config_fp": "a6afa8915fbf3360",
+      "ts_utc": "2026-11-03T22:57:18Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 12
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 12
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.6305418719211823,
+        "gross": 28.27735364745513,
+        "net": -67.54471365568261,
+        "fees": 95.82206730313774,
+        "gross_per_leg": 0.139297,
+        "profit_factor": 0.5791986217730347,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 94.50247264401042,
+        "wall_secs": 2.02
+      },
+      "path": "results/runs/sweep_cell-a6afa8915fbf3360__92d9ee5__20261103T225718Z.json",
+      "parent_fp": "a6afa8915fbf3360"
+    },
+    {
+      "run_id": "sweep_cell-d4b48a1f6180fe8f__92d9ee5__20261103T225721Z",
+      "kind": "sweep_cell",
+      "config_fp": "d4b48a1f6180fe8f",
+      "ts_utc": "2026-11-03T22:57:21Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 15
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 15
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.6305418719211823,
+        "gross": 23.397353647446835,
+        "net": -72.42428985187053,
+        "fees": 95.82164349931736,
+        "gross_per_leg": 0.115258,
+        "profit_factor": 0.5621106809892227,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 99.38204884019837,
+        "wall_secs": 2.07
+      },
+      "path": "results/runs/sweep_cell-d4b48a1f6180fe8f__92d9ee5__20261103T225721Z.json",
+      "parent_fp": "d4b48a1f6180fe8f"
+    },
+    {
+      "run_id": "sweep_cell-9593172b13d7a626__92d9ee5__20261103T225723Z",
+      "kind": "sweep_cell",
+      "config_fp": "9593172b13d7a626",
+      "ts_utc": "2026-11-03T22:57:23Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 20
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 20
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.6305418719211823,
+        "gross": 38.75735364744696,
+        "net": -57.065623791764025,
+        "fees": 95.82297743921099,
+        "gross_per_leg": 0.190923,
+        "profit_factor": 0.619652240573035,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 92.22184375377067,
+        "wall_secs": 2.11
+      },
+      "path": "results/runs/sweep_cell-9593172b13d7a626__92d9ee5__20261103T225723Z.json",
+      "parent_fp": "9593172b13d7a626"
+    },
+    {
+      "run_id": "sweep_cell-0c1c92078f775288__92d9ee5__20261103T225725Z",
+      "kind": "sweep_cell",
+      "config_fp": "0c1c92078f775288",
+      "ts_utc": "2026-11-03T22:57:25Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 30
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.5,
+          "sl_max_usd": 30
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 203,
+        "hit_rate": 0.6305418719211823,
+        "gross": 38.75735364744696,
+        "net": -57.065623791764025,
+        "fees": 95.82297743921099,
+        "gross_per_leg": 0.190923,
+        "profit_factor": 0.619652240573035,
+        "trades_per_day": 6.844830297833946,
+        "max_drawdown_usd": 92.22184375377067,
+        "wall_secs": 2.08
+      },
+      "path": "results/runs/sweep_cell-0c1c92078f775288__92d9ee5__20261103T225725Z.json",
+      "parent_fp": "0c1c92078f775288"
+    },
+    {
+      "run_id": "sweep_cell-9050134aee4651b8__92d9ee5__20261103T225727Z",
+      "kind": "sweep_cell",
+      "config_fp": "9050134aee4651b8",
+      "ts_utc": "2026-11-03T22:57:27Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 2.5
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 2.5
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.5614035087719298,
+        "gross": 34.90203864745217,
+        "net": -45.90131966120891,
+        "fees": 80.80335830866107,
+        "gross_per_leg": 0.204105,
+        "profit_factor": 0.6394421787323392,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 51.69343394691888,
+        "wall_secs": 1.87
+      },
+      "path": "results/runs/sweep_cell-9050134aee4651b8__92d9ee5__20261103T225727Z.json",
+      "parent_fp": "9050134aee4651b8"
+    },
+    {
+      "run_id": "sweep_cell-4cbbd90ff2042612__92d9ee5__20261103T225729Z",
+      "kind": "sweep_cell",
+      "config_fp": "4cbbd90ff2042612",
+      "ts_utc": "2026-11-03T22:57:29Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 4
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 4
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6140350877192983,
+        "gross": 37.312243647452306,
+        "net": -43.49162452456087,
+        "fees": 80.80386817201317,
+        "gross_per_leg": 0.2182,
+        "profit_factor": 0.6639126470366159,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 60.76193538375817,
+        "wall_secs": 1.92
+      },
+      "path": "results/runs/sweep_cell-4cbbd90ff2042612__92d9ee5__20261103T225729Z.json",
+      "parent_fp": "4cbbd90ff2042612"
+    },
+    {
+      "run_id": "sweep_cell-8223ef850317ac2b__92d9ee5__20261103T225731Z",
+      "kind": "sweep_cell",
+      "config_fp": "8223ef850317ac2b",
+      "ts_utc": "2026-11-03T22:57:31Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 6
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 6
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6198830409356725,
+        "gross": 22.71339364745336,
+        "net": -58.09221673603748,
+        "fees": 80.80561038349084,
+        "gross_per_leg": 0.132827,
+        "profit_factor": 0.598047999073022,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 76.46348053412709,
+        "wall_secs": 1.9
+      },
+      "path": "results/runs/sweep_cell-8223ef850317ac2b__92d9ee5__20261103T225731Z.json",
+      "parent_fp": "8223ef850317ac2b"
+    },
+    {
+      "run_id": "sweep_cell-f6e416b58ae29f52__92d9ee5__20261103T225734Z",
+      "kind": "sweep_cell",
+      "config_fp": "f6e416b58ae29f52",
+      "ts_utc": "2026-11-03T22:57:34Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 8
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 8
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6257309941520468,
+        "gross": 14.778143647453817,
+        "net": -66.02887205821551,
+        "fees": 80.80701570566933,
+        "gross_per_leg": 0.086422,
+        "profit_factor": 0.5674009990293887,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 86.76903900338468,
+        "wall_secs": 1.93
+      },
+      "path": "results/runs/sweep_cell-f6e416b58ae29f52__92d9ee5__20261103T225734Z.json",
+      "parent_fp": "f6e416b58ae29f52"
+    },
+    {
+      "run_id": "sweep_cell-16dd111652401a03__92d9ee5__20261103T225736Z",
+      "kind": "sweep_cell",
+      "config_fp": "16dd111652401a03",
+      "ts_utc": "2026-11-03T22:57:36Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 12
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 12
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6608187134502924,
+        "gross": 71.96514364745371,
+        "net": -8.83840806989941,
+        "fees": 80.80355171735313,
+        "gross_per_leg": 0.420849,
+        "profit_factor": 0.9131820802837941,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 72.18011120820272,
+        "wall_secs": 1.93
+      },
+      "path": "results/runs/sweep_cell-16dd111652401a03__92d9ee5__20261103T225736Z.json",
+      "parent_fp": "16dd111652401a03"
+    },
+    {
+      "run_id": "sweep_cell-00b68752d4ce3e86__92d9ee5__20261103T225738Z",
+      "kind": "sweep_cell",
+      "config_fp": "00b68752d4ce3e86",
+      "ts_utc": "2026-11-03T22:57:38Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 15
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 15
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6608187134502924,
+        "gross": 71.96514364745371,
+        "net": -8.83840806989941,
+        "fees": 80.80355171735313,
+        "gross_per_leg": 0.420849,
+        "profit_factor": 0.9131820802837941,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 72.18011120820272,
+        "wall_secs": 1.93
+      },
+      "path": "results/runs/sweep_cell-00b68752d4ce3e86__92d9ee5__20261103T225738Z.json",
+      "parent_fp": "00b68752d4ce3e86"
+    },
+    {
+      "run_id": "sweep_cell-46111c614b512400__92d9ee5__20261103T225740Z",
+      "kind": "sweep_cell",
+      "config_fp": "46111c614b512400",
+      "ts_utc": "2026-11-03T22:57:40Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 20
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 20
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6608187134502924,
+        "gross": 71.96514364745371,
+        "net": -8.83840806989941,
+        "fees": 80.80355171735313,
+        "gross_per_leg": 0.420849,
+        "profit_factor": 0.9131820802837941,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 72.18011120820272,
+        "wall_secs": 1.95
+      },
+      "path": "results/runs/sweep_cell-46111c614b512400__92d9ee5__20261103T225740Z.json",
+      "parent_fp": "46111c614b512400"
+    },
+    {
+      "run_id": "sweep_cell-52fa9bc4719862a5__92d9ee5__20261103T225742Z",
+      "kind": "sweep_cell",
+      "config_fp": "52fa9bc4719862a5",
+      "ts_utc": "2026-11-03T22:57:42Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 30
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 0.75,
+          "sl_max_usd": 30
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 171,
+        "hit_rate": 0.6608187134502924,
+        "gross": 71.96514364745371,
+        "net": -8.83840806989941,
+        "fees": 80.80355171735313,
+        "gross_per_leg": 0.420849,
+        "profit_factor": 0.9131820802837941,
+        "trades_per_day": 5.77783808960295,
+        "max_drawdown_usd": 72.18011120820272,
+        "wall_secs": 2.06
+      },
+      "path": "results/runs/sweep_cell-52fa9bc4719862a5__92d9ee5__20261103T225742Z.json",
+      "parent_fp": "52fa9bc4719862a5"
+    },
+    {
+      "run_id": "sweep_cell-7b26e9d075b33e52__92d9ee5__20261103T225744Z",
+      "kind": "sweep_cell",
+      "config_fp": "7b26e9d075b33e52",
+      "ts_utc": "2026-11-03T22:57:44Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 2.5
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 2.5
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.576,
+        "gross": 36.48966364745138,
+        "net": -22.55618566050607,
+        "fees": 59.045849307957454,
+        "gross_per_leg": 0.291917,
+        "profit_factor": 0.7461153741975833,
+        "trades_per_day": 4.233431407827615,
+        "max_drawdown_usd": 38.573494295469644,
+        "wall_secs": 1.69
+      },
+      "path": "results/runs/sweep_cell-7b26e9d075b33e52__92d9ee5__20261103T225744Z.json",
+      "parent_fp": "7b26e9d075b33e52"
+    },
+    {
+      "run_id": "sweep_cell-e7dbae81410c820e__92d9ee5__20261103T225746Z",
+      "kind": "sweep_cell",
+      "config_fp": "e7dbae81410c820e",
+      "ts_utc": "2026-11-03T22:57:46Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 4
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 4
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.624,
+        "gross": 31.169368647452302,
+        "net": -27.875537562829233,
+        "fees": 59.04490621028153,
+        "gross_per_leg": 0.249355,
+        "profit_factor": 0.716413810517022,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 57.57640164786452,
+        "wall_secs": 1.68
+      },
+      "path": "results/runs/sweep_cell-e7dbae81410c820e__92d9ee5__20261103T225746Z.json",
+      "parent_fp": "e7dbae81410c820e"
+    },
+    {
+      "run_id": "sweep_cell-e4f44929e69a53f0__92d9ee5__20261103T225748Z",
+      "kind": "sweep_cell",
+      "config_fp": "e4f44929e69a53f0",
+      "ts_utc": "2026-11-03T22:57:48Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 6
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 6
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.624,
+        "gross": 17.21356864745303,
+        "net": -41.83221679943469,
+        "fees": 59.04578544688772,
+        "gross_per_leg": 0.137709,
+        "profit_factor": 0.6273405619267352,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 72.2955704849793,
+        "wall_secs": 1.7
+      },
+      "path": "results/runs/sweep_cell-e4f44929e69a53f0__92d9ee5__20261103T225748Z.json",
+      "parent_fp": "e4f44929e69a53f0"
+    },
+    {
+      "run_id": "sweep_cell-2e57f336ae41f834__92d9ee5__20261103T225750Z",
+      "kind": "sweep_cell",
+      "config_fp": "2e57f336ae41f834",
+      "ts_utc": "2026-11-03T22:57:50Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 8
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 8
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.632,
+        "gross": 13.278318647453489,
+        "net": -45.76852474143209,
+        "fees": 59.04684338888558,
+        "gross_per_leg": 0.106227,
+        "profit_factor": 0.606666391438185,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 82.60112895423687,
+        "wall_secs": 1.7
+      },
+      "path": "results/runs/sweep_cell-2e57f336ae41f834__92d9ee5__20261103T225750Z.json",
+      "parent_fp": "2e57f336ae41f834"
+    },
+    {
+      "run_id": "sweep_cell-20fe0d7104125b53__92d9ee5__20261103T225752Z",
+      "kind": "sweep_cell",
+      "config_fp": "20fe0d7104125b53",
+      "ts_utc": "2026-11-03T22:57:52Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 12
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 12
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.664,
+        "gross": 48.21831864745354,
+        "net": -10.826992794835455,
+        "fees": 59.045311442289,
+        "gross_per_leg": 0.385747,
+        "profit_factor": 0.8686840617559285,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 68.0122011590549,
+        "wall_secs": 1.71
+      },
+      "path": "results/runs/sweep_cell-20fe0d7104125b53__92d9ee5__20261103T225752Z.json",
+      "parent_fp": "20fe0d7104125b53"
+    },
+    {
+      "run_id": "sweep_cell-b95d6ada1b936c1c__92d9ee5__20261103T225753Z",
+      "kind": "sweep_cell",
+      "config_fp": "b95d6ada1b936c1c",
+      "ts_utc": "2026-11-03T22:57:53Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 15
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 15
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.664,
+        "gross": 48.21831864745354,
+        "net": -10.826992794835455,
+        "fees": 59.045311442289,
+        "gross_per_leg": 0.385747,
+        "profit_factor": 0.8686840617559285,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 68.0122011590549,
+        "wall_secs": 1.72
+      },
+      "path": "results/runs/sweep_cell-b95d6ada1b936c1c__92d9ee5__20261103T225753Z.json",
+      "parent_fp": "b95d6ada1b936c1c"
+    },
+    {
+      "run_id": "sweep_cell-2800198d0ed70a72__92d9ee5__20261103T225755Z",
+      "kind": "sweep_cell",
+      "config_fp": "2800198d0ed70a72",
+      "ts_utc": "2026-11-03T22:57:55Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 20
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 20
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.664,
+        "gross": 48.21831864745354,
+        "net": -10.826992794835455,
+        "fees": 59.045311442289,
+        "gross_per_leg": 0.385747,
+        "profit_factor": 0.8686840617559285,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 68.0122011590549,
+        "wall_secs": 1.8
+      },
+      "path": "results/runs/sweep_cell-2800198d0ed70a72__92d9ee5__20261103T225755Z.json",
+      "parent_fp": "2800198d0ed70a72"
+    },
+    {
+      "run_id": "sweep_cell-3fd74bd1586b09a7__92d9ee5__20261103T225757Z",
+      "kind": "sweep_cell",
+      "config_fp": "3fd74bd1586b09a7",
+      "ts_utc": "2026-11-03T22:57:57Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f071b85757d826e4",
+      "params": {
+        "knob": "_multi",
+        "value": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 30
+        },
+        "overrides": {
+          "vol_state_min_range_norm": 1.0,
+          "sl_max_usd": 30
+        },
+        "scope": "XAUUSD_S1_1y__20250101_20250201",
+        "start": "2025-01-01",
+        "end": "2025-02-01",
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "notebook": "canonical_run"
+      },
+      "summary": {
+        "n_trades": 125,
+        "hit_rate": 0.664,
+        "gross": 48.21831864745354,
+        "net": -10.826992794835455,
+        "fees": 59.045311442289,
+        "gross_per_leg": 0.385747,
+        "profit_factor": 0.8686840617559285,
+        "trades_per_day": 4.232878886752853,
+        "max_drawdown_usd": 68.0122011590549,
+        "wall_secs": 1.73
+      },
+      "path": "results/runs/sweep_cell-3fd74bd1586b09a7__92d9ee5__20261103T225757Z.json",
+      "parent_fp": "3fd74bd1586b09a7"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225836Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "3df39553b61b89f2",
+      "ts_utc": "2026-11-03T22:58:36Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "62acccc364395d39",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "criterion": "gross_per_leg vs measured_fee"
+      },
+      "summary": {
+        "canonical_legs": 6663,
+        "variant_legs": 7122,
+        "canonical_net": -741.1608,
+        "variant_net": 2298.2009,
+        "delta_net": 3039.36,
+        "canonical_gross_per_leg": 0.387691,
+        "variant_gross_per_leg": 0.789492,
+        "canonical_gross_over_fee": 0.7771,
+        "variant_gross_over_fee": 1.6913,
+        "variant_covers_round_trip": true,
+        "canonical_excess_per_leg": -0.076393,
+        "variant_excess_per_leg": -0.064363,
+        "canonical_excess_t": -8.4484,
+        "variant_excess_t": -7.0262,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "canonical_beta": 0.33,
+        "variant_beta": 22.94,
+        "canonical_alpha": 82.55,
+        "variant_alpha": 127.2,
+        "canonical_corr": 0.0161,
+        "variant_corr": 0.3373,
+        "variant_is_proxy": false,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-3df39553b61b89f2__92d9ee5__20261103T225836Z.json",
+      "parent_fp": "3df39553b61b89f2"
+    },
+    {
+      "run_id": "sl_ceiling_paired_1m-47f3df251ccf4ae2__92d9ee5__20261103T230144Z",
+      "kind": "sl_ceiling_paired_1m",
+      "config_fp": "47f3df251ccf4ae2",
+      "ts_utc": "2026-11-03T23:01:44Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "62acccc364395d39",
+      "params": {
+        "knobs": [
+          "vol_state_min_range_norm",
+          "sl_max_usd"
+        ],
+        "grid_range_norm": [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "grid_sl_max_usd": [
+          2.5,
+          4.0,
+          6.0,
+          8.0,
+          12.0,
+          15.0,
+          20.0,
+          30.0
+        ],
+        "window": [
+          "2025-01-01",
+          "2025-02-01"
+        ],
+        "scope": "one_month_screen",
+        "criterion": "gross_per_leg"
+      },
+      "summary": {
+        "n_cells": 40,
+        "canonical_cell": "rn=1.0|sl=15.0",
+        "canonical_gross_per_leg": 0.385747,
+        "canonical_net": -10.83,
+        "canonical_trades_per_day": 4.233,
+        "best_cell": "rn=0.75|sl=12.0",
+        "best_gross_per_leg": 0.420849,
+        "best_trades_per_day": 5.778,
+        "note": "ONE MONTH (2025-01) SCREEN ONLY -- a screen, not a verdict. The corpus re-measurement of this pair is still OWED."
+      },
+      "path": "results/runs/sl_ceiling_paired_1m-47f3df251ccf4ae2__92d9ee5__20261103T230144Z.json",
+      "parent_fp": "47f3df251ccf4ae2"
+    },
+    {
+      "run_id": "ledger_fingerprint_invalidation-0647438f770dfbcc__92d9ee5__20261103T230553Z",
+      "kind": "ledger_fingerprint_invalidation",
+      "config_fp": "0647438f770dfbcc",
+      "ts_utc": "2026-11-03T23:05:53Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "7b4816127f62c97c",
+      "params": {
+        "event": "source_hash source-list change (commit 5b38b82)",
+        "affected": "leg_ledger_expand_{0,0.7,0.85,1,1.1,1.2,1.3}.json",
+        "built_utc_range": [
+          "2026-11-03T19:47:51Z",
+          "2026-11-03T20:01:32Z"
+        ],
+        "commit_utc": "2026-11-03T22:35:12Z",
+        "cause": "bt/_engine/vol_state.py added to _source_hash() rels; hash switched to AST-normalised"
+      },
+      "summary": {
+        "stale_by_fingerprint": 7,
+        "canonical_stale": false,
+        "numbers_changed": false,
+        "cross_check": "leg_ledger_expand_1 vs canonical: 6663 legs, gross sum 2583.1827326484 both, np.array_equal=True",
+        "lesson": "a fingerprint change is a CACHE-KEY event: it invalidates every artifact built under the old key, including untouched ones. Verify old artifacts against a fresh one before trusting them."
+      },
+      "path": "results/runs/ledger_fingerprint_invalidation-0647438f770dfbcc__92d9ee5__20261103T230553Z.json",
+      "parent_fp": "0647438f770dfbcc"
+    },
+    {
+      "run_id": "leg_ledger-074bbdbb51636521__92d9ee5__20261103T230959Z",
+      "kind": "leg_ledger",
+      "config_fp": "074bbdbb51636521",
+      "ts_utc": "2026-11-03T23:09:59Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f77c7a3064fa11cc",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_mode": "'off'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7284,
+        "gross": 4917.659187,
+        "fees": 3324.502993,
+        "net": 1593.156194,
+        "gross_per_leg": 0.675132,
+        "fee_per_leg": 0.456412,
+        "drift": 5395.123275,
+        "excess": -477.464088,
+        "trades_per_day": 7.8576
+      },
+      "path": "results/runs/leg_ledger-074bbdbb51636521__92d9ee5__20261103T230959Z.json",
+      "parent_fp": "074bbdbb51636521"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-045f47c9c3618c52__92d9ee5__20261103T231131Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "045f47c9c3618c52",
+      "ts_utc": "2026-11-03T23:11:31Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "62acccc364395d39",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "baseline_overrides": {
+          "trail_mode": "'off'"
+        },
+        "splits": [
+          "2024-07-01",
+          "2024-10-01",
+          "2025-01-01",
+          "2025-04-01",
+          "2025-07-01",
+          "2025-10-01",
+          "2026-01-01"
+        ],
+        "criterion": "gross_per_leg vs measured_fee"
+      },
+      "summary": {
+        "canonical_legs": 6663,
+        "variant_legs": 7122,
+        "canonical_net": -741.1608,
+        "variant_net": 2298.2009,
+        "delta_net": 3039.36,
+        "canonical_gross_per_leg": 0.387691,
+        "variant_gross_per_leg": 0.789492,
+        "canonical_gross_over_fee": 0.7771,
+        "variant_gross_over_fee": 1.6913,
+        "variant_covers_round_trip": true,
+        "canonical_excess_per_leg": -0.076393,
+        "variant_excess_per_leg": -0.064363,
+        "canonical_excess_t": -8.4484,
+        "variant_excess_t": -7.0262,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "canonical_beta": 0.33,
+        "variant_beta": 22.94,
+        "canonical_alpha": 82.55,
+        "variant_alpha": 127.2,
+        "canonical_corr": 0.0161,
+        "variant_corr": 0.3373,
+        "variant_is_proxy": false,
+        "trail_off_legs": 7284,
+        "trail_off_net": 1593.1562,
+        "trail_off_gross_per_leg": 0.675132,
+        "trail_off_gross_over_fee": 1.4792,
+        "delta_net_vs_trail_off": 705.04,
+        "delta_gross_per_leg_vs_trail_off": 0.11436,
+        "n_split_points": 7,
+        "n_wins_both_vs_canonical": 4,
+        "n_wins_both_gross_per_leg": 4,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-045f47c9c3618c52__92d9ee5__20261103T231131Z.json",
+      "parent_fp": "045f47c9c3618c52"
+    },
+    {
+      "run_id": "leg_ledger-4f861db948366a53__92d9ee5__20261103T231342Z",
+      "kind": "leg_ledger",
+      "config_fp": "4f861db948366a53",
+      "ts_utc": "2026-11-03T23:13:42Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f77c7a3064fa11cc",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_sides": "'long'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7063,
+        "gross": 2739.338145,
+        "fees": 3324.323117,
+        "net": -584.984972,
+        "gross_per_leg": 0.387843,
+        "fee_per_leg": 0.470667,
+        "drift": 3284.079641,
+        "excess": -544.741496,
+        "trades_per_day": 7.6192
+      },
+      "path": "results/runs/leg_ledger-4f861db948366a53__92d9ee5__20261103T231342Z.json",
+      "parent_fp": "4f861db948366a53"
+    },
+    {
+      "run_id": "leg_ledger-7001e276e44d3370__92d9ee5__20261103T231734Z",
+      "kind": "leg_ledger",
+      "config_fp": "7001e276e44d3370",
+      "ts_utc": "2026-11-03T23:17:34Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {},
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": false
+      },
+      "summary": {
+        "legs": 7122,
+        "gross": 5622.765228,
+        "fees": 3324.564326,
+        "net": 2298.200902,
+        "gross_per_leg": 0.789492,
+        "fee_per_leg": 0.466802,
+        "drift": 6081.159182,
+        "excess": -458.393954,
+        "trades_per_day": 7.6828
+      },
+      "path": "results/runs/leg_ledger-7001e276e44d3370__92d9ee5__20261103T231734Z.json",
+      "parent_fp": "7001e276e44d3370"
+    },
+    {
+      "run_id": "leg_ledger-20b4e8e65bb1d782__92d9ee5__20261103T232404Z",
+      "kind": "leg_ledger",
+      "config_fp": "20b4e8e65bb1d782",
+      "ts_utc": "2026-11-03T23:24:04Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_sides": "'both'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 6663,
+        "gross": 2583.182733,
+        "fees": 3324.343501,
+        "net": -741.160769,
+        "gross_per_leg": 0.387691,
+        "fee_per_leg": 0.498926,
+        "drift": 3092.192,
+        "excess": -509.009267,
+        "trades_per_day": 7.1877
+      },
+      "path": "results/runs/leg_ledger-20b4e8e65bb1d782__92d9ee5__20261103T232404Z.json",
+      "parent_fp": "20b4e8e65bb1d782"
+    },
+    {
+      "run_id": "daily_direction_dependence-385e72ff3e34feff__92d9ee5__20261103T234333Z",
+      "kind": "daily_direction_dependence",
+      "config_fp": "385e72ff3e34feff",
+      "ts_utc": "2026-11-03T23:43:33Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "aggregation": "daily",
+        "window": "2024-01-01..2026-07-16",
+        "books": [
+          "canonical",
+          "trail_short",
+          "trail_off"
+        ],
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "canonical": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_short": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_off": {
+          "n_legs": 7284,
+          "n_days": 577,
+          "corr": 0.2229,
+          "corr_t": 5.4314,
+          "r2": 0.0497,
+          "excess_per_leg": -0.06555,
+          "excess_t": -7.4562,
+          "verdict": "MARKET-DRIVEN"
+        }
+      },
+      "path": "results/runs/daily_direction_dependence-385e72ff3e34feff__92d9ee5__20261103T234333Z.json",
+      "parent_fp": "385e72ff3e34feff"
+    },
+    {
+      "run_id": "daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234912Z",
+      "kind": "daily_direction_dependence",
+      "config_fp": "66eb689cf951d040",
+      "ts_utc": "2026-11-03T23:49:12Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "aggregation": "daily",
+        "window": "2024-01-01..2026-07-16",
+        "books": [
+          "canonical",
+          "trail_short",
+          "trail_off",
+          "seqwlf_unfiltered_H1",
+          "seqwlf_unfiltered_H2",
+          "seqwlf_shipped_H1",
+          "seqwlf_shipped_H2",
+          "seqwlf_longonly_H1",
+          "seqwlf_longonly_H2"
+        ],
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "canonical": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_short": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_off": {
+          "n_legs": 7284,
+          "n_days": 577,
+          "corr": 0.2229,
+          "corr_t": 5.4314,
+          "r2": 0.0497,
+          "excess_per_leg": -0.06555,
+          "excess_t": -7.4562,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H1": {
+          "n_legs": 18640,
+          "n_days": 418,
+          "corr": 0.0401,
+          "corr_t": 0.8178,
+          "r2": 0.0016,
+          "excess_per_leg": -0.057409,
+          "excess_t": -12.1714,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H2": {
+          "n_legs": 18350,
+          "n_days": 275,
+          "corr": -0.0035,
+          "corr_t": -0.0573,
+          "r2": 0.0,
+          "excess_per_leg": -0.141466,
+          "excess_t": -15.8563,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H1": {
+          "n_legs": 2157,
+          "n_days": 309,
+          "corr": 0.2081,
+          "corr_t": 3.6935,
+          "r2": 0.0433,
+          "excess_per_leg": -0.031505,
+          "excess_t": -2.8681,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H2": {
+          "n_legs": 1997,
+          "n_days": 198,
+          "corr": 0.2473,
+          "corr_t": 3.5271,
+          "r2": 0.0612,
+          "excess_per_leg": -0.101595,
+          "excess_t": -3.4702,
+          "verdict": "MARKET-DRIVEN"
+        }
+      },
+      "path": "results/runs/daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234912Z.json",
+      "parent_fp": "66eb689cf951d040"
+    },
+    {
+      "run_id": "daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234932Z",
+      "kind": "daily_direction_dependence",
+      "config_fp": "66eb689cf951d040",
+      "ts_utc": "2026-11-03T23:49:32Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "aggregation": "daily",
+        "window": "2024-01-01..2026-07-16",
+        "books": [
+          "canonical",
+          "trail_short",
+          "trail_off",
+          "seqwlf_unfiltered_H1",
+          "seqwlf_unfiltered_H2",
+          "seqwlf_shipped_H1",
+          "seqwlf_shipped_H2",
+          "seqwlf_longonly_H1",
+          "seqwlf_longonly_H2"
+        ],
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "canonical": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_short": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_off": {
+          "n_legs": 7284,
+          "n_days": 577,
+          "corr": 0.2229,
+          "corr_t": 5.4314,
+          "r2": 0.0497,
+          "excess_per_leg": -0.06555,
+          "excess_t": -7.4562,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H1": {
+          "n_legs": 18640,
+          "n_days": 418,
+          "corr": 0.0401,
+          "corr_t": 0.8178,
+          "r2": 0.0016,
+          "excess_per_leg": -0.057409,
+          "excess_t": -12.1714,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H2": {
+          "n_legs": 18350,
+          "n_days": 275,
+          "corr": -0.0035,
+          "corr_t": -0.0573,
+          "r2": 0.0,
+          "excess_per_leg": -0.141466,
+          "excess_t": -15.8563,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H1": {
+          "n_legs": 3329,
+          "n_days": 344,
+          "corr": 0.0472,
+          "corr_t": 0.8729,
+          "r2": 0.0022,
+          "excess_per_leg": -0.044094,
+          "excess_t": -4.8375,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H2": {
+          "n_legs": 3024,
+          "n_days": 214,
+          "corr": 0.1868,
+          "corr_t": 2.7455,
+          "r2": 0.0349,
+          "excess_per_leg": -0.129919,
+          "excess_t": -5.6201,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H1": {
+          "n_legs": 2157,
+          "n_days": 309,
+          "corr": 0.2081,
+          "corr_t": 3.6935,
+          "r2": 0.0433,
+          "excess_per_leg": -0.031505,
+          "excess_t": -2.8681,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H2": {
+          "n_legs": 1997,
+          "n_days": 198,
+          "corr": 0.2473,
+          "corr_t": 3.5271,
+          "r2": 0.0612,
+          "excess_per_leg": -0.101595,
+          "excess_t": -3.4702,
+          "verdict": "MARKET-DRIVEN"
+        }
+      },
+      "path": "results/runs/daily_direction_dependence-66eb689cf951d040__92d9ee5__20261103T234932Z.json",
+      "parent_fp": "66eb689cf951d040"
+    },
+    {
+      "run_id": "leg_ledger-64e7add63c34ab5f__92d9ee5__20261103T235040Z",
+      "kind": "leg_ledger",
+      "config_fp": "64e7add63c34ab5f",
+      "ts_utc": "2026-11-03T23:50:40Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_sides": "'short'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7122,
+        "gross": 5622.765228,
+        "fees": 3324.564326,
+        "net": 2298.200902,
+        "gross_per_leg": 0.789492,
+        "fee_per_leg": 0.466802,
+        "drift": 6081.159182,
+        "excess": -458.393954,
+        "trades_per_day": 7.6828
+      },
+      "path": "results/runs/leg_ledger-64e7add63c34ab5f__92d9ee5__20261103T235040Z.json",
+      "parent_fp": "64e7add63c34ab5f"
+    },
+    {
+      "run_id": "leg_ledger-0b595127e7e84d18__92d9ee5__20261103T235204Z",
+      "kind": "leg_ledger",
+      "config_fp": "0b595127e7e84d18",
+      "ts_utc": "2026-11-03T23:52:04Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trade_sides": "'long'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 4371,
+        "gross": 4917.385925,
+        "fees": 2186.334566,
+        "net": 2731.051359,
+        "gross_per_leg": 1.125002,
+        "fee_per_leg": 0.500191,
+        "drift": 5100.189,
+        "excess": -182.803075,
+        "trades_per_day": 4.7152
+      },
+      "path": "results/runs/leg_ledger-0b595127e7e84d18__92d9ee5__20261103T235204Z.json",
+      "parent_fp": "0b595127e7e84d18"
+    },
+    {
+      "run_id": "leg_ledger-4f861db948366a53__92d9ee5__20261103T235216Z",
+      "kind": "leg_ledger",
+      "config_fp": "4f861db948366a53",
+      "ts_utc": "2026-11-03T23:52:16Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_sides": "'long'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7063,
+        "gross": 2739.338145,
+        "fees": 3324.323117,
+        "net": -584.984972,
+        "gross_per_leg": 0.387843,
+        "fee_per_leg": 0.470667,
+        "drift": 3284.079641,
+        "excess": -544.741496,
+        "trades_per_day": 7.6192
+      },
+      "path": "results/runs/leg_ledger-4f861db948366a53__92d9ee5__20261103T235216Z.json",
+      "parent_fp": "4f861db948366a53"
+    },
+    {
+      "run_id": "leg_ledger-9c7ef07de2650dde__92d9ee5__20261103T235320Z",
+      "kind": "leg_ledger",
+      "config_fp": "9c7ef07de2650dde",
+      "ts_utc": "2026-11-03T23:53:20Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "structure_gate": "True"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 3731,
+        "gross": 2900.866107,
+        "fees": 1818.014928,
+        "net": 1082.851179,
+        "gross_per_leg": 0.777504,
+        "fee_per_leg": 0.487273,
+        "drift": 3106.190667,
+        "excess": -205.32456,
+        "trades_per_day": 4.0248
+      },
+      "path": "results/runs/leg_ledger-9c7ef07de2650dde__92d9ee5__20261103T235320Z.json",
+      "parent_fp": "9c7ef07de2650dde"
+    },
+    {
+      "run_id": "daily_direction_dependence-f2f5aec41de15de4__92d9ee5__20261103T235343Z",
+      "kind": "daily_direction_dependence",
+      "config_fp": "f2f5aec41de15de4",
+      "ts_utc": "2026-11-03T23:53:43Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "aggregation": "daily",
+        "window": "2024-01-01..2026-07-16",
+        "books": [
+          "canonical",
+          "trail_short",
+          "trail_off",
+          "seqwlf_unfiltered_H1",
+          "seqwlf_unfiltered_H2",
+          "seqwlf_shipped_H1",
+          "seqwlf_shipped_H2",
+          "seqwlf_longonly_H1",
+          "seqwlf_longonly_H2",
+          "trade_sides_long",
+          "structure_gate_on"
+        ],
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "canonical": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_short": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_off": {
+          "n_legs": 7284,
+          "n_days": 577,
+          "corr": 0.2229,
+          "corr_t": 5.4314,
+          "r2": 0.0497,
+          "excess_per_leg": -0.06555,
+          "excess_t": -7.4562,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H1": {
+          "n_legs": 18640,
+          "n_days": 418,
+          "corr": 0.0401,
+          "corr_t": 0.8178,
+          "r2": 0.0016,
+          "excess_per_leg": -0.057409,
+          "excess_t": -12.1714,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H2": {
+          "n_legs": 18350,
+          "n_days": 275,
+          "corr": -0.0035,
+          "corr_t": -0.0573,
+          "r2": 0.0,
+          "excess_per_leg": -0.141466,
+          "excess_t": -15.8563,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H1": {
+          "n_legs": 3329,
+          "n_days": 344,
+          "corr": 0.0472,
+          "corr_t": 0.8729,
+          "r2": 0.0022,
+          "excess_per_leg": -0.044094,
+          "excess_t": -4.8375,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H2": {
+          "n_legs": 3024,
+          "n_days": 214,
+          "corr": 0.1868,
+          "corr_t": 2.7455,
+          "r2": 0.0349,
+          "excess_per_leg": -0.129919,
+          "excess_t": -5.6201,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H1": {
+          "n_legs": 2157,
+          "n_days": 309,
+          "corr": 0.2081,
+          "corr_t": 3.6935,
+          "r2": 0.0433,
+          "excess_per_leg": -0.031505,
+          "excess_t": -2.8681,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H2": {
+          "n_legs": 1997,
+          "n_days": 198,
+          "corr": 0.2473,
+          "corr_t": 3.5271,
+          "r2": 0.0612,
+          "excess_per_leg": -0.101595,
+          "excess_t": -3.4702,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trade_sides_long": {
+          "n_legs": 4371,
+          "n_days": 528,
+          "corr": 0.4371,
+          "corr_t": 10.737,
+          "r2": 0.191,
+          "excess_per_leg": -0.041822,
+          "excess_t": -3.174,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "structure_gate_on": {
+          "n_legs": 3731,
+          "n_days": 511,
+          "corr": 0.3054,
+          "corr_t": 7.1098,
+          "r2": 0.0933,
+          "excess_per_leg": -0.055032,
+          "excess_t": -4.2784,
+          "verdict": "MARKET-DRIVEN"
+        }
+      },
+      "path": "results/runs/daily_direction_dependence-f2f5aec41de15de4__92d9ee5__20261103T235343Z.json",
+      "parent_fp": "f2f5aec41de15de4"
+    },
+    {
+      "run_id": "leg_ledger-074bbdbb51636521__92d9ee5__20261103T235351Z",
+      "kind": "leg_ledger",
+      "config_fp": "074bbdbb51636521",
+      "ts_utc": "2026-11-03T23:53:51Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "d00e9f7974b930db",
+      "params": {
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "warmup_days": 14,
+        "engine_overrides": {
+          "trail_mode": "'off'"
+        },
+        "lots": 0.01,
+        "contract_size": 100.0,
+        "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+        "variant": true
+      },
+      "summary": {
+        "legs": 7284,
+        "gross": 4917.659187,
+        "fees": 3324.502993,
+        "net": 1593.156194,
+        "gross_per_leg": 0.675132,
+        "fee_per_leg": 0.456412,
+        "drift": 5395.123275,
+        "excess": -477.464088,
+        "trades_per_day": 7.8576
+      },
+      "path": "results/runs/leg_ledger-074bbdbb51636521__92d9ee5__20261103T235351Z.json",
+      "parent_fp": "074bbdbb51636521"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235351Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "001902a516a351e0",
+      "ts_utc": "2026-11-03T23:53:51Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f47dd77c4338cd2a",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "scope_both_overrides": {
+          "trail_sides": "'both'"
+        },
+        "scope_long_overrides": {
+          "trail_sides": "'long'"
+        },
+        "baseline_overrides": {
+          "trail_mode": "'off'"
+        },
+        "splits": [
+          "2024-07-01",
+          "2024-10-01",
+          "2025-01-01",
+          "2025-04-01",
+          "2025-07-01",
+          "2025-10-01",
+          "2026-01-01"
+        ],
+        "criterion": "net_profit"
+      },
+      "summary": {
+        "criterion": "net_profit",
+        "most_profitable_arm": "scope 'short'",
+        "scope_short_legs": 7122,
+        "scope_short_net": 2298.2009,
+        "scope_short_gross": 5622.7652,
+        "scope_short_gross_per_leg": 0.789492,
+        "scope_short_gross_over_fee": 1.6913,
+        "scope_both_legs": 6663,
+        "scope_both_net": -741.1608,
+        "scope_both_gross": 2583.1827,
+        "scope_long_legs": 7063,
+        "scope_long_net": -584.985,
+        "scope_long_gross": 2739.3381,
+        "delta_net_vs_scope_both": 3039.36,
+        "variant_covers_round_trip": true,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "trail_off_legs": 7284,
+        "trail_off_net": 1593.1562,
+        "trail_off_gross_per_leg": 0.675132,
+        "trail_off_gross_over_fee": 1.4792,
+        "delta_net_vs_trail_off": 705.04,
+        "delta_gross_per_leg_vs_trail_off": 0.11436,
+        "n_split_points": 7,
+        "n_wins_both_vs_scope_both": 4,
+        "n_wins_both_gross_per_leg": 4,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235351Z.json",
+      "parent_fp": "001902a516a351e0"
+    },
+    {
+      "run_id": "seq5_beta_regression-3cbab4d4403ae2f1__92d9ee5__20261103T235556Z",
+      "kind": "seq5_beta_regression",
+      "config_fp": "3cbab4d4403ae2f1",
+      "ts_utc": "2026-11-03T23:55:56Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "window": "2024-01-01..2026-07-16",
+        "arms": [
+          "unfiltered_H1",
+          "unfiltered_H2",
+          "fitH2_on_H1",
+          "fitH1_on_H2",
+          "shipped_on_H1",
+          "shipped_on_H2",
+          "longonly_on_H1",
+          "longonly_on_H2"
+        ],
+        "aggregation": "daily",
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "unfiltered_H1": {
+          "beta": 1.26,
+          "alpha": -4.39,
+          "r2": 0.0016,
+          "corr": 0.0401,
+          "corr_t": 0.8178
+        },
+        "unfiltered_H2": {
+          "beta": -0.1,
+          "alpha": -7.21,
+          "r2": 0.0,
+          "corr": -0.0035,
+          "corr_t": -0.0573
+        },
+        "fitH2_on_H1": {
+          "beta": 0.83,
+          "alpha": 2.89,
+          "r2": 0.0042,
+          "corr": 0.0645,
+          "corr_t": 1.1449
+        },
+        "fitH1_on_H2": {
+          "beta": 2.94,
+          "alpha": -1.53,
+          "r2": 0.0349,
+          "corr": 0.1868,
+          "corr_t": 2.7455
+        },
+        "shipped_on_H1": {
+          "beta": 0.68,
+          "alpha": 3.1,
+          "r2": 0.0022,
+          "corr": 0.0472,
+          "corr_t": 0.8729
+        },
+        "shipped_on_H2": {
+          "beta": 2.94,
+          "alpha": -1.53,
+          "r2": 0.0349,
+          "corr": 0.1868,
+          "corr_t": 2.7455
+        },
+        "longonly_on_H1": {
+          "beta": 2.61,
+          "alpha": 2.29,
+          "r2": 0.0433,
+          "corr": 0.2081,
+          "corr_t": 3.6935
+        },
+        "longonly_on_H2": {
+          "beta": 3.01,
+          "alpha": 0.73,
+          "r2": 0.0612,
+          "corr": 0.2473,
+          "corr_t": 3.5271
+        }
+      },
+      "path": "results/runs/seq5_beta_regression-3cbab4d4403ae2f1__92d9ee5__20261103T235556Z.json",
+      "parent_fp": "3cbab4d4403ae2f1"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235708Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "001902a516a351e0",
+      "ts_utc": "2026-11-03T23:57:08Z",
+      "commit": "92d9ee540a5e5f90fa97b85aee717052fb77d2b0",
+      "commit_short": "92d9ee5",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f47dd77c4338cd2a",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "scope_both_overrides": {
+          "trail_sides": "'both'"
+        },
+        "scope_long_overrides": {
+          "trail_sides": "'long'"
+        },
+        "baseline_overrides": {
+          "trail_mode": "'off'"
+        },
+        "splits": [
+          "2024-07-01",
+          "2024-10-01",
+          "2025-01-01",
+          "2025-04-01",
+          "2025-07-01",
+          "2025-10-01",
+          "2026-01-01"
+        ],
+        "criterion": "net_profit"
+      },
+      "summary": {
+        "criterion": "net_profit",
+        "most_profitable_arm": "scope 'short'",
+        "scope_short_legs": 7122,
+        "scope_short_net": 2298.2009,
+        "scope_short_gross": 5622.7652,
+        "scope_short_gross_per_leg": 0.789492,
+        "scope_short_gross_over_fee": 1.6913,
+        "scope_both_legs": 6663,
+        "scope_both_net": -741.1608,
+        "scope_both_gross": 2583.1827,
+        "scope_long_legs": 7063,
+        "scope_long_net": -584.985,
+        "scope_long_gross": 2739.3381,
+        "delta_net_vs_scope_both": 3039.36,
+        "variant_covers_round_trip": true,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "trail_off_legs": 7284,
+        "trail_off_net": 1593.1562,
+        "trail_off_gross_per_leg": 0.675132,
+        "trail_off_gross_over_fee": 1.4792,
+        "delta_net_vs_trail_off": 705.04,
+        "delta_gross_per_leg_vs_trail_off": 0.11436,
+        "n_split_points": 7,
+        "n_wins_both_vs_scope_both": 4,
+        "n_wins_both_gross_per_leg": 4,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235708Z.json",
+      "parent_fp": "001902a516a351e0"
     }
   ]
 }

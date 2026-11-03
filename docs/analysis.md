@@ -229,10 +229,13 @@ full cost model.
   Doubly dead: canonical `0.0`, and no `atr=` array is ever passed.
   A 1s-cadence ATR is $0.098 median, so a $5 stop needs
   `mult ≈ 51` — a constant with no cross-regime meaning.
-* **`structure_gate`** — measured, **NOT promoted**. It improves gross
-  but leaves the market correlation untouched.
-* **`trade_sides = "long"`** — measured, **NOT promoted**. It raises
-  market correlation above the two-sided recipe's aggregate.
+* **`structure_gate`** — measured, **NOT promoted**. It loses **−$1,215
+  of net** against the canonical book, and its per-leg `excess` stays
+  significantly negative on both sides.
+* **`trade_sides = "long"`** — measured, **NOT promoted**. A long-only
+  book has no hedge in a sell-off, and its daily market correlation is
+  higher than the two-sided recipe's. ⚠️ Its net is **higher** — the
+  rejection is a deliberate risk choice, not a measured-worse one.
 * **The sequence whitelist** and **the sequence flip** — measured and
   **DEAD**. See `docs/promotions.md`.
 * **`entry_mode`** — switching between `'sniper'` / `'immediate'` /

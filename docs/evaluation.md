@@ -203,8 +203,9 @@ single most actionable split in the repo:
 > LEVEL**, not the signal timing. So the long side's edge is a
 > **level-selection** edge that happens to be profitable per leg —
 > and it is exposed to the market, because a level edge harvested
-> by a drift-following position is drift-dependent by construction.
-> Do not read "1.47× the round trip" as "this side is safe".
+> by a passive-hold-following position is market-dependent by
+> construction. Do not read "1.47× the round trip" as "this side is
+> safe".
 
 > ### ⚠️ The "profitable" number in the old AGENTS.md was a CHUNKING ARTEFACT
 >
@@ -335,20 +336,53 @@ one.** The realised P&L is market drift, and the timing component is
 *less* than a passive hold of the same positions.
 
 > **The verdict is ROBUST to the book size.** On the wide book the
-> excess is negative for **every exit reason**, not just in
-> aggregate:
+> excess is negative in aggregate and on **every side**:
 >
-> | exit reason | n | excess |
+> | side | n | excess |
 > |---|---|---|
-> | tp | 1,047 | −$49.03 |
-> | tp1 | 1,113 | −$13.77 |
-> | tp2 | 10,118 | −$1,617.60 |
-> | sl | 21,583 | −$1,089.71 |
-> | eod | 3 | +$0.01 (noise, n=3) |
-> | contra_close | 17,211 | −$1,309.97 |
+> | long | — | negative |
+> | short | — | negative |
 > | **TOTAL** | **51,075** | **−$4,080.07** (t = −15.63) |
 >
 > Guard: `tests/test_signal_bar_completeness.py::test_excess_is_negative_for_every_exit_reason`.
+
+> **⚠️ THE PER-BUCKET FORM WAS WITHDRAWN 2026-11-04, AND THE OLD
+> TABLE ABOVE IS SUPERSEDED.** The wide-book per-bucket table (with
+> `sl` at −$1,089.71) was measured on a book whose `sl` exits had a
+> NEGATIVE execution-gap differential. On the promoted book the `sl`
+> bucket's excess is **+$134.24** — and the bucket's SIGN **flips
+> with book composition**:
+>
+> | book | `sl` excess | `sl` t |
+> |---|---|---|
+> | scope `'both'` | −$42.30 | −1.52 |
+> | scope `'short'` (promoted) | **+$134.24** | +3.13 |
+> | scope `'long'` | −$36.50 | −1.15 |
+> | trail OFF | +$116.66 | +2.62 |
+>
+> **WHY.** The engine books P&L at the **actual SL / TP fill price**,
+> and `drift` is a **close-to-close** passive hold. On **71.6%** of
+> `sl` legs the exit bar's CLOSE is BEYOND the stop, so the fill
+> price and the close differ by construction. The identity
+>
+> ```text
+> excess == gap@exit − gap@entry      (gap = (fill − bar_close)·side·qty)
+> ```
+>
+> holds to **1e-15** in every bucket of every book — so a stop or
+> target bucket's `excess` is the **EXECUTION-GAP DIFFERENTIAL**, not
+> a timing measure. A stop fill and a close-to-close benchmark are
+> **not exchangeable** — the same confound class as the random-entry
+> control's limit-vs-market comparison.
+>
+> The assertion was therefore replaced by the forms that DO hold:
+> the **whole-book** excess and the **per-side** excess (both
+> negative), plus the buckets with **no fill-price/close divergence**
+> (`contra_close`, `trail_stop`, `replaced_by_new_signal`), which have
+> no confound in them.
+>
+> **The promotion criterion is NET PROFIT**, not the decomposition
+> (user instruction, 2026-11-04).
 
 > **⚠️ The random-entry control's `post_fill_discount_total` flipped
 > POSITIVE on the wide book** (+$3,224,633.82). That is a **metric
@@ -359,8 +393,7 @@ one.** The realised P&L is market drift, and the timing component is
 > for +$3,439,943.61 of the total; **excluding the netting legs the
 > post-fill discount is −$215,309.79**, still negative. The
 > `excess` decomposition above is unaffected (it uses the ledger's own
-> drift) and remains negative for every bucket including
-> `contra_close`.
+> drift) and remains negative in aggregate and per side.
 
 **The honest verdict is the opposite of the one this section used to
 give.** The entry does **not** demonstrate skill. It demonstrates a
@@ -488,14 +521,14 @@ VERDICT: the gross COLLAPSES under the shuffle - it came
 and the placebo's own variance across the three seeds is small
 (sd $428 on a ~$2,400 base). So this is not noise.
 
-**The mechanism, per the drift/excess split.** The shuffle destroyed
-the **DRIFT**: drift/leg falls from **+$0.3934** to **+$0.0677**
-(and to **−$0.1227** on seed 37). The positions no longer sit on the
-side of the market that pays. The **excess** collapsed even harder
-(−$0.0916 → −$1.2102 per leg), because the payoff geometry was
-capturing a drift that no longer existed. So the FVG **level** was
-doing **directional** work — it was choosing which side of the market
-to sit on.
+**The mechanism, per the passive-hold/excess split.** The shuffle
+destroyed the **passive hold**: passive-hold/leg falls from **+$0.3934**
+to **+$0.0677** (and to **−$0.1227** on seed 37). The positions no
+longer sit on the side of the market that pays. The **excess**
+collapsed even harder (−$0.0916 → −$1.2102 per leg), because the
+payoff geometry was capturing a passive hold that no longer existed.
+So the FVG **level** was doing **directional** work — it was choosing
+which side of the market to sit on.
 
 **The `recentred` arm is the sharpest form of the question.** It
 keeps the zone's width, direction and trigger bar, but re-centres the
@@ -602,8 +635,8 @@ explicit. A gross edge that does not cover the round trip is **not**
 an edge.
 
 **Question 2 — is the edge direction-independent?**
-The **drift / excess decomposition** — the leg-level replacement for
-the monthly beta regression.
+The **per-leg passive-hold / excess decomposition** — the exact
+leg-level replacement for the monthly beta regression.
 
 The engine computes
 
@@ -616,28 +649,44 @@ position of the same size and side have earned by simply being there
 over the same window?
 
 \[
-\text{drift} = (\text{close}_{\text{exit bar}} - \text{close}_{\text{entry bar}}) \cdot \text{direction} \cdot \text{qty}
+\text{passive\_hold} = (\text{close}_{\text{exit bar}} - \text{close}_{\text{entry bar}}) \cdot \text{direction} \cdot \text{qty}
 \]
 
 \[
-\text{excess} = \text{gross} - \text{drift}
+\text{excess} = \text{gross} - \text{passive\_hold}
 \]
 
-`drift` is the **directional / beta component** — the P&L any
-position of that size and side would have earned by being there.
-`excess` is the **timing component** — the part attributable to the
-strategy's **entry timing**, which a directional proxy cannot have.
+`passive_hold` is the P&L any position of that size and side would
+have earned by being there. `excess` is the part attributable to the
+strategy's **entry timing**, which a purely directional book cannot
+have.
 
 This decomposition is an **exact algebraic identity**, not an
-estimate. No regression, no monthly aggregation, and no regime label
-are required, and it is measured **per leg** with a standard error on
-the mean.
+estimate. No regression, no aggregation and no regime label are
+required, and it is measured **per leg** — so its standard error uses
+n = thousands of legs rather than n = 13..31 months.
 
 **Current reading (continuous corpus, contra OFF):**
-drift **+$665.58** (t = +2.10), excess **−$155.00** (t = −2.96).
-**The realised P&L is MORE than explained by market drift — the
-timing component is negative.** That is the beta-proxy signature,
-now measured at the leg level.
+passive hold **+$665.58** (t = +2.10), excess **−$155.00**
+(t = −2.96). **The realised P&L is MORE than explained by the passive
+hold — the timing component is negative.**
+
+> **⚠️ `excess` IS A DIAGNOSTIC, NOT A PROMOTION GATE.** The engine
+> books P&L at the **actual SL / TP fill price**, while the passive
+> hold is a **close-to-close** measure. Those are not exchangeable, so
+> a stop or target bucket's `excess` is the **execution-gap
+> differential**, not a timing measure. See AGENTS.md § 1.1.
+
+> **⛔ NEVER draw a direction-dependence verdict from a MONTHLY
+> regression.** The repo's historical monthly beta regressions had
+> n = 13..31, where the correlation's standard error is ~0.32 in
+> Fisher-z space — every quoted monthly `r` sat inside its own noise
+> band (`r = +0.459` at n = 13 → **t = 1.57**; `r = +0.337` at
+> n = 31 → **t = 1.86**). It was also **sign-unstable**: the monthly
+> table called one book **−0.373** where the daily regression measures
+> **+0.187** (t = +2.75). The sanctioned instrument is
+> `python -m runtime.diagnostics.daily_direction_dependence` — the
+> **daily** aggregation (n ≈ 577 days) plus the per-leg decomposition.
 
 **Question 3 — is the loss concentrated?**
 The loss buckets' mean and their tail. A strategy whose losses are
