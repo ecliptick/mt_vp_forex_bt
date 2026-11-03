@@ -152,7 +152,7 @@ def test_gate_raises_when_structure_is_missing():
     with pytest.raises(ValueError, match="structure_gate=True"):
         run_vp_sniper_backtest(
             bars=bars, zones=[], vp_set=None,
-            qty_btc=1.0, sl_mode="fvg_only", tp_mode="fvg_mult",
+            qty_oz=1.0, sl_mode="fvg_only", tp_mode="fvg_mult",
             lvn_mode="mid", sl_buffer_usd=0.05, poc_buffer_usd=0.2,
             hvn_buffer_usd=0.1, tp_zone_mult_fallback=8.0,
             tp_max_distance_usd=0.0, lvn_skip_usd=0.3,
@@ -177,7 +177,7 @@ def test_gate_rejects_on_length_mismatch():
     with pytest.raises(ValueError, match="built on"):
         run_vp_sniper_backtest(
             bars=bars.iloc[:20], zones=[], vp_set=None,
-            qty_btc=1.0, sl_mode="fvg_only", tp_mode="fvg_mult",
+            qty_oz=1.0, sl_mode="fvg_only", tp_mode="fvg_mult",
             lvn_mode="mid", sl_buffer_usd=0.05, poc_buffer_usd=0.2,
             hvn_buffer_usd=0.1, tp_zone_mult_fallback=8.0,
             tp_max_distance_usd=0.0, lvn_skip_usd=0.3,

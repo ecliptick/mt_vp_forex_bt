@@ -1,0 +1,188 @@
+{
+  "schema": "results-run/1",
+  "run_id": "seq5_walkforward-9b0e3d644f43f9f0__d558402__20261103T185307Z",
+  "kind": "seq5_walkforward",
+  "config_fp": "9b0e3d644f43f9f0",
+  "ts_utc": "2026-11-03T18:53:07Z",
+  "commit": "d558402226ca3506abec96dfbc5b769d8f03228f",
+  "commit_short": "d558402",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "ledger": "runtime\\diagnostics\\_reports\\leg_ledger_seqwl_unfiltered.json",
+    "score_start": "2024-01-01",
+    "score_end": "2026-07-16",
+    "engine_overrides": {
+      "structure_seq_drop_set": "None",
+      "structure_seq_whitelist": "None"
+    },
+    "min_n": 100,
+    "null_iters": 2000
+  },
+  "summary": {
+    "n_legs": 37159,
+    "long_oos_d_gross": 1041.251499,
+    "short_oos_d_gross": 3099.74957,
+    "long_kept_legs": 8593,
+    "short_kept_legs": 5710
+  },
+  "path": "results/runs/seq5_walkforward-9b0e3d644f43f9f0__d558402__20261103T185307Z.json",
+  "parent_fp": "9b0e3d644f43f9f0",
+  "payload": {
+    "min_n": 100,
+    "null_iters": 2000,
+    "ledger": {
+      "path": "runtime\\diagnostics\\_reports\\leg_ledger_seqwl_unfiltered.json",
+      "score_start": "2024-01-01",
+      "score_end": "2026-07-16",
+      "engine_overrides": {
+        "structure_seq_drop_set": "None",
+        "structure_seq_whitelist": "None"
+      },
+      "n_legs": 37159
+    },
+    "sides": {
+      "long": {
+        "folds": [
+          {
+            "base_legs": 9722,
+            "kept_legs": 4991,
+            "base_gross": -582.064073519022,
+            "kept_gross": 10.49531973556509,
+            "d_gross": 592.5593932545871,
+            "base_net": -6433.015282530447,
+            "kept_net": -2982.855731202334,
+            "d_net": 3450.1595513281127,
+            "dropped_n": 4731,
+            "dropped_gross": -592.5593932545876,
+            "dropped_t": -1.3649925703388897,
+            "kept_gross_per_leg": 0.002102849075448826,
+            "base_gross_per_leg": -0.0598708160377517,
+            "fold": "fit H1 -> test H2",
+            "keep_size": 30
+          },
+          {
+            "base_legs": 9342,
+            "kept_legs": 3602,
+            "base_gross": 60.06199853253929,
+            "kept_gross": 508.75410392029477,
+            "d_gross": 448.6921053877555,
+            "base_net": -3554.6753722957474,
+            "kept_net": -882.4987716849109,
+            "d_net": 2672.1766006108364,
+            "dropped_n": 5740,
+            "dropped_gross": -448.6921053877555,
+            "dropped_t": -1.5437747899367067,
+            "kept_gross_per_leg": 0.1412421165797598,
+            "base_gross_per_leg": 0.006429244116092838,
+            "fold": "fit H2 -> test H1",
+            "keep_size": 23
+          }
+        ],
+        "null": [
+          {
+            "fold": "fit H1 -> test H2",
+            "real_d_gross": 592.5593932545871,
+            "null_mean": 363.71218636500885,
+            "null_p95": 888.1338282216067,
+            "null_p99": 1078.503896587973,
+            "real_percentile": 0.7695
+          },
+          {
+            "fold": "fit H2 -> test H1",
+            "real_d_gross": 448.6921053877555,
+            "null_mean": 5.085340098347762,
+            "null_p95": 381.315186522199,
+            "null_p99": 502.6157566800275,
+            "real_percentile": 0.9785
+          }
+        ],
+        "pooled_oos": {
+          "test_legs": 19064,
+          "kept_legs": 8593,
+          "base_gross": -522.0020749864827,
+          "kept_gross": 519.2494236558598,
+          "d_gross": 1041.2514986423425,
+          "base_net": -9987.690654826194,
+          "kept_net": -3865.354502887245,
+          "d_net": 6122.336151938949,
+          "base_gross_per_leg": -0.027381560794507067,
+          "kept_gross_per_leg": 0.060427024747568926,
+          "fee_per_leg_kept": 0.5102529880767025,
+          "kept_gross_over_fee": 0.11842561662467989
+        }
+      },
+      "short": {
+        "folds": [
+          {
+            "base_legs": 8856,
+            "kept_legs": 2830,
+            "base_gross": -2367.227223487787,
+            "kept_gross": -762.0933315787257,
+            "d_gross": 1605.1338919090613,
+            "base_net": -7698.973012254613,
+            "kept_net": -2471.880085024346,
+            "d_net": 5227.092927230267,
+            "dropped_n": 6026,
+            "dropped_gross": -1605.1338919090613,
+            "dropped_t": -3.134125792087404,
+            "kept_gross_per_leg": -0.2692909298864755,
+            "base_gross_per_leg": -0.26730208033963265,
+            "fold": "fit H1 -> test H2",
+            "keep_size": 22
+          },
+          {
+            "base_legs": 9229,
+            "kept_legs": 2880,
+            "base_gross": -1848.30960047337,
+            "kept_gross": -353.693922099345,
+            "d_gross": 1494.615678374025,
+            "base_net": -5396.8678429315905,
+            "kept_net": -1465.4669375645205,
+            "d_net": 3931.4009053670698,
+            "dropped_n": 6349,
+            "dropped_gross": -1494.6156783740248,
+            "dropped_t": -4.815345986289099,
+            "kept_gross_per_leg": -0.12281038961782813,
+            "base_gross_per_leg": -0.20027192550366996,
+            "fold": "fit H2 -> test H1",
+            "keep_size": 19
+          }
+        ],
+        "null": [
+          {
+            "fold": "fit H1 -> test H2",
+            "real_d_gross": 1605.1338919090613,
+            "null_mean": 1535.3022478841851,
+            "null_p95": 2121.117792665652,
+            "null_p99": 2343.7920364779475,
+            "real_percentile": 0.563
+          },
+          {
+            "fold": "fit H2 -> test H1",
+            "real_d_gross": 1494.615678374025,
+            "null_mean": 1206.6824706631385,
+            "null_p95": 1550.4258109930752,
+            "null_p99": 1672.9646478901557,
+            "real_percentile": 0.917
+          }
+        ],
+        "pooled_oos": {
+          "test_legs": 18085,
+          "kept_legs": 5710,
+          "base_gross": -4215.536823961157,
+          "kept_gross": -1115.7872536780708,
+          "d_gross": 3099.7495702830865,
+          "base_net": -13095.840855186205,
+          "kept_net": -3937.347022588867,
+          "d_net": 9158.493832597338,
+          "base_gross_per_leg": -0.23309576024114775,
+          "kept_gross_per_leg": -0.19540932638845374,
+          "fee_per_leg_kept": 0.49414356723481545,
+          "kept_gross_over_fee": -0.39545051144133553
+        }
+      }
+    }
+  }
+}

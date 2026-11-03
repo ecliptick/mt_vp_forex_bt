@@ -1,0 +1,99 @@
+{
+  "schema": "results-run/1",
+  "run_id": "dual_mode_invariance-e12bb4f927d30f26__d558402__20261103T113612Z",
+  "kind": "dual_mode_invariance",
+  "config_fp": "e12bb4f927d30f26",
+  "ts_utc": "2026-11-03T11:36:12Z",
+  "commit": "d558402226ca3506abec96dfbc5b769d8f03228f",
+  "commit_short": "d558402",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "probe": "dual_mode_invariance",
+    "invariant": "dual_n_legs == immediate_n_legs",
+    "slices": [
+      "2025-01-01..2025-02-01",
+      "2025-04-01..2025-05-01",
+      "2025-07-01..2025-08-01",
+      "2025-10-01..2025-11-01",
+      "2026-01-01..2026-02-01",
+      "2026-04-01..2026-05-01"
+    ],
+    "engine": "run_vp_sniper_backtest_forex",
+    "entry_mode": "dual"
+  },
+  "summary": {
+    "n_slices": 6,
+    "slices_with_dual_eq_immediate": 6,
+    "invariant_holds": true
+  },
+  "path": "results/runs/dual_mode_invariance-e12bb4f927d30f26__d558402__20261103T113612Z.json",
+  "parent_fp": "e12bb4f927d30f26",
+  "payload": {
+    "slices": [
+      {
+        "slice": "2025-01-01..2025-02-01",
+        "dual_legs": 1058,
+        "immediate_legs": 1058,
+        "equal": true,
+        "dual_net": -240.3972,
+        "immediate_net": -240.3972
+      },
+      {
+        "slice": "2025-04-01..2025-05-01",
+        "dual_legs": 3407,
+        "immediate_legs": 3407,
+        "equal": true,
+        "dual_net": -994.6016,
+        "immediate_net": -994.6016
+      },
+      {
+        "slice": "2025-07-01..2025-08-01",
+        "dual_legs": 1505,
+        "immediate_legs": 1505,
+        "equal": true,
+        "dual_net": -2018.0587,
+        "immediate_net": -2018.0587
+      },
+      {
+        "slice": "2025-10-01..2025-11-01",
+        "dual_legs": 3905,
+        "immediate_legs": 3905,
+        "equal": true,
+        "dual_net": 2058.8378,
+        "immediate_net": 2058.8378
+      },
+      {
+        "slice": "2026-01-01..2026-02-01",
+        "dual_legs": 3567,
+        "immediate_legs": 3567,
+        "equal": true,
+        "dual_net": -1277.073,
+        "immediate_net": -1277.073
+      },
+      {
+        "slice": "2026-04-01..2026-05-01",
+        "dual_legs": 3463,
+        "immediate_legs": 3463,
+        "equal": true,
+        "dual_net": -3746.7502,
+        "immediate_net": -3746.7502
+      }
+    ],
+    "n_slices": 6,
+    "slices_with_dual_eq_immediate": 6,
+    "invariant_holds": true,
+    "dropped_unknown_knobs": [
+      "sl_max_atr_mult",
+      "sl_max_usd_abs",
+      "sl_min_atr_mult",
+      "sl_min_usd_abs",
+      "trail_activation_mult",
+      "trail_atr_mult",
+      "trail_giveback_frac",
+      "trail_mode"
+    ],
+    "note": "Re-verification under the 2026-11-03 19:2x config: a concurrent ATR/trailing-stop refactor left build_engine_kwargs() advertising 8 knobs the engine does not accept, so the probe dropped them. The causality property is CONFIG-INDEPENDENT: dual == immediate on every slice, which is what proves no whole-file verdict remains in the immediate path."
+  }
+}

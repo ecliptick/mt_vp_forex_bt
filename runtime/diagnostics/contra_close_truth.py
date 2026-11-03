@@ -153,7 +153,7 @@ def main() -> int:
                 "direction": int(r0.direction),
                 "entry_price": float(r0.entry_price),
                 "exit_price": float(recs[-1].exit_price),
-                "qty": sum(float(r.qty_btc) for r in recs),
+                "qty": sum(float(r.qty_oz) for r in recs),
                 "exit_reasons": [r.exit_reason for r in recs],
             })
 

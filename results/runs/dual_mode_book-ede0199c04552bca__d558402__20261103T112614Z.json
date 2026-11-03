@@ -1,0 +1,94 @@
+{
+  "schema": "results-run/1",
+  "run_id": "dual_mode_book-ede0199c04552bca__d558402__20261103T112614Z",
+  "kind": "dual_mode_book",
+  "config_fp": "ede0199c04552bca",
+  "ts_utc": "2026-11-03T11:26:14Z",
+  "commit": "d558402226ca3506abec96dfbc5b769d8f03228f",
+  "commit_short": "d558402",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "probe": "dual_mode_book",
+    "label": "pre_fix",
+    "slices": [
+      "2025-01-01..2025-02-01",
+      "2025-04-01..2025-05-01",
+      "2025-07-01..2025-08-01",
+      "2025-10-01..2025-11-01",
+      "2026-01-01..2026-02-01",
+      "2026-04-01..2026-05-01"
+    ],
+    "engine": "run_vp_sniper_backtest_forex",
+    "entry_mode": "dual",
+    "lots": 0.01,
+    "contract_size": 100.0
+  },
+  "summary": {
+    "n_slices": 6,
+    "net_sum": -4104.9375,
+    "gross_per_leg_mean": 0.054912,
+    "net_positive_slices": 2
+  },
+  "path": "results/runs/dual_mode_book-ede0199c04552bca__d558402__20261103T112614Z.json",
+  "parent_fp": "ede0199c04552bca",
+  "payload": {
+    "label": "pre_fix",
+    "slices": [
+      {
+        "slice": "2025-01-01..2025-02-01",
+        "n_legs": 858,
+        "gross": 524.9618,
+        "fees": 386.1545,
+        "net": 138.8073,
+        "gross_per_leg": 0.611844
+      },
+      {
+        "slice": "2025-04-01..2025-05-01",
+        "n_legs": 2363,
+        "gross": -591.4455,
+        "fees": 762.5434,
+        "net": -1353.9889,
+        "gross_per_leg": -0.250294
+      },
+      {
+        "slice": "2025-07-01..2025-08-01",
+        "n_legs": 1317,
+        "gross": -187.2118,
+        "fees": 515.4033,
+        "net": -702.6151,
+        "gross_per_leg": -0.14215
+      },
+      {
+        "slice": "2025-10-01..2025-11-01",
+        "n_legs": 2889,
+        "gross": 1426.4233,
+        "fees": 931.739,
+        "net": 494.6843,
+        "gross_per_leg": 0.493743
+      },
+      {
+        "slice": "2026-01-01..2026-02-01",
+        "n_legs": 2488,
+        "gross": 294.2925,
+        "fees": 861.5703,
+        "net": -567.2779,
+        "gross_per_leg": 0.118285
+      },
+      {
+        "slice": "2026-04-01..2026-05-01",
+        "n_legs": 2540,
+        "gross": -1274.9635,
+        "fees": 839.5837,
+        "net": -2114.5472,
+        "gross_per_leg": -0.501954
+      }
+    ],
+    "net_sum": -4104.9375,
+    "gross_per_leg_mean": 0.054912,
+    "net_positive_slices": 2,
+    "n_slices": 6,
+    "note": "pre_fix = the shipped engine's `int(zone.inverted_bar) >= 0` skip (a whole-file verdict read at the trigger bar). post_fix = the causal `0 <= _inv_b <= i` test."
+  }
+}

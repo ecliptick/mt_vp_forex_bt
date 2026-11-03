@@ -1,0 +1,70 @@
+{
+  "schema": "results-run/1",
+  "run_id": "leg_ledger-f92c8616842e1a31__d558402__20261103T181349Z",
+  "kind": "leg_ledger",
+  "config_fp": "f92c8616842e1a31",
+  "ts_utc": "2026-11-03T18:13:49Z",
+  "commit": "d558402226ca3506abec96dfbc5b769d8f03228f",
+  "commit_short": "d558402",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": "4881b8663c75dae3",
+  "params": {
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "warmup_days": 14,
+    "engine_overrides": {
+      "structure_seq_drop_set": "frozenset({'short|c', 'short|C', 'short|B'})"
+    },
+    "lots": 0.01,
+    "contract_size": 100.0,
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "variant": true
+  },
+  "summary": {
+    "legs": 41102,
+    "gross": -4592.004784,
+    "fees": 20748.067434,
+    "net": -25340.072218,
+    "gross_per_leg": -0.111722,
+    "fee_per_leg": 0.504795,
+    "drift": -223.373767,
+    "excess": -4368.631017,
+    "trades_per_day": 44.3387
+  },
+  "path": "results/runs/leg_ledger-f92c8616842e1a31__d558402__20261103T181349Z.json",
+  "parent_fp": "f92c8616842e1a31",
+  "payload": {
+    "n_legs": 41102,
+    "meta": {
+      "scope": "XAUUSD_S1_1y__20240101_20260716",
+      "exec_start": "2023-12-18",
+      "exec_end": "2026-07-16",
+      "score_start": "2024-01-01",
+      "score_end": "2026-07-16",
+      "bars": 41233730,
+      "n_zones": 114479,
+      "cache_hit": true,
+      "engine_secs": 242.65944690000106,
+      "legs_total": 41102,
+      "legs_kept": 41102,
+      "legs_skipped_warmup": 0,
+      "n_dropped_vol_state": 53568,
+      "n_signals_emitted": 120186
+    },
+    "exit_reasons": [
+      "tp",
+      "tp1",
+      "tp2",
+      "sl",
+      "inv",
+      "eod",
+      "soft_sl",
+      "contra_close",
+      "replaced_by_new_signal",
+      "other"
+    ],
+    "ledger_path": "runtime\\diagnostics\\_reports\\leg_ledger_seqdrop_BcC.json",
+    "ledger_fingerprint": "4a36c3fb37abc520"
+  }
+}

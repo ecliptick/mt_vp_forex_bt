@@ -166,7 +166,13 @@ def _build_artifacts(bars: pd.DataFrame, scope: str) -> dict[str, Any]:
         bars["low"].to_numpy(dtype=np.float64),
         bars["close"].to_numpy(dtype=np.float64),
         bars["open"].to_numpy(dtype=np.float64),
-        measures=("vel_5m", "range_norm_1m", "wick_ratio"),
+        measures=(
+            "vel_5m", "vel_15m",
+            "range_norm_1m", "wick_ratio",
+            "rv_ratio_30s", "shock",
+            "vol_expand_prev_day",
+        ),
+        times_ns=to_ns_arr(bars),
     )
     return {
         "zones": zones, "vp_set": vp_set,

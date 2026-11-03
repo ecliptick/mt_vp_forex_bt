@@ -18,6 +18,7 @@ from bt.optimal_config import (
     FOREX_CONTRACT_SIZE,
     FOREX_COMMISSION_PER_LOT_USD,
     FOREX_SPREAD_PER_OZ_USD,
+    SL_MIN_USD,
     build_engine_kwargs,
     build_detector_kwargs,
     build_p95_kwargs,
@@ -53,8 +54,7 @@ def test_bt_imports():
 
 def test_all_submodules_importable():
     """Every bt/ module should be importable without error."""
-    from bt import optimal_config, volume_profile, vol_state
-    from bt import swing_cap, vp_engine, risk, kelly, leverage
+    from bt import optimal_config, vp_engine, risk, kelly, leverage
     assert optimal_config is not None
 
 
@@ -464,7 +464,7 @@ def test_sl_and_tp_have_independent_nth_hvn():
 def test_sl_hvn_lvn_is_the_canonical_mode():
     ek = build_engine_kwargs()
     assert ek['sl_mode'] == 'hvn_lvn'
-    assert ek['sl_min_usd'] == pytest.approx(2.50)
+    assert ek['sl_min_usd'] == pytest.approx(SL_MIN_USD)
 
 
 def test_unknown_sl_mode_raises():
@@ -530,7 +530,7 @@ def test_kelly_insufficient_data():
 
 # ─── Vol-state gate (NB85) ─────────────────────────────────────
 #
-# ``bt.vol_state.gate`` was DELETED in the 2026-10-22 dead-code
+# ``bt._engine.vol_state.gate`` was DELETED in the 2026-10-22 dead-code
 # sweep: it had zero production callers, and its "active" closure
 # never actually compared the velocity against the floor (it always
 # returned True). The engine's own ``_vol_state_pass`` is the only

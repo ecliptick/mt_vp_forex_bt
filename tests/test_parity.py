@@ -1,5 +1,5 @@
 """Parity checks: ensure the engine wrapper behaves the same
-as the underlying crypto engine when the inputs match.
+as the underlying engine when the inputs match.
 
 These tests run only if the engine is importable and a sample
 dataset is available. Skip if not.
@@ -11,7 +11,7 @@ import sys
 import pytest
 
 
-# Skip these if the crypto engine isn't importable
+# Skip these if the engine isn't importable
 try:
     from bt.vp_engine import run_vp_sniper_backtest_forex
     _engine_available = True

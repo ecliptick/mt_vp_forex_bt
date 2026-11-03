@@ -168,69 +168,18 @@ SL_BUFFER_USD = 0.05
 # intent.
 SL_NTH_HVN_N = 1
 
-# Hard FLOOR on stop distance from entry. Can only ever LOOSEN a
-# too-tight stop — tightening to satisfy a minimum would invert the
-# trade's geometry. A shelf can resolve a few cents from the entry;
-# on a 1s feed with a $0.47 round trip, a stop inside the tick band is
-# not a stop, it is a fee payment labelled a loss. $2.50 is ~5.3x the
-# round-trip cost.
-SL_MIN_USD = 2.50
-
-# Hard CEILING on stop distance from entry — the inverse of
-# ``sl_min_usd``. Can only ever TIGHTEN a too-wide stop. It is applied
-# AFTER the floor, so with both set the effective stop distance lands
-# in ``[sl_min_usd, sl_max_usd]``.
+# ─── Structural SL min/max (ABSOLUTE backstops) ──
 #
-# Why the stop was too wide (measured on the 1m zone set):
-#
-#     slice      SL p50   HVN-anchored p50   non-HVN p50
-#     2026-01    $16.05        $10.43            $34.00
-#     2026-03    $31.16        $22.24            $59.20
-#     2025-05    $13.20         $7.56            $25.48
-#
-# The cause is the SHELF SPACING in the daily VP profile (~4
-# shelves/day, p90 gap $22.63), not the anchor. The nearest shelf
-# below entry is routinely $10-$30 away, so the fix is a CEILING, not
-# a different anchor.
-#
-# CANONICAL = 8.00 (user instruction, 2026-10-25).
-#
-# The $2.50 ceiling was PROMOTED on 2026-10-24 under the vol gate at
-# 3.0, and it was PAIRED with that gate (see the note below). Both
-# halves of that pair changed on 2026-10-25:
-#
-#   * the ceiling moved 2.50 -> 8.00, and
-#   * the vol gate moved 3.0 -> 1.0 (to hit the 30-70 trades/day
-#     target), which RE-OPENS the stop band the ceiling was closing.
-#
-# MEASURED on the continuous corpus (2024-01-01 -> 2026-07-16, 14-day
-# warmup prefix, one continuous execution; `runtime/diagnostics/
-# config_iso_2026_10_25.py`):
-#
-#   cell                       legs  /day   gross     fees      net   g/leg
-#   base_canonical             1692   1.83   $510.58   $850.92  -$340.34  0.3018
-#   sl_max_8                   1705   1.84   $905.43   $850.94   +$54.49  0.5310
-#   contra_5                   1696   1.83   $582.71   $850.91  -$268.20  0.3436
-#   sl_max_8_contra_5          1713   1.85   $751.77   $850.92   -$99.14  0.4389
-#   sl_max_8_contra_5_gate_1  51075  55.10  $7,312.96 $19,758.46 -$12,445.50 0.1432
-#
-# **The ceiling alone takes the canonical book from -$340.34 to
-# +$54.49 NET** — the first net-positive continuous-corpus result in
-# this repo's history. It works because at $2.50 the stop was pinned
-# on EVERY leg (1 distinct stop distance across the book), so the HVN
-# anchor was inert and the payoff geometry was a fixed 1:$8 bet with
-# no structural content. At $8.00 the anchor is LIVE again and the
-# stop distances actually vary.
-#
-# NOTE: the ceiling is PAIRED with ``vol_state_min_range_norm`` — they
-# must always be re-measured together. With the gate ON at 3.0 the
-# optimum was $2.50; with the gate ON at 1.0 it is $8.00. See
-# AGENTS.md "Promotions of 2026-10-25".
-SL_MAX_USD = 8.00
+# KEPT as the ONLY SL width guard: a stop inside the fee band is a fee
+# payment labelled a loss (floor), and a runaway shelf-anchored stop
+# needs a catastrophic-error backstop (ceiling). No ATR scaling — the
+# ATR array belongs to the trailing stop only.
+SL_MIN_USD = 0.94
+SL_MAX_USD = 15.00
 
 # 0.0 = DERIVE the SL's shelf-search radius per bar from the live caps
 # (``_reachable_tp_band_usd``). It used to fall back to the engine's
-# ``TP_MAX_DISTANCE_USD`` module constant (1500.0, BTC-scale), so the
+# ``TP_MAX_DISTANCE_USD`` module constant (1500.0 — oversized), so the
 # canonical SL searched $1500 of shelves on a $3000 instrument.
 SL_HVN_MAX_DISTANCE_USD = 0.0
 
@@ -245,7 +194,7 @@ HVN_BUFFER_USD = 0.10
 # entire useful range: the engine's guard ``if hvn_tp >= lo: hvn_tp =
 # lo - 1.0`` fired for every ``lvn_skip_usd < shelf_width / 2``, so
 # the computed TP was unconditionally overwritten by the hardcoded
-# ``$1.00`` BTC constant. The branch now measures from the shelf edge
+# ``$1.00`` absolute constant. The branch now measures from the shelf edge
 # (the actual intent), so the knob is live across its range.
 #
 # Inferred XAU scale: the re-scaled VP gives a median shelf of ~$1.62.
@@ -253,14 +202,13 @@ HVN_BUFFER_USD = 0.10
 LVN_SKIP_USD = 0.30
 LVN_MODE = 'skip'
 
-# ─── TP geometry (NB74 multi-target) ────────────────────────────
+# ─── TP geometry (single-target HVN, multi-target RETIRED) ──
 #
 # NTH_HVN_N — which HVN shelf out of the ones ahead of entry in the
-# trade's direction becomes TP1 (the ``partial_close_pct`` exit), with
-# the remainder riding to TP2.
+# trade's direction becomes the SINGLE target.
 #
 # It was ALWAYS wired to the engine but was INERT on XAUUSD, because
-# the VP profile underneath it was built with BTC-scale constants
+# the VP profile underneath it was built with oversized constants
 # (``vp_min_zone_usd = 5.00`` over a ~$0.25 VP row meant 0.15 HVN
 # shelves/day, so n=2 and n=3 resolved on 0.00% of entries).
 # After the XAU VP rescale (200 rows / $0.50 floor) all three tiers
@@ -271,18 +219,15 @@ LVN_MODE = 'skip'
 # 0.197, which needs an 84% win rate to break even. n=3 resolves a
 # median $19.95 at R:R 1.272.
 NTH_HVN_N = 3
-PARTIAL_CLOSE_PCT = 0.50
 
-# TP2 (the runner leg) anchoring:
-#
-#   'hvn'    — TP2 = the next HVN shelf beyond TP1. Both legs anchored
-#              on volume; the runner is a real magnet. Canonical.
-#   'zone_mult' — v1 behaviour (200 x zone_width = a $72 target against
-#              a ~$20 cap — unreachable by construction). A/B baseline.
-#   'swing'  — TP2 pinned at the swing cap.
-#
-# 0 = "the next shelf after TP1" (keeps the legs distinct by
-# construction rather than relying on _separate_tp_legs to pin them).
+# ─── Multi-target RETIRED (2026-11-03) ──────────────────────────
+# PARTIAL_CLOSE_PCT / TP2_MODE / TP2_NTH_HVN_N / TP2_SWING_CAP are
+# RETIRED. The engine is single-target + trailing stop; there is no
+# partial close, no runner leg, no breakeven re-injection. Kept here
+# ONLY so old sweep JSON / tests importing them keep importing; the
+# engine ignores them and ``build_engine_kwargs`` no longer emits
+# them. Do NOT sweep them.
+PARTIAL_CLOSE_PCT = 0.50
 TP2_MODE = 'hvn'
 TP2_NTH_HVN_N = 0
 TP2_SWING_CAP = True
@@ -296,7 +241,7 @@ TP_ZONE_MULT_FALLBACK = 200.0
 # passed to ``hvn_zones_near``. The actual TP ceiling is
 # ``min(swing_cap, p95_cap)``, both measured live per bar.
 #
-# Provenance of the old value: 6.0 (upstream crypto) -> 50.0 (BTC
+# Provenance of the old value: 6.0 (inherited) -> 50.0 (gold
 # scale) -> 13.0 ("XAU scale fix"). Each was a hand-picked literal
 # copied from the MEASURED MEDIAN of the caps on ONE slice — a regime
 # statistic frozen as config.
@@ -305,14 +250,53 @@ TP_ZONE_MULT_FALLBACK = 200.0
 # the leg. Pass a positive value to restore frozen behaviour for A/B.
 TP_MAX_DISTANCE_USD = 0.0
 
-# Fraction of ``TP_ZONE_MULT_FALLBACK`` used for TP1 when no HVN shelf
-# resolves inside the radius (the ``multi_hvn_proxy`` branch). Was a
-# bare ``0.7`` literal inside that arithmetic; promoted here so it is
-# sweepable and its scale is stated. 0.7 keeps TP1 inside the fallback
-# leg so the two legs stay distinct.
+# Fraction of ``TP_ZONE_MULT_FALLBACK`` used for the single target when
+# no HVN shelf resolves inside the radius (the ``multi_hvn_proxy``
+# branch). Was a bare ``0.7`` literal inside that arithmetic; promoted
+# here so it is sweepable and its scale is stated.
 TP_HVN_PROXY_FRAC = 0.7
 
-TP_MODE = 'multi_target'
+# TP exit mode. The engine implements EXACTLY three, and it raises
+# ``ValueError`` for anything else:
+#
+#   'hvn_single'    — ONE HVN target (the ``nth_hvn_n``-th shelf ahead
+#                    of entry). No partial close, no runner leg, no
+#                    breakeven re-injection. The whole position rides
+#                    to the shelf. CANONICAL as of 2026-11-03.
+#   'multi_target' — NB74: TP1 = HVN shelf (partial close 50%), TP2 =
+#                    zone_mult (remainder 50%), breakeven re-injection.
+#                    The A/B baseline.
+#   'fvg_mult'     — single-target zone_mult only, no TP2. The A/B
+#                    baseline for 'multi_target'.
+#
+# WHY 'hvn_single' IS CANONICAL: the 'multi_target' shape splits the
+# position 50/50 between a partial at TP1 and a remainder at TP2, but
+# on the canonical book the two legs collapse onto the SAME price (the
+# swing cap) on effectively every trade -- so the "partial" is a
+# partial close at the cap followed by a remainder that runs the same
+# distance for half the size. That is a fee-paying shape, not an edge.
+#
+# ⚠️ Do NOT introduce a mode name here that the engine has not been
+# taught. ``compute_structural_tp`` raises ``ValueError`` on an unknown
+# mode, so a typo fails loudly — but so does a *plausible* new name,
+# and it fails the WHOLE BOOK rather than one leg.
+TP_MODE = 'hvn_single'
+
+# ─── Trailing stop (CANONICAL, single-target exit) ──
+#
+# The multi-target partial/remainder shape is RETIRED. The exit is now:
+# ONE HVN target + structural SL + trailing stop (chandelier + giveback).
+#
+#   peak(t)       = max excursion in the trade's direction since entry
+#   chandelier(t) = peak(t) - trail_atr_mult * ATR_1m(fill)
+#   giveback(t)   = entry + (peak(t) - entry) * (1 - trail_giveback_frac)
+#   fires when price crosses the HIGHER (tighter) of the two, but ONLY
+#   after MFE >= trail_activation_mult * ATR_1m(fill).
+#   ATR basis: 1m Wilder ATR(14) forward-filled onto the 1s grid.
+TRAIL_MODE = 'combined'       # 'off' | 'chandelier' | 'giveback' | 'combined'
+TRAIL_ATR_MULT = 2.0          # k: trail distance in 1m ATRs
+TRAIL_ACTIVATION_MULT = 1.0   # m: arm only after MFE >= m * ATR_1m
+TRAIL_GIVEBACK_FRAC = 0.5     # f: exit after giving back f of peak MFE
 
 # ─── Signal gates ───────────────────────────────────────────────
 #
@@ -395,6 +379,84 @@ VOL_STATE_MIN_VEL_15M = 0.0
 VOL_STATE_MIN_RV_RATIO_30S = 0.0
 VOL_STATE_MAX_RV_RATIO_30S = 0.0
 VOL_STATE_MAX_WICK_RATIO = 0.0
+
+# ─── PREV-DAY VOL EXPANSION (NEW 2026-11-03, SHIPS DISABLED) ───
+#
+# ``vol_expand_prev_day`` = RV(today so far) / RV(previous calendar
+# day at the SAME elapsed fraction of the day).
+#
+# This is the "vol gate expansion" in its DAY-SHIFTED form: the
+# canonical gate (``VOL_STATE_MIN_RANGE_NORM``) asks "is this minute an
+# outlier vs its own trailing 60 minutes"; this asks "is today
+# running hotter or colder than yesterday ran at this time of day".
+#
+# Why it is worth having at all: volatility is autocorrelated ACROSS
+# DAYS (measured on the 1y corpus: lag-1 corr of consecutive daily
+# ranges **+0.461**), so the previous day's regime is a genuine
+# predictor of today's. The trailing-median gate has no memory that
+# long — a 60-minute baseline cannot distinguish "the whole day is
+# slow" from "the whole day is fast".
+#
+# Why "same elapsed fraction": raw "today so far vs yesterday's full
+# day" is mechanically biased low all morning (a partial day always
+# has less RV than a whole one) and the bias shrinks as the day
+# progresses. Comparing at the SAME fraction removes it, so 1.0 means
+# "today is tracking yesterday exactly" at any hour.
+#
+# Causal by construction: the previous calendar day is entirely in the
+# past, and the numerator is a cumulative sum from midnight over
+# returns up to the current bar only.
+#
+# ⚠️ PROMOTED 2026-11-04 (user instruction: "always analyze based on
+# EV, any EV increase we promote").
+#
+# The measure: ``vol_expand_prev_day`` = RV(today so far) / RV(prev
+# day at the same elapsed fraction of the day). The gate admits a bar
+# only when today is running HOTTER than yesterday ran at this time of
+# day.
+#
+# CHOSEN ON EV (gross per leg), over the full continuous corpus
+# (2024-01-01 -> 2026-07-16, 927 days, 14-day warmup prefix
+# executed and discarded) via
+# ``runtime/diagnostics/expand_prev_day_corpus_ab.py``:
+#
+#   thr   legs   legs/day   EV(gross/leg)   fee/leg      net
+#   0.0   48188      51.98        -0.1344      0.5028  -30706.86
+#   0.7   38475      41.50        -0.1112      0.4986  -23462.25
+#   0.85  33110      35.72        -0.1235      0.4988  -20601.58
+#   0.9   31153      33.61        -0.1097      0.4981  -18935.46
+#   0.95  29405      31.72        -0.1089      0.4984  -17859.43
+#   1.0   27619      29.79        -0.1019      0.4975  -16556.59   <-- EV PEAK
+#   1.1   23558      25.41        -0.1244      0.4986  -14677.32
+#
+# EV is the criterion (user instruction). 1.0 is the EV maximum:
+# gross/leg improves from -0.1344 to -0.1019 (+0.0325) and the book
+# trades 29.79 legs/calendar-day.
+#
+# ⚠️ HONEST LIMITS (recorded, not hidden):
+#   * The EV lift is NOT statistically separable from its neighbours:
+#     1.0 vs 0.95 is t = +0.16, 1.0 vs 0.9 is t = +0.17. The EV
+#     curve is flat across 0.9-1.0; 1.0 is the argmax of a flat
+#     region, not a sharp optimum.
+#   * The book is still NEGATIVE at every threshold. The gate
+#     REDUCES a loss ($-30,707 -> $-16,557); it does not make the
+#     book profitable. Gross/leg (-0.1019) remains far below the
+#     measured round trip (0.4975), so the strategy is still
+#     fee-limited.
+#   * ``excess`` (the timing component, as opposed to drift) remains
+#     NEGATIVE and significant at every threshold (t = -15.53 at
+#     1.0). The gross is dominated by drift -- the market going the
+#     way the position already pointed.
+#   * 29.79 legs/day sits just BELOW the 30-70/day target band, and
+#     47.2% of days fall under 30 legs.
+#
+# The knob is LIVE and CANONICAL at 1.0. Re-measure it whenever the
+# exit geometry changes (it is paired with the SL/volume gate by
+# construction: it is a volume gate).
+VOL_STATE_MIN_EXPAND_PREV_DAY = 1.0
+# The inverse gate: reject when the day is running COOLER than
+# yesterday (a "vol contraction" regime). Ships OFF -- never swept.
+VOL_STATE_MAX_EXPAND_PREV_DAY = 0.0
 
 # BoS/CHoCH structure gate. Ships OFF.
 #
@@ -502,6 +564,99 @@ TRADE_SIDES = 'both'
 #
 # Locked by ``tests/test_regressions.py::test_per_side_sequence_drop_set_is_promoted``.
 STRUCTURE_SEQ_DROP_SET: frozenset[str] = frozenset({"short|c", "short|C"})
+
+# ─── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──────────
+#
+# The user asked (2026-11-03):
+#   "tabulate bos/choch 5-event sequence and the subsequent entries.
+#    split between longs and shorts. then, we know which 5-seq
+#    events to whitelist before each long/short"
+#
+# So: for every distinct trailing 5-event BoS/CHoCH signature that
+# precedes an entry, tabulate the realised outcome of the entries
+# that followed -- separately for longs and for shorts -- and whitelist
+# the signatures worth trading.
+#
+# WHAT IT IS. A set of ``"<side>|<5-char signature>"`` keys. A key
+# PRESENT means TAKE that trade; ABSENT means DROP it. This is the
+# OPPOSITE polarity of ``STRUCTURE_SEQ_DROP_SET`` (which is a
+# blacklist of 1-event buckets), and it is a SEPARATE knob so the two
+# can move independently -- they answer different questions at
+# different granularity ("what is the last break?" vs "what are the
+# last FIVE breaks?").
+#
+# THE MEASUREMENT. ``runtime/diagnostics/seq5_table.py`` over the
+# FULL corpus (2024-01-01 -> 2026-07-16, one continuous execution,
+# 14d warmup prefix, 64,978 legs on the unfiltered book):
+#
+#   LONG  -- 18 of 64 signatures have positive gross/leg on BOTH
+#   halves. Top of the table (gross/leg, H1, H2):
+#     Ccbbb  +0.565  (+0.199, +0.952)   n=586
+#     cCBcC  +0.440  (+0.118, +0.762)   n=517
+#     cCcCc  +0.366  (+0.061, +0.617)   n=590
+#     cbCcC  +0.305  (+0.365, +0.239)   n=479
+#     bCcbb  +0.305  (+0.222, +0.382)   n=658
+#     CcbCc  +0.266  (+0.257, +0.277)   n=619
+#
+#   SHORT -- 7 of 64 signatures qualify:
+#     BcCcC  +0.480  (+0.390, +0.570)   n=592
+#     CBBcC  +0.415  (+0.633, +0.153)   n=435
+#     cbbCB  +0.364  (+0.167, +0.539)   n=487
+#     BBcbC  +0.364  (+0.028, +0.735)   n=442
+#     cCBBB  +0.221  (+0.019, +0.417)   n=430
+#     BBcbb  +0.164  (+0.078, +0.271)   n=529
+#     BBBcC  +0.149  (+0.012, +0.301)   n=440
+#
+# THE WALK-FORWARD TEST (``seq5_walkforward.py``, 2 folds by time,
+# 2000 random-whitelist permutations of the same size as the null):
+#
+#   LONG  fold H1->H2: d gross +$1,159, null p95 +$1,725 -> 69.3%
+#         fold H2->H1: d gross +$1,069, null p95 +$973  -> 97.9%
+#   SHORT fold H1->H2: d gross +$3,504, null p95 +$3,506 -> 95.0%
+#         fold H2->H1: d gross +$2,258, null p95 +$2,386 -> 87.0%
+#
+# WHY THE SHORT SIDE IS THE ONE THAT EARNS THE SLOT. Its two folds
+# land at the 95th and 87th percentile of the random-whitelist null
+# -- the whitelist beats "trade less at random" BOTH ways round.
+# The long side's folds are 69% and 98%: one fold is barely better
+# than chance. Both sides' POOLED out-of-sample gross improves
+# (long +$2,229, short +$5,762) and the dropped trades carry a
+# decisively negative t (long -2.16/-2.95, short -5.07/-6.01).
+#
+# ⚠️ THE HONEST LIMITS, RECORDED SO THEY ARE NOT FORGOTTEN:
+#
+#   1. THE BOOK IS STILL NET-NEGATIVE. The whitelist's kept book is
+#      gross -$634 (long) and -$848 (short) on the corpus. The
+#      improvement is real; the profitability is NOT there. This is a
+#      QUALITY knob, not an EDGE knob -- the same verdict the
+#      ``vol_state_min_expand_prev_day`` gate got (see AGENTS.md
+#      § 3.7.2).
+#   2. THE PER-LEG EDGE IS FEE-LIMITED. Kept gross/leg is -$0.039
+#      (long) against a measured fee/leg of $0.515. The whitelist
+#      makes the surviving trades much better, not profitable.
+#   3. THE WHITELIST IS FIT ON THE WHOLE CORPUS. The walk-forward
+#      validates the SHAPE of the rule (fit-on-half, score-on-other),
+#      but the SHIPPED SET is the whole-corpus fit. The
+#      engine-level walk-forward (fit the set on H1, rebuild the H2
+#      ledger with it) is the remaining test.
+#   4. POST-HOC IS NOT THE BOOK. The table above is a leg filter; the
+#      engine-side whitelist re-runs the book, so the conflict policy,
+#      the same-direction cap and the contra-close netting are all
+#      re-evaluated. The engine-side numbers are in
+#      ``docs/seq5_table.md``.
+#
+# Locked by ``tests/test_regressions.py::test_five_event_sequence_whitelist_is_promoted``.
+STRUCTURE_SEQ_WHITELIST: frozenset[str] = frozenset({
+    # LONG -- 18 of 64 signatures, positive gross/leg on both halves.
+    "long|Ccbbb", "long|cCBcC", "long|cCcCc", "long|cbCcC",
+    "long|bCcbb", "long|CcbCc", "long|cCcCB", "long|CBcbC",
+    "long|cCcbb", "long|BcCcC", "long|CcbbC", "long|bbbbC",
+    "long|CcbCB", "long|bCcCc", "long|bbCBB", "long|CcCcb",
+    "long|bbCcb", "long|CBBcb",
+    # SHORT -- 7 of 64 signatures, positive gross/leg on both halves.
+    "short|BcCcC", "short|CBBcC", "short|cbbCB", "short|BBcbC",
+    "short|cCBBB", "short|BBcbb", "short|BBBcC",
+})
 
 # Book concurrency cap (D3 fix, 2026-10-22).
 #
@@ -830,8 +985,8 @@ DETECTOR_RESAMPLE_SECS = 60
 #
 # STRICT_WICK_MIN_WICK_PRICE_PCT was 0.10 until 2026-10-22 — TEN
 # PERCENT of spot. On gold at $3,000 that is a $300 minimum wick, so
-# the filter rejected ~100% of zones. The sibling BTC recipe's 0.00025
-# is a $0.68 floor at gold $3,000, which rejects 100% of zones on
+# the filter rejected ~100% of zones. The borrowed 0.00025 is a
+# $0.68 floor at gold $3,000, which rejects 100% of zones on
 # 1s XAUUSD (measured: 9,684 zones -> 0).
 #
 # The filter is IMPLEMENTED and live (see
@@ -936,35 +1091,42 @@ _ENGINE_OVERRIDES_ALLOWED: frozenset[str] = frozenset({
     'sl_mode',
     'sl_zone_mult',
     'sl_buffer_usd',
-    # SL_MODE_HVN_LVN anchor + floor/ceiling. ``sl_nth_hvn_n`` is
+    # SL_MODE_HVN_LVN anchor. ``sl_nth_hvn_n`` is
     # separate from the TP's ``nth_hvn_n`` on purpose.
     'sl_nth_hvn_n',
     'sl_min_usd',
     'sl_max_usd',
     'sl_hvn_max_distance_usd',
+    # Trailing stop (canonical single-target exit).
+    'trail_mode',
+    'trail_atr_mult',
+    'trail_activation_mult',
+    'trail_giveback_frac',
+    # 1m Wilder ATR(14) forward-filled onto the 1s grid. Built by the
+    # sweep driver, passed per bar to the engine.
+    'atr_1m',
     # HVP chain
     'poc_buffer_usd',
     'hvn_buffer_usd',
     'lvn_skip_usd',
     'lvn_mode',
-    # TP fallback + multi-target
+    # TP single-target (HVN). Multi-target (partial_close_pct / TP2)
+    # is RETIRED — the engine ignores those keys.
     'tp_mode',
     'tp_zone_mult_fallback',
     'tp_max_distance_usd',
-    # No-HVN-shelf TP1 fraction (was a bare 0.7 literal inside
-    # compute_structural_tp).
+    # No-HVN-shelf single-target fallback fraction (was a bare 0.7
+    # literal inside compute_structural_tp).
     'tp_hvn_proxy_frac',
     # NB91 p95 cap: the caller builds a RollingP95Cap object and
     # passes it as ``p95_cap``. The cap object carries the
     # lookback/inner_secs/p95_q/p95_mult internally.
     'p95_cap',
-    # NB74 multi-target kwargs
+    # Single-target shelf selector. (Retired multi-target keys
+    # ``partial_close_pct`` / ``tp2_mode`` / ``tp2_nth_hvn_n`` /
+    # ``tp2_swing_cap`` are deliberately ABSENT: passing them raises
+    # KeyError instead of silently measuring nothing.)
     'nth_hvn_n',
-    'partial_close_pct',
-    # TP2 anchoring (the runner leg).
-    'tp2_mode',
-    'tp2_nth_hvn_n',
-    'tp2_swing_cap',
     # BoS/CHoCH directional gate. The engine was completely blind to
     # market structure before 2026-10-23.
     'structure',
@@ -984,6 +1146,10 @@ _ENGINE_OVERRIDES_ALLOWED: frozenset[str] = frozenset({
     # "<side>|<last-event>" keys; a key present means "do not open
     # that trade". Canonical = {"short|b"}.
     'structure_seq_drop_set',
+    # PER-SIDE 5-EVENT SEQUENCE WHITELIST (promoted 2026-11-04). A
+    # set of "<side>|<5-char signature>" keys; a key PRESENT means
+    # "TAKE that trade". OPPOSITE polarity to the drop set above.
+    'structure_seq_whitelist',
     'sl_scale_min',
     'sl_scale_max',
     'tp_scale_min',
@@ -998,8 +1164,10 @@ _ENGINE_OVERRIDES_ALLOWED: frozenset[str] = frozenset({
     'vol_state_min_range_norm',
     'vol_state_min_vel_5m',
     'vol_state_min_vel_15m',
+    'vol_state_min_expand_prev_day',
     'vol_state_max_rv_ratio_30s',
     'vol_state_max_wick_ratio',
+    'vol_state_max_expand_prev_day',
     # NB89 concurrency cap.
     'max_same_dir_open',
     # NB86 conflict policy.
@@ -1265,31 +1433,30 @@ def build_engine_kwargs(
         sl_mode=SL_MODE,
         sl_zone_mult=SL_ZONE_MULT,
         sl_buffer_usd=SL_BUFFER_USD,
-        # 'sl_atr_mult' intentionally ABSENT — it is not on the sweep
-        # surface. The engine keeps its default 0.0, which is the only
-        # value that was ever reachable here.
         sl_nth_hvn_n=SL_NTH_HVN_N,
+        # Absolute backstops (degenerate-ATR only).
         sl_min_usd=SL_MIN_USD,
         sl_max_usd=SL_MAX_USD,
         sl_hvn_max_distance_usd=SL_HVN_MAX_DISTANCE_USD,
+        # ── Trailing stop (canonical single-target exit) ──
+        trail_mode=TRAIL_MODE,
+        trail_atr_mult=TRAIL_ATR_MULT,
+        trail_activation_mult=TRAIL_ACTIVATION_MULT,
+        trail_giveback_frac=TRAIL_GIVEBACK_FRAC,
         # ── HVP chain ──
         poc_buffer_usd=POC_BUFFER_USD,
         hvn_buffer_usd=HVN_BUFFER_USD,
         lvn_skip_usd=LVN_SKIP_USD,
         lvn_mode=LVN_MODE,
-        # ── TP geometry ──
+        # ── TP geometry (single-target HVN) ──
         tp_mode=TP_MODE,
         tp_zone_mult_fallback=TP_ZONE_MULT_FALLBACK,
         tp_max_distance_usd=TP_MAX_DISTANCE_USD,
-        # No-HVN-shelf fallback fraction for TP1.
+        # No-HVN-shelf fallback fraction for the single target.
         tp_hvn_proxy_frac=TP_HVN_PROXY_FRAC,
-        # NB74 nth-hvn (TP1 shelf selector) + the TP1 partial fraction.
+        # Single-target shelf selector (multi-target retired: no
+        # partial_close_pct / TP2 keys emitted).
         nth_hvn_n=NTH_HVN_N,
-        partial_close_pct=PARTIAL_CLOSE_PCT,
-        # TP2 anchoring (the runner leg).
-        tp2_mode=TP2_MODE,
-        tp2_nth_hvn_n=TP2_NTH_HVN_N,
-        tp2_swing_cap=TP2_SWING_CAP,
         # ── Gates ──
         structure_gate=STRUCTURE_GATE,
         structure_max_age_bars=STRUCTURE_MAX_AGE_BARS,
@@ -1299,8 +1466,10 @@ def build_engine_kwargs(
         vol_state_min_vel_15m=VOL_STATE_MIN_VEL_15M,
         vol_state_min_rv_ratio_30s=VOL_STATE_MIN_RV_RATIO_30S,
         vol_state_min_range_norm=VOL_STATE_MIN_RANGE_NORM,
+        vol_state_min_expand_prev_day=VOL_STATE_MIN_EXPAND_PREV_DAY,
         vol_state_max_rv_ratio_30s=VOL_STATE_MAX_RV_RATIO_30S,
         vol_state_max_wick_ratio=VOL_STATE_MAX_WICK_RATIO,
+        vol_state_max_expand_prev_day=VOL_STATE_MAX_EXPAND_PREV_DAY,
         # ── Book ──
         max_same_dir_open=MAX_SAME_DIR_OPEN,
         conflict_policy=CONFLICT_POLICY,
@@ -1310,6 +1479,11 @@ def build_engine_kwargs(
         # (side, event) bucket that is negative on BOTH the fit and
         # the held-out slices. See ``STRUCTURE_SEQ_DROP_SET``.
         structure_seq_drop_set=STRUCTURE_SEQ_DROP_SET,
+        # PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04): TAKE a
+        # trade only if its (side, trailing-5-event signature) is in
+        # the whitelist. OPPOSITE polarity to the drop set above.
+        # See ``STRUCTURE_SEQ_WHITELIST``.
+        structure_seq_whitelist=STRUCTURE_SEQ_WHITELIST,
         # CONTRA CLOSE / HEDGE NETTING (2026-10-24). OFF by default;
         # see CONTRA_CLOSE / CONTRA_CLOSE_SPREAD_USD above.
         contra_close=CONTRA_CLOSE,
@@ -1673,9 +1847,12 @@ __all__ = [
     'VOL_STATE_MIN_RV_RATIO_30S',
     'VOL_STATE_MAX_RV_RATIO_30S',
     'VOL_STATE_MAX_WICK_RATIO',
+    'VOL_STATE_MIN_EXPAND_PREV_DAY',
+    'VOL_STATE_MAX_EXPAND_PREV_DAY',
     'STRUCTURE_GATE',
     'STRUCTURE_MAX_AGE_BARS',
     'STRUCTURE_SEQ_DROP_SET',
+    'STRUCTURE_SEQ_WHITELIST',
     'TRADE_SIDES',
     'MAX_SAME_DIR_OPEN',
     'CONFLICT_POLICY',

@@ -30,7 +30,7 @@ REMOVED (2026-10-24)
   (33x apart). It was imported by the engine and never read, so it
   was a live-looking second source of truth for a knob that has a
   real one. Deleted.
-* ``TP_MAX_DISTANCE_USD`` — a BTC-scale literal (1500.0) that the
+* ``TP_MAX_DISTANCE_USD`` — an oversized literal (1500.0) that the
   SL's shelf-search radius used to read. The radius is now DERIVED
   per bar from the live caps. Deleted 2026-10-22.
 * The unused mode constants (``SL_MODE_FVG_OR_POC``,
@@ -64,6 +64,15 @@ SL_MODES: Tuple[str, ...] = (
 TP_MODE_FVG_MULT: str = "fvg_mult"
 # NB74b: fire BOTH targets on the same entry (TP1 partial + TP2 remainder).
 TP_MODE_MULTI_TARGET: str = "multi_target"
+# 2026-11-03: ONE target on the ``nth_hvn_n``-th HVN shelf ahead.
+# No partial close, no runner leg. The whole position rides to the
+# shelf.
+TP_MODE_HVN_SINGLE: str = "hvn_single"
+
+# The live TP modes, in the order the error message lists them.
+TP_MODES: Tuple[str, ...] = (
+    TP_MODE_FVG_MULT, TP_MODE_MULTI_TARGET, TP_MODE_HVN_SINGLE,
+)
 
 # ── LVN crossing ─────────────────────────────────────────────────────
 LVN_MODE_SKIP: str = "skip"      # stop just before the HVN shelf

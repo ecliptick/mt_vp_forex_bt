@@ -91,13 +91,13 @@ def main() -> None:
 
     # ── 4. lvn_skip_usd = 0.30 vs the shelf width ──
     # The engine does: hvn_tp = mid - lvn_skip_usd; if hvn_tp >= lo: lo - 1.0
-    # The `lo - 1.0` is a HARDCODED ABSOLUTE $1.00 (BTC-scale assumption).
+    # The `lo - 1.0` is a HARDCODED ABSOLUTE $1.00 (scale assumption).
     hw_arr = np.asarray(hw, dtype=float)
     frac = float(np.mean(hw_arr < 0.30)) if hw_arr.size else 0.0
     print(f"\n== 4. LVN_SKIP_USD = 0.30 vs SHELF WIDTH ==")
     print(f"  shelves NARROWER than lvn_skip_usd=0.30: {frac*100:.1f}%")
     print(f"  -> for those shelves the engine takes the `lo - 1.0` branch,")
-    print(f"     a HARDCODED $1.00 absolute move (BTC-scale assumption).")
+    print(f"     a HARDCODED $1.00 absolute move (scale assumption).")
 
     # ── 5. nth_hvn_n: how many HVNs are inside tp_max_distance_usd=50? ──
     # This is the decisive measurement for nth_hvn_n.

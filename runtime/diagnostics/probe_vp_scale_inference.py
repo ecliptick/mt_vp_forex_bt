@@ -1,7 +1,7 @@
 """Infer the correct XAUUSD scale for the VP / HVN knob family.
 
-The canonical XAUUSD run uses BTC-scale VP constants
-(``vp_min_zone_usd=5.0``, ``vp_rows=100``) and a BTC-scale TP
+The canonical XAUUSD run used oversized VP constants
+(``vp_min_zone_usd=5.0``, ``vp_rows=100``) and an oversized TP
 lookup radius (``tp_max_distance_usd=50``). On gold this makes:
 
 * every HVN "shelf" >= $5.00 wide, which at the measured $0.274
@@ -44,11 +44,11 @@ def main() -> None:
     print(f"{len(bars):,} bars\n")
 
     # VP shapes to test. ``vp_min_zone_usd`` is the lever that turns a
-    # "shelf" from a BTC-sized band into a real XAU shelf; the row
+    # "shelf" from an oversized band into a real XAU shelf; the row
     # counts set the resolution.
     shapes = [
         # (vp_rows, vp_min_zone_usd, label)
-        (100, 5.00, "CURRENT (BTC)  rows=100 min=$5.00"),
+        (100, 5.00, "CURRENT (pre-rescale)  rows=100 min=$5.00"),
         (100, 1.00, "min=$1.00"),
         (100, 0.50, "min=$0.50"),
         (100, 0.25, "min=$0.25  ~1 row"),

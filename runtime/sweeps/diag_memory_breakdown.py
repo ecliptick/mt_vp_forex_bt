@@ -133,7 +133,7 @@ def main() -> None:
         entry_time_ns=0, exit_time_ns=0, entry_price=3000.0,
         exit_price=3001.0, direction=1, stop_price=2999.0,
         target_price=3001.0, exit_reason="tp", hold_secs=1.0,
-        pnl_gross_usd=1.0, fee_usd=0.5, pnl_net_usd=0.5, qty_btc=1.0,
+        pnl_gross_usd=1.0, fee_usd=0.5, pnl_net_usd=0.5, qty_oz=1.0,
         fvg_direction=1, source="immediate", sl_mode="fvg_only",
         tp_mode="multi_target", sl_struct_ref="zone_edge",
         tp_struct_ref="hvn",

@@ -7,11 +7,11 @@ Design (2026-10-01)
 
 Why 1-min bars (not 1s)?
 
-* The 1-second cache ``notebooks/.cache/BTCUSDT-aggTrades-2025-04/bars.parquet``
+* The 1-second cache under ``notebooks/.cache/``
  is already 5 MB per month (2.5M rows). For VP we only need the
  per-price volume distribution — 1-min bars give 60× fewer rows
  (≈43k/month) at the cost of some price resolution (rows finer
- than $0.10-$1.00 at BTC scale are folded together).
+ than $0.10-$1.00 at XAUUSD scale are folded together).
 * 1-min bars are the canonical institutional "session volume
  profile" cadence (TradingView default, Sierra/Jigsaw default,
  TrendSpider default). Aligns with what human traders chart.

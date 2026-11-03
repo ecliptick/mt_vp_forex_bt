@@ -32,6 +32,16 @@ runtime/parity/_artifacts/
 *_ledger*.json
 *.log
 
+# ---- THE RESULTS REGISTRY (committed) ----
+# results/ IS the durable, commit-stamped record of every measurement.
+# It must be tracked — a result that is not in git is not a result.
+# The `*_ledger*.json` pattern above would swallow
+# results/runs/leg_ledger-*.json, so it is re-included here.
+!results/
+!results/index.json
+!results/runs/
+!results/runs/*.json
+
 # ---- local scratch ----
 nul
 0

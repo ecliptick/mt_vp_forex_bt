@@ -97,7 +97,7 @@ def main() -> None:
         r = min(cand, key=lambda x: x.exit_bar)
         actual_net = r.pnl_net_usd
         # If BE had been enforced on the TP1 bar: exit at entry price.
-        fee = abs(t1.entry_price + t1.entry_price) * 0.5 * r.qty_btc * (
+        fee = abs(t1.entry_price + t1.entry_price) * 0.5 * r.qty_oz * (
             0.47 / (2.0 * 1.0 * 3000.0) * 10000.0 / 10000.0
         ) * 2.0
         esc_rows.append((t1, r, actual_net, r.exit_price))

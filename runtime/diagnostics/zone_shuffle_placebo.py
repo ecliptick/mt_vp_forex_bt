@@ -322,7 +322,7 @@ def _run(bars, art, zones, label: str) -> dict[str, Any]:
         eb = np.array([int(t.entry_bar) for t in trades], dtype=np.int64)
         xb = np.array([int(t.exit_bar) for t in trades], dtype=np.int64)
         sd = np.array([float(t.direction) for t in trades], dtype=np.float64)
-        qt = np.array([float(t.qty_btc) for t in trades], dtype=np.float64)
+        qt = np.array([float(t.qty_oz) for t in trades], dtype=np.float64)
         c_fill = close[np.clip(eb, 0, close.size - 1)]
         c_exit = close[np.clip(xb, 0, close.size - 1)]
         drift = float(np.sum((c_exit - c_fill) * sd * qt))

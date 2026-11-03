@@ -498,13 +498,13 @@ def compute_dynamic_wick_floor(
 ) -> np.ndarray:
     """Per-bar USD wick floor scaled to a rolling mid-price.
 
-    Ported from the sibling BTC repo (``bt/signals.py``). The floor is
+    The floor is
     recomputed at ``recompute_secs`` boundaries (hourly by default) so
     the per-bar cost is amortised: each bar looks its floor up from a
     small bucket array — no per-bar percentile call.
 
     An absolute-USD wick floor is scale-blind: $25 is a meaningful
-    "this candle has a real wick" threshold on BTC at $100k and an
+    "this candle has a real wick" threshold at $100k and an
     impossible one on gold at $3,000. Scaling the floor by the bucket's
     median close keeps the filter scale-invariant, which is the same
     argument that promoted the NB83 scale-invariant stop.
@@ -515,7 +515,7 @@ def compute_dynamic_wick_floor(
         Per-bar close price (1s on the canonical corpus).
     price_pct : float
         Fraction of the bucket median close used as the USD floor.
-        ``0.00025`` = 0.025% → $0.75 at gold $3,000, $25 at BTC $100k.
+        ``0.00025`` = 0.025% → $0.75 at gold $3,000.
     recompute_secs : int
         Bucket size in seconds. Default 3600 (1 hour).
     times_utc_ns : np.ndarray | None

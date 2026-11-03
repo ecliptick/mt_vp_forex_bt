@@ -154,6 +154,7 @@ from bt.optimal_config import (  # noqa: E402
     build_engine_kwargs,
 )
 from bt.vp_engine import run_vp_sniper_backtest_forex  # noqa: E402
+from runtime.results import registry  # noqa: E402
 
 DEFAULT_DATA = Path(r"C:\coding\ict_tier_v2\data\XAUUSD_S1_1y.parquet")
 LEDGER_PATH = _REPO_ROOT / "runtime" / "diagnostics" / "_reports" / "leg_ledger.json"
@@ -227,9 +228,23 @@ LEG_FIELDS: tuple[str, ...] = (
 
 # Exit reasons are encoded as small ints so the cached payload stays
 # compact. The order is FIXED — the ledger file records the list.
+#
+# ⚠️ 2026-11-04: ``trail_stop`` was MISSING from this tuple. The
+# engine's trailing-stop exit (added with ``trail_mode``) therefore
+# fell through ``_EXIT_CODE.get(er, len(EXIT_REASONS) - 1)`` and was
+# silently reported as ``other`` -- 20,992 of 27,619 legs (76%) in
+# the promoted canonical book. The NUMBERS were never affected (the
+# gross/fee/exit-price fields carry the truth; only the exit-reason
+# LABEL was wrong), but an exit histogram that cannot name 76% of its
+# own legs is not auditable.
+#
+# The tuple is APPENDED-ONLY from here: an existing ledger's
+# ``exit_reasons`` list is recorded in the payload, and reordering it
+# would silently re-map every code in every cached ledger.
 EXIT_REASONS: tuple[str, ...] = (
     "tp", "tp1", "tp2", "sl", "inv", "eod", "soft_sl",
     "contra_close", "replaced_by_new_signal", "other",
+    "trail_stop",
 )
 _EXIT_CODE = {r: i for i, r in enumerate(EXIT_REASONS)}
 
@@ -303,6 +318,16 @@ def ledger_fingerprint(*, data: Path, start: str, end: str,
 def _overrides_are_canonical(engine_overrides: dict[str, Any]) -> bool:
     """True when the overrides describe the CANONICAL recipe."""
     return dict(engine_overrides or {}) == CANONICAL_OVERRIDES
+
+
+def _span_days(start: str, end: str) -> float:
+    """The scored window's length in calendar days."""
+    try:
+        s = pd.Timestamp(start, tz="UTC")
+        e = pd.Timestamp(end, tz="UTC")
+    except (ValueError, TypeError):
+        return 0.0
+    return max(0.0, (e - s).total_seconds() / 86400.0)
 
 
 def _guard_canonical_path(*, out_path: Path,
@@ -418,7 +443,7 @@ def _leg_rows(trades: list, bars: pd.DataFrame) -> dict[str, np.ndarray]:
         x_px = float(t.exit_price)
         out["entry_price"][i] = e_px
         out["exit_price"][i] = x_px
-        qty = float(getattr(t, "qty_btc", 0.0))
+        qty = float(getattr(t, "qty_oz", 0.0))
         out["qty"][i] = qty
         out["move_usd"][i] = abs(x_px - e_px) * qty
 
@@ -636,6 +661,52 @@ def build_ledger(*, data: Path = DEFAULT_DATA,
     tmp.replace(out_path)
     if verbose:
         print(f"ledger: BUILT {payload['n_legs']} legs (fp={fp}) -> {out_path}")
+
+    # ── RESULTS REGISTRY ────────────────────────────────────────
+    # The ledger file itself is gitignored scratch. This is the
+    # DURABLE record: which commit produced the book, how many legs
+    # it had, and what the headline numbers were. A later run of the
+    # SAME params on a newer commit produces a second entry with the
+    # SAME config_fp -- and the diff between them is "what did the
+    # bug fix do".
+    gross = sum(legs["gross"])
+    fees = sum(legs["fee"])
+    n_legs = int(len(legs["gross"]))
+    registry.record_run(
+        kind="leg_ledger",
+        params={
+            "start": start,
+            "end": end,
+            "warmup_days": warmup_days,
+            "engine_overrides": {k: repr(v) for k, v in
+                                 sorted(engine_overrides.items())},
+            "lots": FOREX_LOTS,
+            "contract_size": FOREX_CONTRACT_SIZE,
+            "data": str(data),
+            "variant": bool(engine_overrides),
+        },
+        summary={
+            "legs": n_legs,
+            "gross": round(gross, 6),
+            "fees": round(fees, 6),
+            "net": round(gross - fees, 6),
+            "gross_per_leg": round(gross / n_legs, 6) if n_legs else None,
+            "fee_per_leg": round(fees / n_legs, 6) if n_legs else None,
+            "drift": round(float(sum(legs["drift_usd"])), 6),
+            "excess": round(float(sum(legs["excess_usd"])), 6),
+            "trades_per_day": (
+                round(n_legs / _span_days(start, end), 4)
+                if _span_days(start, end) > 0 else None),
+        },
+        payload={
+            "n_legs": n_legs,
+            "meta": meta,
+            "exit_reasons": list(EXIT_REASONS),
+            "ledger_path": str(out_path),
+            "ledger_fingerprint": fp,
+        },
+        src_fp=_source_hash(),
+    )
     return payload
 
 

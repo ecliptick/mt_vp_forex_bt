@@ -263,7 +263,7 @@ class _FakeTrade:
         self.pnl_gross_usd = 10.0
         self.fee_usd = 0.47
         self.pnl_net_usd = 9.53
-        self.qty_btc = 1.0
+        self.qty_oz = 1.0
         self.fvg_direction = 1
         self.source = "immediate"
         self.signal_bar = 5
@@ -312,10 +312,10 @@ def test_leg_rows_drift_uses_the_legs_own_qty():
     the TP1 remainder creates.
     """
     bars = _fake_bars()
-    big = _FakeTrade(qty_btc=1.0, entry_bar=10, exit_bar=20,
+    big = _FakeTrade(qty_oz=1.0, entry_bar=10, exit_bar=20,
                      entry_price=3000.0, exit_price=3010.0,
                      pnl_gross_usd=10.0)
-    half = _FakeTrade(qty_btc=0.5, entry_bar=10, exit_bar=20,
+    half = _FakeTrade(qty_oz=0.5, entry_bar=10, exit_bar=20,
                       entry_price=3000.0, exit_price=3010.0,
                       pnl_gross_usd=5.0)
     cols = leg_ledger._leg_rows([big, half], bars)

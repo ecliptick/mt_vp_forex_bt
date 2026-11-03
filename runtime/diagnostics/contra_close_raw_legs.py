@@ -90,7 +90,7 @@ def main() -> int:
                 "exit_bar": max(int(r.exit_bar) for r in recs),
                 "direction": int(r0.direction),
                 "entry_price": float(r0.entry_price),
-                "qty": float(r0.qty_btc),
+                "qty": float(r0.qty_oz),
             })
 
         longs = [p for p in pos if p["direction"] > 0]
@@ -113,7 +113,7 @@ def main() -> int:
                             {"exit_bar": int(r.exit_bar),
                              "exit_price": float(r.exit_price),
                              "reason": r.exit_reason,
-                             "qty": float(r.qty_btc),
+                             "qty": float(r.qty_oz),
                              "gross": float(r.pnl_gross_usd),
                              "fee": float(r.fee_usd),
                              "net": float(r.pnl_net_usd),
@@ -128,7 +128,7 @@ def main() -> int:
                             {"exit_bar": int(r.exit_bar),
                              "exit_price": float(r.exit_price),
                              "reason": r.exit_reason,
-                             "qty": float(r.qty_btc),
+                             "qty": float(r.qty_oz),
                              "gross": float(r.pnl_gross_usd),
                              "fee": float(r.fee_usd),
                              "net": float(r.pnl_net_usd),

@@ -83,6 +83,7 @@ from bt.optimal_config import (  # noqa: E402
     build_vp_kwargs,
 )
 from bt.vp_engine import run_vp_sniper_backtest_forex  # noqa: E402
+from runtime.results import registry  # noqa: E402
 
 DEFAULT_DATA = Path(r"C:\coding\ict_tier_v2\data\XAUUSD_S1_1y.parquet")
 CACHE_ROOT = _REPO_ROOT / "notebooks" / ".cache"
@@ -749,14 +750,29 @@ class ArtifactCache:
         # ``vel_5m`` is UNSIGNED (|P_t - P_{t-w}| / P_{t-w}); the sign
         # comes from price inside ``momentum_score``. These measures
         # are backward-only and already causality-fixed (2026-10-13).
+        #
+        # EVERY gateable measure is built here, not just the two the
+        # score filter needs. A gate threshold for a measure that was
+        # never materialised raises ``KeyError`` deep inside the
+        # engine's ``_vol_state_pass`` -- i.e. a sweep of
+        # ``vol_state_min_vel_15m`` CRASHES rather than measuring
+        # anything. Building them all costs ~0.8 s per month and
+        # makes every threshold in the allowlist sweepable.
         t5 = time.perf_counter()
         from bt._engine.vol_state import build_vol_state
+        from bt._engine.timebase import to_ns_arr
         vol_state = build_vol_state(
             bars["high"].to_numpy(dtype=np.float64),
             bars["low"].to_numpy(dtype=np.float64),
             bars["close"].to_numpy(dtype=np.float64),
             bars["open"].to_numpy(dtype=np.float64),
-            measures=("vel_5m", "range_norm_1m", "wick_ratio"),
+            measures=(
+                "vel_5m", "vel_15m",
+                "range_norm_1m", "wick_ratio",
+                "rv_ratio_30s", "shock",
+                "vol_expand_prev_day",
+            ),
+            times_ns=to_ns_arr(bars),
         )
         t_vstate = time.perf_counter() - t5
 
@@ -1286,6 +1302,42 @@ def main() -> None:
             )
         records.append(rec)
         m = rec["metrics"]
+        # ── RESULTS REGISTRY ─────────────────────────────────────
+        # The per-cell JSON under runtime/sweeps/_results/ is
+        # gitignored scratch. This is the DURABLE, commit-stamped
+        # record: it survives a checkout, it is diffable, and it
+        # answers "have we measured this before, and on which
+        # commit?".
+        registry.record_run(
+            kind="sweep_cell",
+            params={
+                "knob": rec["knob"],
+                "value": rec["value"],
+                "overrides": rec["overrides_vs_canonical"],
+                "scope": scope,
+                "start": args.start,
+                "end": args.end,
+                "data": str(args.data),
+                "notebook": notebook,
+            },
+            summary={
+                "n_trades": m.get("n_trades"),
+                "hit_rate": m.get("hit_rate"),
+                "gross": m.get("total_pnl_gross_usd"),
+                "net": m.get("total_pnl_net_usd"),
+                "fees": m.get("total_fees_usd"),
+                "gross_per_leg": (None if not m.get("n_trades") else
+                                  round(float(m.get("total_pnl_gross_usd")
+                                              or 0.0)
+                                        / float(m["n_trades"]), 6)),
+                "profit_factor": m.get("profit_factor"),
+                "trades_per_day": m.get("trades_per_day"),
+                "max_drawdown_usd": m.get("max_drawdown_usd"),
+                "wall_secs": round(float(rec.get("wall_secs") or 0.0), 2),
+            },
+            payload=rec,
+            src_fp=registry.source_fingerprint(_ARTIFACT_SOURCES),
+        )
         print(f"   trades={m['n_trades']:>6}  "
               f"signals={m['n_signals_emitted']:>8}  "
               f"net=${m['total_pnl_net_usd']:>10.2f}  "

@@ -183,7 +183,7 @@ def test_contra_close_banks_the_locked_spread():
         bars=bars,
         zones=[long_zone, short_zone],
         vp_set=_make_vp(),
-        qty_btc=1.0,
+        qty_oz=1.0,
         contra_close=True,
         contra_close_spread_usd=4.5,
         **_engine_kwargs(),
@@ -219,7 +219,7 @@ def test_contra_close_does_not_fire_below_the_threshold():
         bars=bars,
         zones=[long_zone, short_zone],
         vp_set=_make_vp(),
-        qty_btc=1.0,
+        qty_oz=1.0,
         contra_close=True,
         contra_close_spread_usd=4.5,
         **_engine_kwargs(),
@@ -248,7 +248,7 @@ def test_contra_close_threshold_is_respected_exactly():
                 _zone(-1, 3004.0, 3005.0, 1),
             ],
             vp_set=_make_vp(),
-            qty_btc=1.0,
+            qty_oz=1.0,
             contra_close=True,
             contra_close_spread_usd=threshold,
             **_engine_kwargs(),
@@ -314,12 +314,12 @@ def test_disabled_contra_close_is_bit_identical():
         _zone(-1, 3049.0, 3050.0, 1),
     ]
     res_off, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         contra_close=False, contra_close_spread_usd=0.0,
         **_engine_kwargs(),
     )
     res_zero, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         contra_close=True, contra_close_spread_usd=0.0,
         **_engine_kwargs(),
     )
@@ -355,7 +355,7 @@ def test_netted_pair_pnl_is_independent_of_the_exit_price():
                 _zone(-1, 3049.0, 3050.0, 1),
             ],
             vp_set=_make_vp(),
-            qty_btc=1.0,
+            qty_oz=1.0,
             contra_close=True,
             contra_close_spread_usd=4.5,
             **_engine_kwargs(),
@@ -411,7 +411,7 @@ def test_partially_netted_remainder_keeps_its_multi_target_geometry():
         bars=bars,
         zones=[long_zone, short_zone_a, short_zone_b],
         vp_set=_make_vp(),
-        qty_btc=1.0,
+        qty_oz=1.0,
         contra_close=True,
         contra_close_spread_usd=1.5,
         **_engine_kwargs(tp_mode="multi_target", partial_close_pct=0.5),
@@ -420,14 +420,14 @@ def test_partially_netted_remainder_keeps_its_multi_target_geometry():
     assert contra, "the netting did not fire"
     # The LONG was fully netted (1.0 of 1.0) and each SHORT was half
     # netted (0.5 of 1.0), so 2.0 of quantity was booked as closed.
-    assert sum(t.qty_btc for t in contra) == pytest.approx(2.0), (
+    assert sum(t.qty_oz for t in contra) == pytest.approx(2.0), (
         "expected 1.0 netted on the long + 0.5 on each short"
     )
     # The SHORT legs were only partially netted: their residuals must
     # still be open at the end of the run (closed with reason 'eod').
     eod = [t for t in res.trades if t.exit_reason == "eod"]
     assert eod, "the partially-netted residual was lost"
-    assert sum(t.qty_btc for t in eod) == pytest.approx(1.0), (
+    assert sum(t.qty_oz for t in eod) == pytest.approx(1.0), (
         "the two 0.5 residuals were not preserved"
     )
     for t in eod:
@@ -471,7 +471,7 @@ def test_contra_close_fees_match_the_engine_convention():
             _zone(-1, 3049.0, 3050.0, 1),
         ],
         vp_set=_make_vp(),
-        qty_btc=1.0,
+        qty_oz=1.0,
         contra_close=True,
         contra_close_spread_usd=4.5,
         **_engine_kwargs(taker_fee_bps=bps),
@@ -698,7 +698,7 @@ def test_contra_close_counters_are_reported():
             _zone(-1, 3049.0, 3050.0, 1),
         ],
         vp_set=_make_vp(),
-        qty_btc=1.0,
+        qty_oz=1.0,
         contra_close=True,
         contra_close_spread_usd=4.5,
         **_engine_kwargs(),
@@ -732,7 +732,7 @@ def test_hedge_stats_count_incoming_opposite_fills():
         _zone(-1, 3049.0, 3050.0, 1),
     ]
     res, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         contra_close=False, contra_close_spread_usd=0.0,
         contra_hedge_stats=True,
         **_engine_kwargs(),
@@ -758,7 +758,7 @@ def test_hedge_stats_are_off_by_default_and_do_not_change_results():
         _zone(-1, 3049.0, 3050.0, 1),
     ]
     off, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         contra_close=False, contra_close_spread_usd=0.0,
         **_engine_kwargs(),
     )
@@ -767,7 +767,7 @@ def test_hedge_stats_are_off_by_default_and_do_not_change_results():
     assert off.n_bars_both_sides_open == 0
 
     on, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         contra_close=False, contra_close_spread_usd=0.0,
         contra_hedge_stats=True,
         **_engine_kwargs(),
@@ -806,7 +806,7 @@ def test_on_bar_callback_survives_a_vol_state_object():
 
     vs = VolState(series={"range_norm_1m": [1.0, 2.0, 3.0]})
     res, _ = run_vp_sniper_backtest(
-        bars=bars, zones=zones, vp_set=_make_vp(), qty_btc=1.0,
+        bars=bars, zones=zones, vp_set=_make_vp(), qty_oz=1.0,
         vol_state=vs,
         on_bar_callback=_cb,
         on_bar_every_k=1,

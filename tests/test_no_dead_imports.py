@@ -414,7 +414,9 @@ def test_no_module_does_work_at_import_time():
 
     The old-repo probes (``runtime/diagnostics/_probe_old_*.py``) used
     to import ``src.*`` from an upstream repo and run a FULL external
-    backtest AT MODULE SCOPE. Three things broke at once:
+    backtest AT MODULE SCOPE. (Those probes were DELETED on
+    2026-11-03 -- they reached into an upstream repo for the bar
+    engine, which this repo does not have.) Three things broke at once:
 
     1. the upstream repo may not exist (a fresh clone of THIS repo),
     2. the upstream API drifts, and a stale call raises on import,
@@ -523,7 +525,7 @@ def test_no_module_imports_from_an_upstream_repo_at_module_scope():
     """A module must not import ``src.*`` (the upstream repo) at module scope.
 
     This repo is **self-contained**: the engine source from
-    ``ict_forex_research/src/`` and ``ict_crypto_research/src/`` is
+    an external repository is
     duplicated into ``bt/_engine/``, and there is no runtime dependency
     on either upstream repo (see AGENTS.md § "Architecture").
 
@@ -657,17 +659,34 @@ def test_no_module_imports_bt_twice_under_different_names():
 
 
 def test_dead_vol_state_gate_is_gone():
-    """``bt.vol_state.gate`` was dead code and must stay deleted.
+    """``bt._engine.vol_state.gate`` was dead code and must stay deleted.
 
     It had zero production callers, and its "active" closure never
     compared the velocity against the floor — it always returned True.
     A guard that cannot fail is worse than no guard.
     """
-    import bt.vol_state as vs
+    import bt._engine.vol_state as vs
 
     assert not hasattr(vs, "gate"), (
-        "bt.vol_state.gate was removed as dead code — do not re-add it"
+        "bt._engine.vol_state.gate was removed as dead code — do not re-add it"
     )
+
+
+def test_the_reexport_wrappers_are_gone():
+    """``bt/rolling_p95.py``, ``bt/swing_cap.py``, ``bt/vol_state.py``
+    and ``bt/volume_profile.py`` were DELETED (2026-11-03).
+
+    They were pure re-export wrappers over ``bt/_engine/`` with zero
+    production callers. A wrapper surface that nothing imports is a
+    second place for a reader to look, and a second name for the same
+    object. ``bt._engine.X`` is the single surface.
+    """
+    import importlib
+
+    for name in ("bt.rolling_p95", "bt.swing_cap", "bt.vol_state",
+                 "bt.volume_profile"):
+        with pytest.raises(ModuleNotFoundError):
+            importlib.import_module(name)
 
 
 @pytest.mark.parametrize("knob", [
@@ -836,7 +855,7 @@ def test_strict_wick_filter_is_implemented_and_ships_disabled():
     gate that could never fire.
 
     The filter is now implemented, but enabling it at the sibling's
-    BTC-calibrated floor (``0.00025`` → $0.68 at gold $3,000) returns
+    The borrowed floor (``0.00025`` → $0.68 at gold $3,000) returns
     ZERO zones on XAUUSD 1s: measured, 0.00% of 3-bar windows have
     both outer candles clearing a $0.68 wick. Shipping it ON would
     silently delete the entire strategy, so it defaults OFF and must
@@ -848,7 +867,7 @@ def test_strict_wick_filter_is_implemented_and_ships_disabled():
     from bt.optimal_config import STRICT_WICK_REQUIRED
 
     assert STRICT_WICK_REQUIRED is False, (
-        "strict-wick must ship disabled: the BTC-scale floor removes "
+        "strict-wick must ship disabled: the borrowed floor removes "
         "100% of XAUUSD 1s zones (measured 9,684 -> 0)."
     )
 

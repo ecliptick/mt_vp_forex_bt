@@ -20,19 +20,29 @@ Measure              Definition                                  Grid
                      returns over the trailing N seconds
 ``rv_ratio_30s``     ``rv_30s / median(rv_30s)`` over the         1s
                      trailing baseline window — the headline
-                     "BTC is moving at Nx its normal vol"
+                     "the market is moving at Nx its normal vol"
 ``range_norm_1m``    1m candle range / median range of the        1s
                      trailing 1m candles
 ``vel_1m/5m/15m``    ``|P_t - P_{t-N}| / P_t``                    1s
 ``shock``            ``|r_1s| / median(|r_1s|)`` over the         1s
                      baseline window
 ``wick_ratio``       max wick / (H - L) of the 1m candle          1s
+``vol_expand_prev_day``  RV(today so far) / RV(prev day, same     1s
+                     elapsed fraction) — the "is today expanding
+                     or contracting vs its own yesterday" measure
 ===================  ==========================================  =========
 
 Everything is expressed as a **ratio to its own rolling median**, so
 the number is scale-free and directly interpretable: ``rv_ratio_30s``
-of 3.0 means "BTC is currently moving three times faster than its own
+of 3.0 means "the market is currently moving three times faster than its own
 24h-normal pace". No annualization, no magic constants.
+
+``vol_expand_prev_day`` is the exception that proves the rule: it is a
+ratio to the **previous calendar day's** realised variance at the same
+elapsed fraction of the day, not to a rolling median. It exists because
+volatility is autocorrelated across days (measured: lag-1 log-log
+corr of consecutive daily ranges **+0.461** on the 1y corpus), so
+"how does today compare to yesterday" is a usable regime prior.
 
 Performance
 -----------
@@ -111,6 +121,7 @@ VOL_MEASURES = (
     "vel_15m",
     "shock",
     "wick_ratio",
+    "vol_expand_prev_day",
 )
 
 _RV_WINDOWS = (5, 10, 30, 60)
@@ -267,6 +278,126 @@ def _rolling_mean_baseline(
     return tot / cnt
 
 
+def _prev_day_expansion(
+    r2: np.ndarray,
+    times_ns: np.ndarray,
+) -> np.ndarray:
+    """``RV(today so far) / RV(prev day, same elapsed fraction)``.
+
+    The "is today expanding or contracting relative to its own
+    yesterday" measure, from ``docs/v2_spec.md`` §4.3.
+
+    Why a *day* baseline and not a rolling median: volatility is
+    strongly autocorrelated across days (measured on the 1y corpus:
+    lag-1 corr of consecutive daily ranges **+0.461**), so
+    "relative to yesterday" is a usable regime prior that a trailing
+    24h median blurs out.
+
+    Why *same elapsed fraction*: raw "today so far vs yesterday total"
+    is mechanically biased — at 09:00 today's partial-day RV is
+    always below yesterday's full-day RV, and the bias shrinks as the
+    day progresses. Comparing today's cumulative RV against
+    yesterday's RV **at the same fraction of the day** removes that
+    bias, so 1.0 means "today is tracking yesterday exactly".
+
+    The ratio is *cumulative from midnight*, not a rolling window:
+    the numerator is the sum of squared returns since 00:00 UTC, and
+    the denominator is the previous day's cumulative sum at the same
+    elapsed fraction of that day.
+
+    Causal by construction: the previous calendar day is entirely in
+    the past at any bar, and today's cumulative sum only ever uses
+    returns up to the current bar.
+
+    Parameters
+    ----------
+    r2 : np.ndarray
+        Squared 1s log returns, shape ``[n]``.
+    times_ns : np.ndarray
+        int64 epoch nanosecond timestamps, shape ``[n]``, ascending.
+
+    Returns
+    -------
+    np.ndarray
+        float64 ratio, ``[n]``. ``1.0`` where undefined (first day,
+        or the previous day was perfectly flat).
+    """
+    n = r2.shape[0]
+    out = np.ones(n, dtype=np.float64)
+
+    # Day index (UTC calendar day) for each bar.
+    day_ns = 86_400 * 1_000_000_000
+    day_id = times_ns // day_ns
+
+    # Cumulative RV within the day, and the elapsed fraction of the day.
+    # ``np.cumsum`` over r2, reset at each day boundary, gives the
+    # "RV so far today" for every bar.
+    # Day-start offset via searchsorted on the unique day ids.
+    uniq_days, day_start = np.unique(day_id, return_index=True)
+    day_start = np.append(day_start, n)  # sentinel for the cumsum offsets
+
+    csum = np.concatenate(([0.0], np.cumsum(r2, dtype=np.float64)))
+    # RV so far today for bar i = csum[i+1] - csum[day_start[day_index]]
+    day_of_bar = np.searchsorted(uniq_days, day_id, side="left")
+    rv_so_far = csum[1:] - csum[day_start[day_of_bar]]
+
+    # Elapsed seconds since midnight, and the fraction of the day.
+    sec_of_day = (times_ns % day_ns) // 1_000_000_000
+    frac = sec_of_day.astype(np.float64) / 86_400.0
+
+    # For each bar, the PREVIOUS day's cumulative RV at the same
+    # elapsed fraction. The previous day's bars are the ones with
+    # ``day_id == day_id[i] - 1``; we need, for each such day, the
+    # cumulative RV as a function of elapsed fraction.
+    #
+    # Implementation: for each day d (except the first), find the
+    # previous day's cumulative-RV curve. We evaluate it at the
+    # current bar's elapsed fraction by walking the previous day's
+    # bars and taking the last bar whose elapsed fraction is <= the
+    # current one (a "last observation carried forward" lookup).
+    #
+    # The previous day's RV curve is monotonic in elapsed fraction
+    # (RV only accumulates), so LOCF is exact, not an approximation.
+    for d in range(1, len(uniq_days)):
+        prev_lo = day_start[d - 1]
+        prev_hi = day_start[d]
+        cur_lo = day_start[d]
+        cur_hi = day_start[d + 1] if d + 1 < len(day_start) else n
+        if cur_hi <= cur_lo:
+            continue
+        # The previous day's own cumulative RV, at each of its bars.
+        prev_csum_off = csum[prev_lo]
+        prev_rv = csum[prev_lo + 1:prev_hi + 1] - prev_csum_off
+        prev_frac = frac[prev_lo:prev_hi]
+
+        # Current day's bars and their fractions.
+        cur_frac = frac[cur_lo:cur_hi]
+        cur_rv = rv_so_far[cur_lo:cur_hi]
+
+        # LOCF: for each current bar, index into the previous day at
+        # the last position whose elapsed fraction <= cur_frac.
+        idx = np.searchsorted(prev_frac, cur_frac, side="right") - 1
+        idx = np.clip(idx, 0, prev_rv.shape[0] - 1)
+        den = prev_rv[idx]
+        num = cur_rv
+        # GUARD: the previous day must actually have TRADED up to this
+        # point in the day. Forex sessions break daily and the weekend
+        # days are partial (Sunday's session is ~1h; Friday's ends
+        # early). Without this guard, Monday 10:00 would be compared
+        # against Sunday 23:59's tiny cumulative RV and the ratio
+        # would explode to ~30x on no real signal.
+        #
+        # The previous day is only usable at fraction f if its LAST
+        # bar reaches at least f. Otherwise the ratio is undefined
+        # and we emit 1.0 ("no opinion") rather than a wild number
+        # that would trip a threshold gate spuriously.
+        prev_covers = prev_frac[-1] >= cur_frac
+        good = (den > 1e-18) & prev_covers
+        out[cur_lo:cur_hi] = np.where(good, num / np.where(good, den, 1.0), 1.0)
+
+    return out
+
+
 def _safe_ratio(num: np.ndarray, den: np.ndarray) -> np.ndarray:
     """``num / den`` with a guard against divide-by-zero.
 
@@ -295,6 +426,7 @@ def build_vol_state(
     min_bars_since_close: int = 1,
     elapsed_adjust: bool = False,
     use_cache: bool = True,
+    times_ns: np.ndarray | None = None,
 ) -> VolState:
     """Build the per-bar volatility state.
 
@@ -336,6 +468,12 @@ def build_vol_state(
         False to force a fresh build. Bounded to ``_CACHE_MAX`` entries
         with oldest-first eviction, because a monthly file's state is
         ~6 measures x 2.6M float64 ~= 126 MB.
+    times_ns:
+        int64 epoch NANOSECONDS, shape ``[n]``, ascending. REQUIRED
+        for the ``vol_expand_prev_day`` measure -- it needs the
+        calendar-day boundary and the elapsed fraction of the day.
+        Omit it and that measure is simply not built (the other
+        measures do not need it).
 
     Returns
     -------
@@ -356,15 +494,31 @@ def build_vol_state(
         # would miss while the data is the same. Hashing 2.6M x 4
         # float64 directly is ~30 ms -- negligible against the ~7 s
         # build it replaces, and far cheaper than a wrong cache hit.
+        #
+        # The ``vol_expand_prev_day`` measure depends on the calendar
+        # DAY BOUNDARIES, so the timestamps must be fingerprinted too
+        # whenever it is requested -- otherwise a build over the same
+        # OHLC with a different day alignment would return a stale
+        # ratio.
+        _want_fp = tuple(sorted(measures))
+        _ts_fp = None
+        if "vol_expand_prev_day" in _want_fp:
+            if times_ns is None:
+                raise ValueError(
+                    "build_vol_state: 'vol_expand_prev_day' requires "
+                    "times_ns (int64 epoch nanoseconds, ascending)."
+                )
+            _ts_fp = (int(times_ns[0]), int(times_ns[-1]), int(times_ns.shape[0]))
         _ck = (
             hash((n, float(close[0]), float(close[-1]),
                   float(high.sum()), float(low.sum()),
                   float(close.sum()))),
-            tuple(sorted(measures)),
+            _want_fp,
             int(rv_baseline_secs), int(range_baseline_mins),
             int(shock_baseline_secs), int(candle_secs),
             int(min_bars_since_close), bool(elapsed_adjust),
             None if open_ is None else float(open_.sum()),
+            _ts_fp,
         )
         _hit = _CACHE.get(_ck)
         if _hit is not None:
@@ -606,6 +760,21 @@ def build_vol_state(
         per_b = _per_bucket_median(abs_r, bucket_idx, n_buckets)
         base = _rolling_median_baseline(per_b, sb)
         series["shock"] = _safe_ratio(abs_r, base[usable])
+
+    # ── Prev-day expansion: today's RV vs yesterday's, same fraction ──
+    if "vol_expand_prev_day" in want:
+        if times_ns is None:
+            raise ValueError(
+                "build_vol_state: 'vol_expand_prev_day' requires times_ns "
+                "(int64 epoch nanoseconds, ascending)."
+            )
+        _ts = np.asarray(times_ns, dtype=np.int64)
+        if _ts.shape[0] != n:
+            raise ValueError(
+                "build_vol_state: times_ns length mismatch "
+                f"({_ts.shape[0]} vs {n})"
+            )
+        series["vol_expand_prev_day"] = _prev_day_expansion(r2, _ts)
 
     _vs = VolState(
         series=series,

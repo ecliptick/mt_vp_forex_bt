@@ -1,13 +1,13 @@
 """Daily-swing TP cap — limits `tp_zone_mult * zone_width` to a
-multiple of recent BTC peak-to-trough daily swing.
+multiple of the recent XAUUSD peak-to-trough daily swing.
 
 Why this exists
 ===============
 
 The canonical sniper uses ``tp_zone_mult=60``: a $50 zone gets
-TP = $3000; a $200 zone gets TP = $12,000. BTC's p90 daily
-peak-to-trough swing on the 6mo corpus is ~$6,700 (8% of price).
-A $12,000 TP is **179% of BTC's p90 daily swing** — structurally
+TP = $3000; a $200 zone gets TP = $12,000. XAUUSD's p90 daily
+peak-to-trough swing is a small fraction of the $3,000 spot price.
+A $12,000 TP is many multiples of that swing — structurally
 unfillable in a 1-2 day hold.
 
 Without a cap, the wider zones produce trades that ride for

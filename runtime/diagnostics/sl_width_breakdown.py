@@ -145,7 +145,7 @@ def main():
             # capped at 2.50 per unit. If the trade WON, the stop
             # distance did not matter -> unchanged.
             if t.pnl_gross_usd < 0:
-                capped.append(-2.50 * t.qty_btc)
+                capped.append(-2.50 * t.qty_oz)
             else:
                 capped.append(t.pnl_net_usd)
         cur_net = sum(t.pnl_net_usd for t in tr)

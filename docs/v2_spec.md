@@ -500,9 +500,9 @@ gate fired rather than silently passing everything. **The gate raises
 loudly** if `structure=None` or if the state length ≠ bars length.
 
 `STRUCTURE_PIVOT_LEN = 9` is the only value with any measurement behind
-it (it is the `detect_market_structure` default). `ms_pivot_len=75` is
-a BTC number and was a dead knob on this engine, so **no gold pivot has
-been validated** — sweep it before trusting the gate.
+it (it is the `detect_market_structure` default). Any larger pivot
+length was a dead knob on this engine, so **no alternative gold pivot
+has been validated** — sweep it before trusting the gate.
 
 ### 6.4 MEASURED 2026-10-23 — is BoS/CHoCH a directional filter?
 

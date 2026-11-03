@@ -86,7 +86,7 @@ def main() -> None:
     for n in (1, 2, 3):
         run(bars, art, f"nth_hvn_n={n}", nth_hvn_n=n)
 
-    # Does lvn_skip_usd do ANYTHING? (BTC-scale hardcoded `lo - 1.0`)
+    # Does lvn_skip_usd do ANYTHING? (hardcoded absolute `lo - 1.0`)
     for v in (0.05, 0.30, 5.00, 25.00):
         run(bars, art, f"lvn_skip_usd={v}", lvn_skip_usd=v)
 

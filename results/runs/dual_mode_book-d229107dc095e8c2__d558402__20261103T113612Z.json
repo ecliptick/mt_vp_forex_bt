@@ -1,0 +1,94 @@
+{
+  "schema": "results-run/1",
+  "run_id": "dual_mode_book-d229107dc095e8c2__d558402__20261103T113612Z",
+  "kind": "dual_mode_book",
+  "config_fp": "d229107dc095e8c2",
+  "ts_utc": "2026-11-03T11:36:12Z",
+  "commit": "d558402226ca3506abec96dfbc5b769d8f03228f",
+  "commit_short": "d558402",
+  "dirty": true,
+  "branch": "main",
+  "src_fp": null,
+  "params": {
+    "probe": "dual_mode_book",
+    "label": "post_fix",
+    "slices": [
+      "2025-01-01..2025-02-01",
+      "2025-04-01..2025-05-01",
+      "2025-07-01..2025-08-01",
+      "2025-10-01..2025-11-01",
+      "2026-01-01..2026-02-01",
+      "2026-04-01..2026-05-01"
+    ],
+    "engine": "run_vp_sniper_backtest_forex",
+    "entry_mode": "dual",
+    "lots": 0.01,
+    "contract_size": 100.0
+  },
+  "summary": {
+    "n_slices": 6,
+    "net_sum": -6218.0429,
+    "gross_per_leg_mean": -0.126339,
+    "net_positive_slices": 1
+  },
+  "path": "results/runs/dual_mode_book-d229107dc095e8c2__d558402__20261103T113612Z.json",
+  "parent_fp": "d229107dc095e8c2",
+  "payload": {
+    "label": "post_fix",
+    "slices": [
+      {
+        "slice": "2025-01-01..2025-02-01",
+        "n_legs": 1058,
+        "gross": 248.9604,
+        "fees": 489.3576,
+        "net": -240.3972,
+        "gross_per_leg": 0.235312
+      },
+      {
+        "slice": "2025-04-01..2025-05-01",
+        "n_legs": 3407,
+        "gross": -86.3759,
+        "fees": 908.2257,
+        "net": -994.6016,
+        "gross_per_leg": -0.025352
+      },
+      {
+        "slice": "2025-07-01..2025-08-01",
+        "n_legs": 1505,
+        "gross": -1392.046,
+        "fees": 626.0127,
+        "net": -2018.0587,
+        "gross_per_leg": -0.924948
+      },
+      {
+        "slice": "2025-10-01..2025-11-01",
+        "n_legs": 3905,
+        "gross": 3186.9866,
+        "fees": 1128.1488,
+        "net": 2058.8378,
+        "gross_per_leg": 0.81613
+      },
+      {
+        "slice": "2026-01-01..2026-02-01",
+        "n_legs": 3567,
+        "gross": -234.8082,
+        "fees": 1042.2648,
+        "net": -1277.073,
+        "gross_per_leg": -0.065828
+      },
+      {
+        "slice": "2026-04-01..2026-05-01",
+        "n_legs": 3463,
+        "gross": -2747.3722,
+        "fees": 999.3779,
+        "net": -3746.7502,
+        "gross_per_leg": -0.79335
+      }
+    ],
+    "net_sum": -6218.0429,
+    "gross_per_leg_mean": -0.126339,
+    "net_positive_slices": 1,
+    "n_slices": 6,
+    "note": "post_fix = the causal `0 <= _inv_b <= i` test. The book now matches the `immediate` arm exactly on every slice."
+  }
+}

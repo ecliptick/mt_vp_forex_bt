@@ -129,7 +129,7 @@ def main() -> int:
                 "direction": int(t.direction),
                 "entry": float(t.entry_price),
                 "exit": float(t.exit_price),
-                "qty": float(t.qty_btc),
+                "qty": float(t.qty_oz),
                 "contra_gross": float(t.pnl_gross_usd),
                 "off_outcome": outcome,
             })
@@ -153,11 +153,11 @@ def main() -> int:
             k = (int(c.entry_time_ns), int(c.direction), float(c.entry_price))
             if k in netted_keys:
                 off_gross_same += float(c.pnl_gross_usd)
-                off_qty_same += float(c.qty_btc)
+                off_qty_same += float(c.qty_oz)
 
         contra_gross = sum(float(t.pnl_gross_usd) for t in on
                             if t.exit_reason == "contra_close")
-        contra_qty = sum(float(t.qty_btc) for t in on
+        contra_qty = sum(float(t.qty_oz) for t in on
                          if t.exit_reason == "contra_close")
 
         mkt = float((bars["close"].iloc[-1] / bars["close"].iloc[0] - 1.0) * 100.0)

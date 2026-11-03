@@ -92,7 +92,7 @@ def _positions(res) -> list[dict]:
             "exit_bar": max(int(r.exit_bar) for r in recs),
             "direction": int(r0.direction),
             "entry_price": float(r0.entry_price),
-            "qty": float(r0.qty_btc),
+            "qty": float(r0.qty_oz),
         })
     return out
 

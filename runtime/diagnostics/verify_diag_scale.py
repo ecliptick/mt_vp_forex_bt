@@ -4,7 +4,7 @@ Every diagnostic in ``runtime/diagnostics/`` calls::
 
     run_vp_sniper_backtest_forex(..., lots=0.01, contract_size=1.0, ...)
 
-``qty_btc = lots * contract_size`` -> **0.01 oz**.
+``qty_oz = lots * contract_size`` -> **0.01 oz**.
 
 The CANONICAL MT4 sizing is::
 

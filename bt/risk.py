@@ -20,8 +20,7 @@ The math:
   ``lots × commission_per_lot_usd + oz × spread_per_oz_usd``
   = ``0.01×7 + 1×0.40 = $0.07 + $0.40 = $0.47``.
 
-P&L per $1 move at 1 oz: ``+ $1`` (or ``- $1`` short). Same
-as BTC at 1 BTC notional.
+P&L per $1 move at 1 oz: ``+ $1`` (or ``- $1`` short).
 
 There is NO "overlay" concept in this repo. The historical
 $0.19 backtest baseline is gone; ``spread_per_oz_usd`` is the

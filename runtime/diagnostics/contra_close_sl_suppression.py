@@ -90,7 +90,7 @@ def _positions(res) -> list[dict]:
 
     The position's SIZE is the SUM of its legs' quantities. A TP1
     position books TWO legs -- the partial close (50%) and the
-    remainder (50%) -- so taking the FIRST leg's ``qty_btc`` halves
+    remainder (50%) -- so taking the FIRST leg's ``qty_oz`` halves
     the position's size and makes every qty comparison wrong.
     """
     by_parent: dict[int, list] = {}
@@ -105,7 +105,7 @@ def _positions(res) -> list[dict]:
             "exit_bar": max(int(r.exit_bar) for r in recs),
             "direction": int(r0.direction),
             "entry_price": float(r0.entry_price),
-            "qty": float(sum(float(r.qty_btc) for r in recs)),
+            "qty": float(sum(float(r.qty_oz) for r in recs)),
             "exit_reasons": [r.exit_reason for r in recs],
             "gross": sum(float(r.pnl_gross_usd) for r in recs),
             "net": sum(float(r.pnl_net_usd) for r in recs),

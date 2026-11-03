@@ -132,21 +132,21 @@ def test_multi_target_qty_uses_per_position_size():
 
     Regression for: the TP1 remainder leg was created but never
     recorded its size, so the TP2 / SL / EOD branches closed it at the
-    full run-level ``qty_btc`` — roughly doubling reported P&L on
+    full run-level ``qty_oz`` — roughly doubling reported P&L on
     every TP1 -> TP2 trade.
     """
     from bt._engine.vp_multi_target_engine import OpenTrade
     src = inspect.getsource(
         __import__("bt._engine.vp_multi_target_engine",
                    fromlist=["run_vp_sniper_backtest"]))
-    # No exit may size gross P&L off the bare run-level qty_btc.
+    # No exit may size gross P&L off the bare run-level qty_oz.
     offenders = [
         line.strip() for line in src.splitlines()
-        if "* ot.direction * qty_btc" in line
-        or "0.5 * qty_btc * (" in line
+        if "* ot.direction * qty_oz" in line
+        or "0.5 * qty_oz * (" in line
     ]
     assert not offenders, (
-        "exit paths still size off run-level qty_btc: "
+        "exit paths still size off run-level qty_oz: "
         f"{offenders}"
     )
 
@@ -154,12 +154,12 @@ def test_multi_target_qty_uses_per_position_size():
 def test_tp2_branch_closes_full_size():
     """TP2 reached before TP1 must close the FULL original size.
 
-    Regression for ``qty_used = qty_btc * (1.0 - pct)`` on the
+    Regression for ``qty_used = qty_oz * (1.0 - pct)`` on the
     TP2-before-TP1 path, which silently discarded half the position.
     """
     from bt._engine.vp_multi_target_engine import run_vp_sniper_backtest
     src = inspect.getsource(run_vp_sniper_backtest)
-    assert "qty_btc * (1.0 - pct)" not in src, (
+    assert "qty_oz * (1.0 - pct)" not in src, (
         "TP2 branch still closes only (1-pct) of the position"
     )
 
@@ -974,7 +974,7 @@ def test_compute_metrics_reads_real_trade_fields():
         entry_price=100.0, exit_price=101.0, direction=1,
         stop_price=99.0, target_price=103.0, exit_reason="tp",
         hold_secs=3600.0, pnl_gross_usd=1.0, fee_usd=0.5,
-        pnl_net_usd=0.5, qty_btc=1.0, fvg_direction=1, source="sniper",
+        pnl_net_usd=0.5, qty_oz=1.0, fvg_direction=1, source="sniper",
         sl_mode="fvg_only", tp_mode="multi_target",
         sl_struct_ref="zone_edge", tp_struct_ref="hvn",
     )
@@ -1291,7 +1291,7 @@ def test_p95_warmup_gate_is_not_active_without_a_seed():
 #   1. A radius wider than the reachable band finds shelves that the
 #      cap then clamps back onto the ceiling, collapsing TP1 onto TP2.
 #   2. ``compute_structural_sl`` fell back to the engine module
-#      constant ``TP_MAX_DISTANCE_USD = 1500.0`` (BTC-scale) when
+#      constant ``TP_MAX_DISTANCE_USD = 1500.0`` (oversized) when
 #      ``sl_hvn_max_distance_usd <= 0`` — which is canonical.
 #
 # The radius is now DERIVED from the same caps that clamp the leg, so
@@ -1492,17 +1492,286 @@ def test_vol_gate_measure_is_built_by_the_drivers():
     driver that omits ``range_norm_1m`` from the built measures would
     silently ship a no-op gate -- the exact class of defect this repo
     calls out in "Dead knobs". Both artifact builders must request it.
+
+    2026-11-03: the driver built only THREE measures
+    (``vel_5m``, ``range_norm_1m``, ``wick_ratio``), so every OTHER
+    vol threshold in the allowlist raised ``KeyError`` inside
+    ``_vol_state_pass`` instead of measuring anything. This test now
+    asserts the FULL set.
     """
     import pathlib
 
     repo = pathlib.Path(__file__).resolve().parents[1]
+    # Every measure a canonical vol threshold can gate on.
+    required = (
+        "vel_5m", "vel_15m",
+        "range_norm_1m", "wick_ratio",
+        "rv_ratio_30s", "shock",
+        "vol_expand_prev_day",
+    )
     for rel in ("runtime/sweeps/cached_sweep.py",
                 "runtime/diagnostics/directional_beta.py"):
         src = (repo / rel).read_text(encoding="utf-8")
-        assert "range_norm_1m" in src, (
-            f"{rel} does not build the range_norm_1m measure -- the "
-            f"promoted vol gate would silently pass every signal"
+        for measure in required:
+            assert measure in src, (
+                f"{rel} does not build the {measure!r} measure -- a "
+                f"vol_state threshold on it would raise KeyError inside "
+                f"_vol_state_pass instead of measuring anything"
+            )
+        # The expansion measure needs a clock.
+        assert "times_ns=to_ns_arr(bars)" in src, (
+            f"{rel} must pass times_ns -- the vol_expand_prev_day "
+            f"measure needs the calendar-day boundary"
         )
+
+
+def test_vol_expand_prev_day_requires_a_clock():
+    """The measure must REFUSE to run without timestamps, not no-op.
+
+    A silent ``1.0`` would be a gate that never fires, which reads
+    exactly like "the knob does nothing" -- the worst possible
+    failure mode for a knob whose whole purpose is to be swept.
+    """
+    from bt._engine.vol_state import build_vol_state
+
+    n = 10
+    close = np.full(n, 3000.0)
+    high = close * 1.0001
+    low = close * 0.9999
+
+    with pytest.raises(ValueError, match="times_ns"):
+        build_vol_state(
+            high, low, close,
+            measures=("vol_expand_prev_day",),
+            use_cache=False,
+        )
+
+
+def test_vol_expand_prev_day_measures_today_vs_yesterday():
+    """The measure must read ~1.0 on a quiet day and >1 on an expansion.
+
+    Synthetic 3-day series: day 0 normal, day 1 at 3x the volatility.
+    Day 1 must read materially ABOVE 1.0 (today is hotter than
+    yesterday) and day 2 must read BELOW 1.0 (today is back to
+    normal).
+    """
+    from bt._engine.vol_state import build_vol_state
+
+    day = 86_400
+    n = 3 * day
+    rng = np.random.default_rng(7)
+    t = (np.arange(n, dtype=np.int64) * 1_000_000_000
+         + 1_700_000_000 * 1_000_000_000)
+    rets = rng.normal(0.0, 1e-5, n)
+    rets[day:2 * day] *= 3.0
+    close = 3000.0 * np.exp(np.cumsum(rets))
+    high = close * 1.00001
+    low = close * 0.99999
+
+    vs = build_vol_state(
+        high, low, close, close.copy(),
+        measures=("vol_expand_prev_day",),
+        times_ns=t,
+        use_cache=False,
+    )
+    s = vs.series["vol_expand_prev_day"]
+
+    # Sample at 12:00 on each day.
+    def at(d: int) -> float:
+        return float(s[d * day + 12 * 3600])
+
+    # Day 0: no previous day -> "no opinion" (1.0).
+    assert at(0) == pytest.approx(1.0)
+    # Day 1: 3x yesterday's vol at the same hour -> well above 1.
+    assert at(1) > 2.0, f"expected an expansion, got {at(1):.3f}"
+    # Day 2: back to normal -> below 1.
+    assert at(2) < 1.0, f"expected a contraction, got {at(2):.3f}"
+
+
+def test_vol_expand_prev_day_ignores_a_partial_previous_day():
+    """A weekend session must not become the denominator.
+
+    Forex sessions break daily and weekend days are partial (Sunday's
+    session is ~1h). Without a guard, Monday 10:00 is compared against
+    Sunday 23:59's tiny cumulative RV and the ratio explodes to ~30x
+    on no real signal. The measure must emit 1.0 ("no opinion")
+    instead.
+    """
+    from bt._engine.vol_state import build_vol_state
+
+    day = 86_400
+    n = 2 * day
+    rng = np.random.default_rng(11)
+    t = (np.arange(n, dtype=np.int64) * 1_000_000_000
+         + 1_700_000_000 * 1_000_000_000)
+    rets = rng.normal(0.0, 1e-5, n)
+    # Day 0 is PARTIAL: only the first hour has bars.
+    rets[3600:] = 0.0
+    close = 3000.0 * np.exp(np.cumsum(rets))
+    high = close * 1.00001
+    low = close * 0.99999
+
+    vs = build_vol_state(
+        high, low, close, close.copy(),
+        measures=("vol_expand_prev_day",),
+        times_ns=t,
+        use_cache=False,
+    )
+    s = vs.series["vol_expand_prev_day"]
+    # Day 1 at 12:00 -- the previous day only covered the first hour.
+    assert float(s[day + 12 * 3600]) == pytest.approx(1.0), (
+        "a partial previous day must yield 'no opinion', not a ratio"
+    )
+
+
+def test_vol_expand_prev_day_is_a_sweepable_engine_knob():
+    """The knob must exist on the engine surface and be CANONICAL at 1.0.
+
+    PROMOTED 2026-11-04 on the corpus EV (gross per leg): -0.1344 at
+    gate-off -> -0.1019 at 1.0, the argmax of a flat 0.9-1.0 region.
+    The decision criterion is EV, by user instruction.
+
+    The INVERSE gate (``vol_state_max_expand_prev_day``) is still
+    OFF -- it was never swept.
+    """
+    from bt.optimal_config import (
+        VOL_STATE_MAX_EXPAND_PREV_DAY,
+        VOL_STATE_MIN_EXPAND_PREV_DAY,
+        build_engine_kwargs,
+    )
+
+    assert VOL_STATE_MIN_EXPAND_PREV_DAY == pytest.approx(1.0), (
+        "the prev-day expansion gate is canonical at 1.0 -- the corpus "
+        "EV argmax (gross/leg -0.1019 vs -0.1344 gate-off)"
+    )
+    assert VOL_STATE_MAX_EXPAND_PREV_DAY == pytest.approx(0.0)
+
+    ek = build_engine_kwargs()
+    assert ek["vol_state_min_expand_prev_day"] == pytest.approx(1.0)
+    assert ek["vol_state_max_expand_prev_day"] == pytest.approx(0.0)
+    # Sweepable.
+    assert build_engine_kwargs(
+        vol_state_min_expand_prev_day=1.1
+    )["vol_state_min_expand_prev_day"] == pytest.approx(1.1)
+    assert build_engine_kwargs(
+        vol_state_max_expand_prev_day=0.8
+    )["vol_state_max_expand_prev_day"] == pytest.approx(0.8)
+
+
+def test_vol_expand_prev_day_gate_is_live_in_the_engine():
+    """The gate must reject a bar whose expansion is below the floor."""
+    from bt._engine.vp_multi_target_engine import _vol_state_pass
+
+    vol = {"vol_expand_prev_day": np.array([0.5, 0.9, 1.0, 1.1, 1.5])}
+    admits = [
+        _vol_state_pass(i, vol, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        min_expand_prev_day=1.0)
+        for i in range(len(vol["vol_expand_prev_day"]))
+    ]
+    assert admits == [False, False, True, True, True]
+
+    # And the inverse gate.
+    admits_max = [
+        _vol_state_pass(i, vol, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        max_expand_prev_day=1.0)
+        for i in range(len(vol["vol_expand_prev_day"]))
+    ]
+    assert admits_max == [True, True, True, False, False]
+
+    # Disabled -> everything admitted.
+    admits_off = [
+        _vol_state_pass(i, vol, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        for i in range(len(vol["vol_expand_prev_day"]))
+    ]
+    assert all(admits_off)
+
+
+def test_hvn_single_tp_mode_is_implemented_and_canonical():
+    """The engine must implement ``hvn_single``, and the config must use it.
+
+    2026-11-03. The config set ``TP_MODE='hvn_single'`` while the
+    engine only accepted ``fvg_mult``/``multi_target``, so EVERY run
+    raised ``ValueError``. The mode was then implemented for real:
+    ONE target on the ``nth_hvn_n``-th HVN shelf, no partial close,
+    no runner leg.
+
+    The rationale: the ``multi_target`` shape splits the position
+    50/50 between a partial at TP1 and a remainder at TP2, but on the
+    canonical book the two legs collapse onto the SAME price (the
+    swing cap) on effectively every trade -- a fee-paying shape, not
+    an edge.
+    """
+    from bt._engine.vp_multi_target_config import (
+        TP_MODE_FVG_MULT,
+        TP_MODE_HVN_SINGLE,
+        TP_MODE_MULTI_TARGET,
+    )
+    from bt.optimal_config import TP_MODE, build_engine_kwargs
+
+    assert TP_MODE_HVN_SINGLE == "hvn_single"
+    assert TP_MODE in (TP_MODE_FVG_MULT, TP_MODE_MULTI_TARGET,
+                       TP_MODE_HVN_SINGLE), (
+        "TP_MODE names a mode the engine does not implement -- every "
+        "run will raise ValueError on the whole book"
+    )
+    assert TP_MODE == TP_MODE_HVN_SINGLE
+    assert build_engine_kwargs()["tp_mode"] == TP_MODE_HVN_SINGLE
+
+
+def test_hvn_single_returns_one_target_and_no_partial():
+    """``hvn_single`` must return NO TP2 and NO partial close.
+
+    ``partial_close_pct=0.0`` is what makes the engine treat TP2 as
+    inactive, so the FULL position closes at TP1. A non-zero partial
+    here would silently re-create the two-leg fee-paying shape the
+    mode exists to remove.
+    """
+    import inspect
+
+    from bt._engine.vp_multi_target_config import (
+        TP_MODE_FVG_MULT,
+        TP_MODE_HVN_SINGLE,
+        TP_MODE_MULTI_TARGET,
+        TP_MODES,
+    )
+    from bt._engine.vp_multi_target_engine import compute_structural_tp
+
+    src = inspect.getsource(compute_structural_tp)
+
+    # Every mode in TP_MODES must have a branch. The source refers to
+    # the CONSTANTS (TP_MODE_FVG_MULT etc.), not the string values, so
+    # assert on the constant names.
+    for const_name in ("TP_MODE_FVG_MULT", "TP_MODE_MULTI_TARGET",
+                       "TP_MODE_HVN_SINGLE"):
+        assert const_name in src, (
+            f"the engine has no branch for {const_name} -- it would "
+            f"fall through to the ValueError and fail the whole book"
+        )
+
+    # The mode's own branch must return zero TP2 and zero partial.
+    branch = src.split("if tp_mode == TP_MODE_HVN_SINGLE:", 1)[1].split(
+        "if tp_mode ==", 1)[0]
+    assert "0.0, \"\", 0.0" in branch, (
+        "the hvn_single branch must return tp2=0.0 and "
+        "partial_close_pct=0.0 -- otherwise the full position does "
+        "not ride to the single target"
+    )
+
+
+def test_hvn_single_knobs_are_inert_under_the_canonical_mode():
+    """``partial_close_pct`` is INACTIVE under ``hvn_single``.
+
+    This is the allowlist rule showing up in a new place: the knob is
+    alive in the ENGINE and dead in the CANONICAL CONFIGURATION. A
+    sweep of it under the canonical mode measures nothing.
+    """
+    from bt.optimal_config import build_engine_kwargs
+
+    ek = build_engine_kwargs()
+    assert ek["tp_mode"] == "hvn_single"
+    # The knob is still forwarded (it is live for the multi_target
+    # A/B) -- the document is what tells the reader it is inert.
+    assert "partial_close_pct" in ek
 
 
 def test_vol_gate_is_live_in_the_engine():
@@ -1603,12 +1872,13 @@ def test_structure_gate_stays_off_until_its_plumbing_is_safe():
     assert build_engine_kwargs()["structure_gate"] is False
 
 
-def test_structure_sequence_whitelist_is_empty_and_must_not_be_promoted():
-    """The 5-event signature whitelist carries NO exploitable P&L.
+def test_structure_sequence_whitelist_monthly_report_is_empty_and_superseded():
+    """The 2026-10-24 monthly-slice whitelist report is EMPTY -- and has
+    been SUPERSEDED by the corpus-level measurement (2026-11-04).
 
-    2026-10-24, re-measured at canonical MT4 sizing
-    (``runtime/diagnostics/sequence_whitelist.py``, log
-    ``_reports/wl_rerun.log``). 64 distinct signatures; the BEST EV is
+    WHAT IT MEASURED (2026-10-24, 8 MONTHLY SLICES):
+    ``runtime/diagnostics/sequence_whitelist.py``, log
+    ``_reports/wl_rerun.log``. 64 distinct signatures; the BEST EV is
     $0.008 on 235 legs (``bbCcb``) against a $0.05 admission bar.
 
     The script prints "the WHITELIST improves held-out P&L" because
@@ -1618,8 +1888,19 @@ def test_structure_sequence_whitelist_is_empty_and_must_not_be_promoted():
     looks like a win, which is the exact failure mode this repo's
     "never report a single-slice winner" rule exists to prevent.
 
-    The FLIP variant is likewise dead: its own docstring records
-    "-$8 on held-out slices".
+    ⚠️ WHY IT WAS SUPERSEDED (2026-11-04). The emptiness was a
+    **SAMPLE-SIZE artefact**, not an EV verdict: after the vol gate
+    the mean was 5.5 legs per signature, against the report's own
+    ``min_n`` floor of 15. So no signature could ever qualify. On the
+    FULL CORPUS (64,978 legs, one continuous execution) each signature
+    has ~500 legs and 25 of the 64 clear BOTH halves with positive
+    gross/leg -- and the 2-fold walk-forward puts the short side's
+    whitelist at the 95th and 87th percentile of the
+    random-whitelist null.
+
+    This test now locks the HISTORICAL REPORT only, so the old
+    artifact cannot be silently edited. The LIVE promotion is locked
+    by ``test_five_event_sequence_whitelist_is_promoted``.
     """
     import json
     import pathlib
@@ -1675,8 +1956,10 @@ def test_structure_sequence_whitelist_is_empty_and_must_not_be_promoted():
         )
 
     assert not wl["keep"], (
-        f"the whitelist is no longer empty ({len(wl['keep'])} signatures "
-        f"kept) -- re-measure it on held-out slices before promoting it"
+        f"the 2026-10-24 monthly whitelist report is no longer empty "
+        f"({len(wl['keep'])} signatures kept) -- this is a HISTORICAL "
+        f"artifact; if you are changing the live whitelist, update "
+        f"test_five_event_sequence_whitelist_is_promoted instead"
     )
 
 
@@ -1698,6 +1981,17 @@ def test_structure_whitelist_powered_heldout_is_not_significantly_profitable():
 
     A filter that changes WHICH trades you take cannot manufacture an
     edge the trade population does not have.
+
+    ⚠️ THIS IS NOT IN CONTRADICTION with the 2026-11-04 promotion of
+    the 5-event whitelist. This test measures a COARSE 3-bucket
+    POLARITY filter (bull / bear / mixed over the whole trailing
+    window) on 8 MONTHLY slices. The promoted feature is the
+    per-SIGNATURE 5-event whitelist on the FULL CORPUS. Different
+    granularity, different sample size, different measurement. What
+    this test proves still stands and is worth keeping: **a coarse
+    polarity bucket does not carry the signal -- the specific
+    5-event shape does.** That is why the promotion is per-signature
+    and not per-polarity.
     """
     import json
     import pathlib
@@ -1945,6 +2239,123 @@ def test_per_side_sequence_drop_set_is_promoted():
         "the short side's gross per leg did not improve -- this would be "
         "a volume reduction, not a quality win"
     )
+
+
+def test_five_event_sequence_whitelist_is_promoted():
+    """The 5-event per-side sequence WHITELIST is PROMOTED (2026-11-04).
+
+    THE USER ASKED (2026-11-03):
+        "tabulate bos/choch 5-event sequence and the subsequent
+         entries. split between longs and shorts. then, we know which
+         5-seq events to whitelist before each long/short"
+
+    WHAT IT IS. A set of ``"<side>|<5-char signature>"`` keys, where the
+    signature is the trailing FIVE BoS/CHoCH events at the SIGNAL bar,
+    oldest first (``b``=BoS bull, ``B``=BoS bear, ``c``=CHoCH bull,
+    ``C``=CHoCH bear). A key PRESENT means TAKE that trade; ABSENT
+    means DROP it. This is the OPPOSITE polarity of the 1-event
+    ``structure_seq_drop_set``.
+
+    THE MEASUREMENT. ``runtime/diagnostics/seq5_table.py`` over the
+    FULL corpus (2024-01-01 -> 2026-07-16, one continuous execution,
+    14d warmup, 64,978 legs on the unfiltered book):
+
+        LONG   18 of 64 signatures positive gross/leg on BOTH halves
+        SHORT   7 of 64 signatures positive gross/leg on BOTH halves
+
+    THE WALK-FORWARD (``seq5_walkforward.py``, 2 folds by time, 2000
+    random-whitelist permutations as the null):
+
+        LONG   H1->H2  69.3%   H2->H1  97.9%
+        SHORT  H1->H2  95.0%   H2->H1  87.0%
+
+    The SHORT side is the one that earns the slot: both of its folds
+    beat "trade less at random". The long side's two folds disagree,
+    so the long set is the WEAKER half of the promotion.
+
+    ⚠️ WHAT THIS DOES NOT CLAIM. The kept book is still gross-negative
+    on the corpus and its per-leg edge is fee-limited. This is a
+    QUALITY knob, not an EDGE knob -- the same verdict the
+    ``vol_state_min_expand_prev_day`` gate got (AGENTS.md § 3.7.2).
+    """
+    import json
+    import pathlib
+
+    from bt.optimal_config import (
+        STRUCTURE_SEQ_WHITELIST,
+        build_engine_kwargs,
+    )
+
+    # The set itself must not change silently. Re-measure before
+    # changing it -- the corpus-level table is the source.
+    assert STRUCTURE_SEQ_WHITELIST == frozenset({
+        "long|Ccbbb", "long|cCBcC", "long|cCcCc", "long|cbCcC",
+        "long|bCcbb", "long|CcbCc", "long|cCcCB", "long|CBcbC",
+        "long|cCcbb", "long|BcCcC", "long|CcbbC", "long|bbbbC",
+        "long|CcbCB", "long|bCcCc", "long|bbCBB", "long|CcCcb",
+        "long|bbCcb", "long|CBBcb",
+        "short|BcCcC", "short|CBBcC", "short|cbbCB", "short|BBcbC",
+        "short|cCBBB", "short|BBcbb", "short|BBBcC",
+    }), (
+        f"the canonical 5-event whitelist is {len(STRUCTURE_SEQ_WHITELIST)} "
+        f"keys -- re-measure the corpus table before changing it"
+    )
+    ek = build_engine_kwargs()
+    assert ek["structure_seq_whitelist"] == STRUCTURE_SEQ_WHITELIST
+
+    # POLARITY: the whitelist is a WHITELIST (present = take), the
+    # drop set is a BLACKLIST (present = drop). They must not be
+    # confused -- a polarity inversion would silently invert the
+    # filter.
+    assert ek["structure_seq_drop_set"] != STRUCTURE_SEQ_WHITELIST
+
+    # Every key must be "<side>|<5 chars>" over the four event
+    # letters. A malformed key would NEVER match and would silently
+    # drop every trade on that side.
+    for key in STRUCTURE_SEQ_WHITELIST:
+        side, _, sig = key.partition("|")
+        assert side in ("long", "short"), f"bad side in {key!r}"
+        assert len(sig) == 5, f"{key!r} is not a 5-event signature"
+        assert set(sig) <= set("bBcC"), f"{key!r} has a bad event letter"
+
+    # BOTH sides must still be present -- a whitelist that emptied a
+    # side would be a directional bet in disguise.
+    assert any(k.startswith("long|") for k in STRUCTURE_SEQ_WHITELIST)
+    assert any(k.startswith("short|") for k in STRUCTURE_SEQ_WHITELIST)
+
+    # The corpus table must exist -- it is the evidence.
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    out = (repo / "runtime" / "diagnostics" / "_reports"
+           / "seq5_table_none.json")
+    assert out.exists(), (
+        "the corpus 5-event table is missing -- run "
+        "`python -m runtime.diagnostics.seq5_table "
+        "--ledger runtime/diagnostics/_reports/"
+        "leg_ledger_seqdrop_none.json`"
+    )
+    d = json.loads(out.read_text(encoding="utf-8"))
+    cand = d["candidates"]
+    assert len(cand["long"]) == 18, (
+        f"the long side now has {len(cand['long'])} candidate signatures "
+        f"(was 18) -- re-measure"
+    )
+    assert len(cand["short"]) == 7, (
+        f"the short side now has {len(cand['short'])} candidate signatures "
+        f"(was 7) -- re-measure"
+    )
+    # Every shipped key must be a candidate the table admits.
+    for key in STRUCTURE_SEQ_WHITELIST:
+        side, _, sig = key.partition("|")
+        assert sig in cand[side], (
+            f"{key!r} is not in the table's candidate list -- re-measure"
+        )
+    # And every candidate must be shipped.
+    for side in ("long", "short"):
+        for sig in cand[side]:
+            assert f"{side}|{sig}" in STRUCTURE_SEQ_WHITELIST, (
+                f"{side}|{sig} is a candidate but was not shipped -- "
+                f"re-measure and update the canonical set together"
+            )
 
 
 def test_short_side_is_a_measured_drag_but_the_strategy_stays_two_sided():

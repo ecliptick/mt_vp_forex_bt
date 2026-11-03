@@ -60,7 +60,7 @@ def main() -> None:
     print("=== 2025-05 FLAT, cap_pct=0.70, n_hvn=3, canonical sizing ===")
     print(f"  lots                 = {FOREX_LOTS}")
     print(f"  contract_size        = {FOREX_CONTRACT_SIZE}")
-    print(f"  qty_btc (= 1 oz)     = {FOREX_LOTS * FOREX_CONTRACT_SIZE}")
+    print(f"  qty_oz (= 1 oz)     = {FOREX_LOTS * FOREX_CONTRACT_SIZE}")
     print(f"  legs                 = {len(tr)}")
     print(f"  TP p50               = ${float(np.median(tp)):.2f}")
     print(f"  SL p50               = ${float(np.median(sl)):.2f}")

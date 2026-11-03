@@ -89,7 +89,7 @@ def _month_bounds(ym: str) -> tuple[str, str]:
     return f"{ym}-01", f"{ny:04d}-{nm:02d}-01"
 
 
-def _book_spread(open_trades: list, qty_btc: float) -> tuple[float, float, float]:
+def _book_spread(open_trades: list, qty_oz: float) -> tuple[float, float, float]:
     """(long_qty, short_qty, spread) for a book snapshot.
 
     ``spread`` is ``wavg(short_entry) - wavg(long_entry)`` -- the SAME
@@ -101,7 +101,7 @@ def _book_spread(open_trades: list, qty_btc: float) -> tuple[float, float, float
     sq = 0.0
     ss = 0.0
     for ot in open_trades:
-        q = ot.qty if ot.qty > 0.0 else qty_btc
+        q = ot.qty if ot.qty > 0.0 else qty_oz
         if ot.direction > 0:
             lq += q
             ls += q * float(ot.entry_price)
@@ -225,7 +225,7 @@ def main() -> int:
         exit_events: list[tuple[int, int, float]] = []  # (bar, side, qty)
         for recs in groups.values():
             rec0 = recs[0]
-            q = sum(float(r.qty_btc) for r in recs)
+            q = sum(float(r.qty_oz) for r in recs)
             side = int(rec0.direction)
             fill_events.append((int(rec0.entry_bar), side, q))
             exit_events.append((max(int(r.exit_bar) for r in recs),

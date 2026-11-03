@@ -1,27 +1,34 @@
 """sniper_mt_vp_forex_bt_only — flat forex backtest engine.
 
 A lean, sweep-only backtest repo for the v22 SNIPER recipe on
-XAUUSD (MT4 MT5 convention). The engine source is DUPLICATED into
-``bt/_engine/`` — there are no cross-repo imports.
+XAUUSD (MT4 MT5 convention). ``bt/_engine/`` IS the canonical
+engine source — there are no cross-repo imports.
 
 Architecture
 ============
 
 * **Flat layout** — every Python module lives directly under
-  ``bt/``. No nested packages. Mirrors ``sniper_mt_vp_bt_only``.
-* **One engine** — the VP multi-target engine
+  ``bt/``. No nested packages.
+* **One engine, one definition** — the VP multi-target engine
   (``run_vp_sniper_backtest``) is the ONLY engine in production
-  and research. The bar engine (``run_ict_backtest``) and its
-  precompute cache were DELETED on 2026-10-24: both had zero
-  production callers, and the recipe object they read was never
-  read by the VP engine at all.
+  and research, and it is defined exactly once, in
+  ``bt/_engine/vp_multi_target_engine.py``. The bar engine
+  (``run_ict_backtest``) and its precompute cache were DELETED on
+  2026-10-24: both had zero production callers.
+* **No re-export wrappers** — ``bt._engine.X`` is the public
+  surface. The thin wrappers that used to sit under ``bt/``
+  (``rolling_p95.py``, ``swing_cap.py``, ``vol_state.py``,
+  ``volume_profile.py``) were DELETED on 2026-11-03: zero
+  production callers, and a second name for the same object.
 * **One source of truth for config** — every canonical value is a
   module constant in :mod:`bt.optimal_config`. There is no recipe
-  dataclass, no upstream re-export, and no second copy of any knob.
-  The three materialisers (``build_engine_kwargs``,
-  ``build_vp_kwargs``, ``build_detector_kwargs``) are the only way
-  to produce a kwargs dict, and they raise ``KeyError`` on an
-  unknown key so a typo can never silently become a no-op.
+  dataclass, no second copy of any knob. The **seven** materialisers
+  (``build_engine_kwargs``, ``build_vp_kwargs``,
+  ``build_detector_kwargs``, ``build_swing_kwargs``,
+  ``build_p95_kwargs``, ``build_live_p95_kwargs``,
+  ``build_structure_kwargs``) are the only way to produce a kwargs
+  dict, and they raise ``KeyError`` on an unknown key so a typo can
+  never silently become a no-op.
 * **No defaults policy** — the dataclasses that remain
   (``MarginAndCost``, ``ExposureSnapshot``, ``KellySizing``) are
   required-field.
@@ -51,7 +58,7 @@ notional per trade (~$3,000 at XAUUSD=$3,000/oz).
 """
 from __future__ import annotations
 
-# ── Engine (duplicated from ict_forex_research/src/ + ict_crypto_research/src/) ──
+# ── Engine (bt/_engine/ IS the canonical engine source) ──
 from bt._engine.ict_signals import (  # type: ignore  # noqa: E402
     FvgZone,
     IctSeries,
@@ -89,9 +96,6 @@ from bt._engine.run_report import (  # type: ignore  # noqa: E402
 # ``IctBacktestResult`` were removed along with the bar engine and
 # the recipe dataclass they existed to serve.
 from bt import optimal_config as optimal_mod    # noqa: E402
-from bt import volume_profile as vp_mod         # noqa: E402
-from bt import vol_state as vol_state_mod       # noqa: E402
-from bt import swing_cap as swing_cap_mod       # noqa: E402
 from bt import vp_engine as vp_engine_mod       # noqa: E402
 from bt import risk as risk_mod                 # noqa: E402
 from bt import kelly as kelly_mod               # noqa: E402
@@ -120,9 +124,6 @@ __all__ = [
     "append_run_report",
     # ── Local submodules (re-export for direct import) ────────
     "optimal_mod",
-    "vp_mod",
-    "vol_state_mod",
-    "swing_cap_mod",
     "vp_engine_mod",
     "risk_mod",
     "kelly_mod",

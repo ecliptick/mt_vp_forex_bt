@@ -75,7 +75,9 @@ from bt._engine.vp_multi_target_config import (
     SL_MODE_HVN_LVN,
     SL_MODES,
     TP_MODE_FVG_MULT,
+    TP_MODE_HVN_SINGLE,
     TP_MODE_MULTI_TARGET,
+    TP_MODES,
 )
 
 
@@ -107,10 +109,19 @@ class OpenTrade:
     zone_width: float = 0.0      # added 2026-10-02 (NB73)
     zone_low: float = 0.0
     zone_high: float = 0.0
-    # Multi-target (NB74b): second TP for partial close
-    target_price_2: float = 0.0   # second TP (e.g. fvg_mult when TP1=HVN)
-    tp_struct_ref_2: str = ""    # e.g. "zone_mult" for TP2
-    partial_close_pct: float = 0.0  # fraction to close at TP1 (e.g. 0.5)
+    # Multi-target RETIRED (2026-11-03): fields kept ONLY so old
+    # result JSON / tests importing them keep importing. The engine
+    # never sets them: single-target + trailing stop has no TP2.
+    target_price_2: float = 0.0
+    tp_struct_ref_2: str = ""
+    partial_close_pct: float = 0.0
+    # Trailing-stop state (single-target exit, 2026-11-03). peak_price
+    # tracks max favourable excursion; trail_stop_price is the armed
+    # trailing level (0.0 = not armed); trail_active flags arming.
+    peak_price: float = 0.0
+    trail_stop_price: float = 0.0
+    trail_active: bool = False
+    trail_atr_value: float = 0.0
     # Initial risk/reward, captured at FILL time (D2, 2026-10-22).
     # After a TP1 partial close the stop moves to breakeven, so
     # ``abs(entry_price - stop_price)`` becomes 0.0 on the remainder
@@ -130,11 +141,11 @@ class OpenTrade:
     tp1_hit: bool = False
     live_pnl_usd: float = 0.0
     # NB: size THIS position carries. Defaults to the run-level
-    # ``qty_btc``. Set to ``qty_btc * (1 - partial_close_pct)`` on the
+    # ``qty_oz``. Set to ``qty_oz * (1 - partial_close_pct)`` on the
     # remainder leg opened at TP1. Before this field existed every exit
-    # path used the run-level ``qty_btc``, so a half-size remainder leg
+    # path used the run-level ``qty_oz``, so a half-size remainder leg
     # was closed at FULL size — silently inflating P&L ~2x on TP1->TP2
-    # trades. 0.0 means "use the run-level qty_btc" (see
+    # trades. 0.0 means "use the run-level qty_oz" (see
     # ``qty_of`` in the bar loop).
     qty: float = 0.0
 
@@ -211,7 +222,7 @@ class ClosedTrade:
     pnl_gross_usd: float
     fee_usd: float
     pnl_net_usd: float
-    qty_btc: float
+    qty_oz: float
     fvg_direction: int
     source: str
     sl_mode: str
@@ -314,6 +325,11 @@ class BacktestResult:
     # -- the trade's (side, last structure event) pair was in the drop
     # set. Non-zero means the per-side sequence filter actually fired.
     n_dropped_seq_side: int = 0
+    # Signals rejected by the PER-SIDE 5-EVENT SEQUENCE WHITELIST
+    # (2026-11-04) -- the trade's (side, trailing-5-event signature)
+    # pair was NOT in the whitelist, so it was dropped. Non-zero means
+    # the whitelist actually fired.
+    n_dropped_seq_whitelist: int = 0
     # Policy drops at SIGNAL time (the signal never became an order).
     n_dropped_policy: int = 0
     # Policy drops at FILL time (the order was placed, then the book
@@ -568,6 +584,100 @@ def _bar_resolves_stop_first(
     return fill_model != FILL_MODEL_MID
 
 
+def _build_atr_1m_forward_filled(
+    high: np.ndarray,
+    low: np.ndarray,
+    close: np.ndarray,
+    times_ns: np.ndarray,
+    length: int = 14,
+) -> np.ndarray:
+    """1m Wilder ATR(14), forward-filled onto the 1s grid (causal).
+
+    Only the trailing stop consumes this. The structural SL never
+    reads ATR (``sl_atr_mult`` stays 0.0) — ATR is a distance
+    yardstick for the trail, not a stop band.
+    """
+    n = int(close.shape[0])
+    out = np.zeros(n, dtype=np.float64)
+    if n == 0:
+        return out
+    # Bucket 1s bars into 1m candles by wall-clock minute.
+    minute_idx = (times_ns // 60_000_000_000).astype(np.int64)
+    uniq, starts = np.unique(minute_idx, return_index=True)
+    order = np.argsort(starts)
+    uniq = uniq[order]
+    starts = starts[order]
+    ends = np.concatenate([starts[1:], np.array([n], dtype=np.int64)])
+    m = int(uniq.shape[0])
+    if m == 0:
+        return out
+    mh = np.empty(m, dtype=np.float64)
+    ml = np.empty(m, dtype=np.float64)
+    mc = np.empty(m, dtype=np.float64)
+    for k in range(m):
+        s, e = int(starts[k]), int(ends[k])
+        mh[k] = float(np.max(high[s:e]))
+        ml[k] = float(np.min(low[s:e]))
+        mc[k] = float(close[e - 1])
+    # Wilder ATR on the 1m series.
+    atr_m = np.zeros(m, dtype=np.float64)
+    if m >= length:
+        prev = mc[0]
+        tr = np.empty(m, dtype=np.float64)
+        for k in range(m):
+            cur_prev = mc[k - 1] if k > 0 else prev
+            tr[k] = max(
+                float(mh[k] - ml[k]),
+                abs(float(mh[k] - cur_prev)),
+                abs(float(ml[k] - cur_prev)),
+            )
+        atr_m[length - 1] = float(np.mean(tr[:length]))
+        for k in range(length, m):
+            atr_m[k] = (atr_m[k - 1] * (length - 1) + tr[k]) / length
+    # Forward-fill the last CLOSED minute's ATR onto each 1s bar.
+    # A bar inside minute k sees minute k-1's ATR (causal).
+    pos = np.searchsorted(starts, np.arange(n), side="right") - 1
+    pos = np.clip(pos, 0, m - 1)
+    prev_atr = np.zeros(m, dtype=np.float64)
+    for k in range(m):
+        prev_atr[k] = atr_m[k - 1] if k > 0 else 0.0
+    return prev_atr[pos]
+
+
+def _trail_level_usd(
+    *,
+    entry_price: float,
+    peak_price: float,
+    direction: int,
+    atr_value: float,
+    trail_atr_mult: float,
+    trail_giveback_frac: float,
+    trail_mode: str,
+) -> float:
+    """Tighter of chandelier / giveback. 0.0 = mode gives no level."""
+    mode = str(trail_mode).lower().strip()
+    chand = 0.0
+    give = 0.0
+    if mode in ("chandelier", "combined"):
+        chand = float(peak_price) - float(direction) * float(
+            trail_atr_mult) * float(atr_value)
+    if mode in ("giveback", "combined"):
+        give = float(entry_price) + (float(peak_price) - float(
+            entry_price)) * (1.0 - float(trail_giveback_frac))
+    if mode == "chandelier":
+        return chand
+    if mode == "giveback":
+        return give
+    # combined: tighter = higher for long, lower for short.
+    if chand == 0.0:
+        return give
+    if give == 0.0:
+        return chand
+    if direction > 0:
+        return chand if chand > give else give
+    return chand if chand < give else give
+
+
 def _vol_state_pass(
     i: int,
     vol_state: Optional[Dict[str, np.ndarray]],
@@ -577,6 +687,8 @@ def _vol_state_pass(
     min_v15: float,
     max_rv30: float,
     max_wick: float,
+    min_expand_prev_day: float = 0.0,
+    max_expand_prev_day: float = 0.0,
 ) -> bool:
     """Volatility-regime gate at bar ``i``. Mirrors the bar engine exactly.
 
@@ -585,6 +697,14 @@ def _vol_state_pass(
     failing regime only *skips the new entry* — it never closes an open
     position, because "bad regime now" is not the same claim as "this trade
     has failed".
+
+    ``min_expand_prev_day`` gates on the PREV-DAY EXPANSION measure
+    (``vol_expand_prev_day``): ``RV(today so far) / RV(yesterday at the
+    same elapsed fraction of the day)``. ``1.0`` means "today is tracking
+    yesterday exactly"; ``1.4`` means "today is 40% more volatile than
+    yesterday was at this time of day". It is a *cumulative from
+    midnight* measure, so it is only meaningful once enough of the day
+    has elapsed to have a non-trivial denominator.
     """
     if vol_state is None:
         return True
@@ -601,6 +721,10 @@ def _vol_state_pass(
         ok = ok and float(vol_state["rv_ratio_30s"][i]) <= max_rv30
     if max_wick > 0.0:
         ok = ok and float(vol_state["wick_ratio"][i]) <= max_wick
+    if min_expand_prev_day > 0.0:
+        ok = ok and float(vol_state["vol_expand_prev_day"][i]) >= min_expand_prev_day
+    if max_expand_prev_day > 0.0:
+        ok = ok and float(vol_state["vol_expand_prev_day"][i]) <= max_expand_prev_day
     return ok
 
 
@@ -1189,7 +1313,7 @@ def _soft_stop_opposite_vp(
     fill_price: float,
     i: int,
     b_time: int,
-    qty_btc: float,
+    qty_oz: float,
     taker_fee_bps: float,
     closed_trades: list,
 ) -> bool:
@@ -1216,7 +1340,7 @@ def _soft_stop_opposite_vp(
         # FULLY closed at fill_price — soft-stop cancels the breakeven
         # remainder wholesale, and the post-replace branch in the caller
         # opens a fresh position with the new SL/TP.
-        qty_used = ot.qty_of(qty_btc)  # this position's own size (see OpenTrade.qty)
+        qty_used = ot.qty_of(qty_oz)  # this position's own size (see OpenTrade.qty)
         gross = (fill_price - entry_price) * direction * qty_used
         fee = abs(fill_price + entry_price) * 0.5 * qty_used * (
             taker_fee_bps / 10000.0) * 2.0
@@ -1236,7 +1360,7 @@ def _soft_stop_opposite_vp(
             exit_reason="replaced_by_new_signal",
             hold_secs=hold_secs,
             pnl_gross_usd=gross, fee_usd=fee, pnl_net_usd=net,
-            qty_btc=qty_used,
+            qty_oz=qty_used,
             fvg_direction=ot.fvg_direction,
             source=ot.source,
             sl_mode=ot.sl_mode, tp_mode=ot.tp_mode,
@@ -1359,7 +1483,7 @@ def _conflict_policy_pass(
     b_time: int,
     policy: str,
     max_same_dir_open: int,
-    qty_btc: float,
+    qty_oz: float,
     taker_fee_bps: float,
     closed_trades: list,
     res: "BacktestResult",
@@ -1442,7 +1566,7 @@ def _conflict_policy_pass(
         if opposite_exists:
             if _soft_stop_opposite_vp(
                 open_trades, -direction, fill_price, i, b_time,
-                qty_btc, taker_fee_bps, closed_trades,
+                qty_oz, taker_fee_bps, closed_trades,
             ):
                 res.n_replaced_opposite += 1
         if same_dir_count > 0 and max_same_dir_open > 0 \
@@ -1499,7 +1623,7 @@ def _conflict_policy_pass(
         if new_conviction > required:
             if _soft_stop_opposite_vp(
                 open_trades, -direction, fill_price, i, b_time,
-                qty_btc, taker_fee_bps, closed_trades,
+                qty_oz, taker_fee_bps, closed_trades,
             ):
                 res.n_replaced_conviction += 1
         else:
@@ -1823,7 +1947,7 @@ def compute_structural_sl(
         vp_set, t_ns, entry_price, hvn_dir,
         # Same derived radius as the hvn_lvn branch. This previously
         # read the ``TP_MAX_DISTANCE_USD`` module constant directly —
-        # a BTC-scale literal with no relationship to either cap.
+        # a frozen literal with no relationship to either cap.
         max_distance_usd=(
             float(sl_hvn_max_distance_usd)
             if sl_hvn_max_distance_usd > 0.0
@@ -1941,6 +2065,7 @@ tp_max_distance_usd: float,
     Canonical modes:
     - ``TP_MODE_FVG_MULT``: single zone_mult TP (A/B baseline).
     - ``TP_MODE_MULTI_TARGET``: TP1 = HVN (partial 50%), TP2 = zone_mult (remainder 50%).
+    - ``TP_MODE_HVN_SINGLE``: ONE HVN target, no partial, no runner.
 
     ``tp_hvn_proxy_frac`` is the fraction of the ``tp_zone_mult_fallback``
     leg used for TP1 when NO HVN shelf resolves within the search radius
@@ -1962,7 +2087,7 @@ tp_max_distance_usd: float,
     Raises
     ------
     ValueError
-        If ``tp_mode`` is not one of the two live modes.
+        If ``tp_mode`` is not one of the three live modes.
     """
     # Fallback zone_mult TP
     zone_mult_tp = (
@@ -1974,6 +2099,64 @@ tp_max_distance_usd: float,
     if tp_mode == TP_MODE_FVG_MULT:
         # Single-target: zone_mult only. No TP2.
         return zone_mult_tp, "zone_mult", 0.0, "", 0.0
+
+    if tp_mode == TP_MODE_HVN_SINGLE:
+        # ── SINGLE HVN TARGET (2026-11-03) ──────────────────────────
+        # ONE target, anchored on the ``nth_hvn_n``-th HVN shelf ahead
+        # of entry. No partial close, no runner leg, no re-injection.
+        #
+        # The whole position rides to the shelf. That is the point:
+        # ``multi_target`` splits the position 50/50 between a partial
+        # at TP1 and a remainder at TP2, and on the canonical book the
+        # two legs collapse onto the SAME price (the swing cap) on
+        # effectively every trade -- so the "partial" is a partial close
+        # at the cap followed by a remainder that runs the same distance
+        # for half the size. That is a fee-paying shape, not an edge.
+        #
+        # This mode is the A/B against that: one exit, one price, one
+        # size. ``partial_close_pct`` is returned as 0.0, which the
+        # engine reads as "TP2 is inactive" (see ``tp2_active``), so
+        # the full position closes at TP1.
+        hvn_dir_s = +1 if direction > 0 else -1
+        _tp_radius_s = (
+            float(tp_max_distance_usd)
+            if tp_max_distance_usd > 0.0
+            else (float(tp_search_radius_usd)
+                  if tp_search_radius_usd is not None
+                  else float("inf"))
+        )
+        _hvns_s = hvn_zones_near(
+            vp_set, t_ns, entry_price, hvn_dir_s,
+            max_distance_usd=_tp_radius_s,
+            max_results=nth_hvn_n,
+        )
+        if len(_hvns_s) >= nth_hvn_n:
+            _lo_s, _hi_s, _mid_s = _hvns_s[nth_hvn_n - 1]
+            if lvn_mode == LVN_MODE_SKIP:
+                # Same edge-relative offset as the multi_target branch:
+                # the target sits just short of the shelf's leading
+                # edge, measured from the EDGE (not an absolute
+                # offset), so it scales with the shelf width.
+                if direction > 0:
+                    hvn_single_tp = float(_lo_s) - float(lvn_skip_usd)
+                else:
+                    hvn_single_tp = float(_hi_s) + float(lvn_skip_usd)
+            else:
+                hvn_single_tp = float(_mid_s)
+            hvn_single_ref = f"hvn_single_n{nth_hvn_n}"
+        else:
+            # No shelf inside the radius. Fall back to the same proxy
+            # the multi_target branch uses, so the two modes are
+            # comparable: a fraction of the fallback leg, scaled by
+            # ``tp_hvn_proxy_frac``. The caller clamps it to the swing
+            # / p95 caps anyway.
+            hvn_single_tp = entry_price + (
+                float(tp_hvn_proxy_frac) * tp_zone_mult_fallback * zone_width
+            ) * hvn_dir_s
+            hvn_single_ref = "hvn_single_proxy"
+        # No TP2 (0.0) and no partial (0.0) -> the full position rides
+        # to this one target.
+        return hvn_single_tp, hvn_single_ref, 0.0, "", 0.0
 
     if tp_mode == TP_MODE_MULTI_TARGET:
         # NB74: TP1 = HVN-derived (partial close 50%), TP2 = zone_mult (remainder 50%).
@@ -1996,7 +2179,7 @@ tp_max_distance_usd: float,
         )
         if len(hvns) >= nth_hvn_n:
             lo, hi, mid = hvns[nth_hvn_n - 1]
-            # ── XAU SCALE FIX (2026-10-22): three BTC-era assumptions ──
+            # ── XAU SCALE FIX (2026-10-22): three legacy assumptions ──
             #
             # The original code was:
             #
@@ -2006,10 +2189,11 @@ tp_max_distance_usd: float,
             # with the short side mirrored. Two defects, both
             # measured:
             #
-            # 1. THE $1.00 IS A BTC CONSTANT. On gold the median HVN
-            #    shelf is ~$1.62 wide (post VP re-scale), so a $1.00
-            #    offset is ~62% of the shelf — it lands the target
-            #    back inside the shelf, defeating the intent.
+            # 1. THE $1.00 OFFSET IS ABSOLUTE, NOT PROPORTIONAL. On
+            #    gold the median HVN shelf is ~$1.62 wide (post VP
+            #    re-scale), so a $1.00 offset is ~62% of the shelf —
+            #    it lands the target back inside the shelf, defeating
+            #    the intent.
             #
             # 2. ``lvn_skip_usd`` WAS REDUNDANT. Measured: 0.05 and
             #    0.30 produced byte-identical runs; only 5.0 and 25.0
@@ -2100,7 +2284,8 @@ tp_max_distance_usd: float,
 
     raise ValueError(
         f"Unknown tp_mode={tp_mode!r}. "
-        f"Valid modes: {TP_MODE_FVG_MULT!r}, {TP_MODE_MULTI_TARGET!r}."
+        f"Valid modes: {TP_MODE_FVG_MULT!r}, {TP_MODE_MULTI_TARGET!r}, "
+        f"{TP_MODE_HVN_SINGLE!r}."
     )
 
 
@@ -2112,7 +2297,7 @@ def run_vp_sniper_backtest(
     zones: List[FvgZone],
     vp_set: VolumeProfileSet,
     *,
-    qty_btc: float,
+    qty_oz: float,
     sl_mode: str,
     tp_mode: str,
     lvn_mode: str,
@@ -2250,12 +2435,53 @@ def run_vp_sniper_backtest(
     #
     # ``None`` (default) disables the feature entirely.
     structure_seq_drop_set: Optional[set] = None,
+    # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ────────
+    # Keys are ``"<side>|<5-char signature>"`` where the signature is
+    # the trailing FIVE BoS/CHoCH events at the SIGNAL bar, oldest
+    # first (``b``=BoS bull, ``B``=BoS bear, ``c``=CHoCH bull,
+    # ``C``=CHoCH bear) -- e.g. ``"long|Ccbbb"``.
+    #
+    # A key PRESENT in the set means: TAKE that trade. A trade whose
+    # key is ABSENT is DROPPED. So the set is a WHITELIST, the
+    # opposite polarity of ``structure_seq_drop_set``.
+    #
+    # This is a SEPARATE knob from the drop set on purpose: the drop
+    # set is 1-event granularity ("what is the last break?") and the
+    # whitelist is 5-event granularity ("what is the last FIVE
+    # breaks?"). They answer different questions and were fitted on
+    # different evidence, so they must be able to move independently.
+    #
+    # The signature is read with the SAME helper the direction flip
+    # uses (``_sequence_signature``), so the whitelist and the flip
+    # cannot disagree about what "the last five events" means. The
+    # length comes from ``structure_seq_len`` when set, else
+    # ``structure_score_lookback`` (canonical 5).
+    #
+    # A signature with fewer than five events by the signal bar is
+    # ``""`` and is NEVER in any whitelist -- so it is dropped.
+    #
+    # ``None`` (default) disables the feature entirely.
+    structure_seq_whitelist: Optional[set] = None,
     # Scale-invariant SL (2026-10-05). See ``compute_structural_sl`` for why
     # the absolute ``sl_buffer_usd`` is a defect. Precedence when both set:
     # ATR wins, then zone-mult, then fall back to the absolute buffer.
     sl_zone_mult: float = 0.0,
     sl_atr_mult: float = 0.0,
     atr: Optional[np.ndarray] = None,
+    atr_1m: Optional[np.ndarray] = None,
+    # ── Trailing stop (CANONICAL single-target exit, 2026-11-03) ─
+    #
+    # Armed once MFE >= trail_activation_mult * ATR_1m(fill). The exit
+    # level is the TIGHTER of:
+    #   chandelier(t) = peak(t) - dir * trail_atr_mult * ATR_1m(fill)
+    #   giveback(t)   = entry + (peak(t) - entry) * (1 - trail_giveback_frac)
+    # ``trail_mode``: 'off' | 'chandelier' | 'giveback' | 'combined'.
+    # Exit reason is "trail_stop". ATR basis is the fill bar's 1m
+    # Wilder ATR, frozen at fill (no look-ahead, no re-scaling).
+    trail_mode: str = "off",
+    trail_atr_mult: float = 0.0,
+    trail_activation_mult: float = 0.0,
+    trail_giveback_frac: float = 0.0,
     # ── SL_MODE_HVN_LVN (2026-10-22, user request) ──────────────
     #
     # When ``sl_mode == 'hvn_lvn'`` the stop is anchored to the Nth
@@ -2286,7 +2512,7 @@ def run_vp_sniper_backtest(
     # live caps at ``t_ns`` (see ``_reachable_tp_band_usd``). Separate
     # from ``tp_max_distance_usd`` because the stop's reachable band is
     # a different question from the target's. Never falls back to a
-    # module constant — a frozen radius is what leaked BTC-scale USD
+    # module constant — a frozen radius is what leaked oversized USD
     # amounts into the canonical SL search (2026-10-22).
     sl_hvn_max_distance_usd: float = 0.0,
     # Volatility-state gate (2026-10-05 port). ``vol_state_*`` thresholds live
@@ -2302,6 +2528,8 @@ def run_vp_sniper_backtest(
     vol_state_min_range_norm: float = 0.0,
     vol_state_min_vel_5m: float = 0.0,
     vol_state_min_vel_15m: float = 0.0,
+    vol_state_min_expand_prev_day: float = 0.0,
+    vol_state_max_expand_prev_day: float = 0.0,
     vol_state_max_rv_ratio_30s: float = 0.0,
     vol_state_max_wick_ratio: float = 0.0,
     # NB86: conflict policy on submit (mirrors src/backtest/ict_backtest.py).
@@ -2488,6 +2716,18 @@ def run_vp_sniper_backtest(
     low = bars["low"].to_numpy(dtype=np.float64)
     close = bars["close"].to_numpy(dtype=np.float64)
     n = len(close)
+
+    # ── Trailing-stop ATR basis (2026-11-03) ─────────────────────
+    # ATR is ONLY a distance yardstick for the trail — the structural
+    # SL never reads it. 1m Wilder ATR(14), forward-filled onto the
+    # 1s grid: a bar inside minute k sees minute k-1's ATR (causal).
+    # An explicit ``atr_1m=`` array (sweep driver) wins; otherwise it
+    # is derived from the bars in O(minutes).
+    if atr_1m is not None and len(atr_1m) == n:
+        _atr1m = np.asarray(atr_1m, dtype=np.float64)
+    else:
+        _atr1m = _build_atr_1m_forward_filled(high, low, close, times)
+    _trail_on = str(trail_mode).lower().strip() not in ("", "off", "none", "disabled")
 
     # Pre-bucket signals
     #
@@ -2691,9 +2931,66 @@ def run_vp_sniper_backtest(
                 # In "immediate" mode, fire on EVERY zone (don't wait
                 # for inversion). In "dual" mode, only fire on zones
                 # that haven't inverted yet (let the sniper handle those).
-                if entry_mode == "dual" and int(zone.inverted_bar) >= 0:
-                    res.n_skipped_dual_inverted += 1
-                    continue
+                #
+                # ── CAUSALITY (2026-11-03) ───────────────────────────
+                # The test MUST be "had this zone ALREADY inverted by
+                # THIS bar?", not "will this zone ever invert?".
+                #
+                # ``zone.inverted_bar`` is a WHOLE-FILE verdict: the
+                # detector computes it over the entire dataset. Reading
+                # it at the zone's trigger bar leaks the future. Measured
+                # on 2025-01 (1.38M bars, 2,475 zones):
+                #
+                #   trigger zones                       2,475
+                #   skipped because inverted_bar >= 0     723  (29.2%)
+                #     of which inverted BEFORE trigger        0  (correct)
+                #     of which inverted AFTER trigger      723  (LOOK-AHEAD)
+                #   lead = inverted_bar - trigger_bar: median 2,518 bars,
+                #   p75 8,755, p90 30,015, max 200,769.
+                #
+                # So 29.2% of the immediate book was a SELECTION ON THE
+                # OUTCOME: zones that eventually invert were silently
+                # removed, and zones that never invert were kept. The
+                # book was measured on a criterion a live engine cannot
+                # evaluate at the trigger bar.
+                #
+                # The impact is NOT noise. Six monthly slices, same
+                # corpus, "dual" (as shipped) vs "immediate" (no
+                # inverted-bar exclusion):
+                #
+                #   slice          dual net    immediate net    delta
+                #   2025-01        +138.81        -73.21        -212.02
+                #   2025-04       -1353.99      -1671.59        -317.60
+                #   2025-07        -702.62      -1208.47        -505.85
+                #   2025-10        +494.68          +7.49        -487.19
+                #   2026-01        -567.28        -957.03        -389.76
+                #   2026-04       -2114.55      -3013.60        -899.05
+                #   SUM           -4104.94      -6916.42      -2811.48
+                #
+                # The look-ahead is FAVOURABLE and SYSTEMATIC: it costs
+                # the causal book $2,811 over six slices, and it flips
+                # net-positive slices from positive to negative.
+                #
+                # THE FIX: compare ``inverted_bar`` against the bar we
+                # are trading. A zone that inverted at or before the
+                # trigger bar genuinely belongs to the sniper path; a
+                # zone that inverts LATER is the immediate path's to
+                # take, exactly as a live engine would decide at that
+                # bar.
+                #
+                # The de-dup against the sniper path is preserved by
+                # ``zone_already_fired``: when the zone later inverts,
+                # the sniper path finds it already fired and skips it.
+                # So a zone still fires exactly ONCE -- but it is the
+                # IMMEDIATE path that takes it when the inversion is in
+                # the future, which is what a live engine does.
+                if entry_mode == "dual":
+                    _inv_b = int(getattr(zone, "inverted_bar", -1))
+                    if 0 <= _inv_b <= i:
+                        # Already inverted by THIS bar -> the sniper
+                        # path owns it.
+                        res.n_skipped_dual_inverted += 1
+                        continue
                 res.n_signals_emitted += 1
                 # BoS/CHoCH structure gate (2026-10-23). Signed: it
                 # decides WHICH SIDE, which the unsigned ER/vol gates
@@ -2714,6 +3011,8 @@ def run_vp_sniper_backtest(
                     vol_state_min_range_norm, vol_state_min_vel_5m,
                     vol_state_min_vel_15m, vol_state_max_rv_ratio_30s,
                     vol_state_max_wick_ratio,
+                    vol_state_min_expand_prev_day,
+                    vol_state_max_expand_prev_day,
                 ):
                     res.n_dropped_vol_state += 1
                     continue
@@ -2813,6 +3112,24 @@ def run_vp_sniper_backtest(
                     if f"{_side_lbl}|{_last_ev}" in structure_seq_drop_set:
                         res.n_dropped_seq_side += 1
                         continue
+                # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──
+                # OPPOSITE polarity to the drop set above: a key
+                # PRESENT means TAKE, ABSENT means DROP.
+                #
+                # It sits here, AFTER the sequence flip (so it sees
+                # the FINAL side) and AFTER the side gate, and BEFORE
+                # the conflict-policy check -- so a dropped trade
+                # cannot consume a same-direction slot or perturb the
+                # book.
+                if structure_seq_whitelist:
+                    _side_lbl = "long" if direction > 0 else "short"
+                    _sig5 = _sequence_signature(
+                        structure, i,
+                        structure_seq_len or structure_score_lookback,
+                    )
+                    if f"{_side_lbl}|{_sig5}" not in structure_seq_whitelist:
+                        res.n_dropped_seq_whitelist += 1
+                        continue
                 # NB86: conflict_policy on submit (mirrors bar engine).
                 # Runs AFTER vol_state and AFTER direction is known. The
                 # decision can short-circuit the heavy SL/TP compute, so
@@ -2820,7 +3137,7 @@ def run_vp_sniper_backtest(
                 if not _conflict_policy_pass(
                     open_trades, direction, b_close, i, b_time,
                     conflict_policy, max_same_dir_open,
-                    qty_btc, taker_fee_bps, closed_trades, res,
+                    qty_oz, taker_fee_bps, closed_trades, res,
                     # NB87: conviction knobs.
                     conviction_alpha=conviction_alpha,
                     conviction_hysteresis_usd=conviction_hysteresis_usd,
@@ -2875,6 +3192,8 @@ def run_vp_sniper_backtest(
                 vol_state_min_range_norm, vol_state_min_vel_5m,
                 vol_state_min_vel_15m, vol_state_max_rv_ratio_30s,
                 vol_state_max_wick_ratio,
+                vol_state_min_expand_prev_day,
+                vol_state_max_expand_prev_day,
             ):
                 res.n_dropped_vol_state += 1
                 continue
@@ -2959,11 +3278,22 @@ def run_vp_sniper_backtest(
                 if f"{_side_lbl}|{_last_ev}" in structure_seq_drop_set:
                     res.n_dropped_seq_side += 1
                     continue
+            # ── PER-SIDE 5-EVENT SEQUENCE WHITELIST (2026-11-04) ──
+            # Sniper path -- same rule as the immediate path.
+            if structure_seq_whitelist:
+                _side_lbl = "long" if direction > 0 else "short"
+                _sig5 = _sequence_signature(
+                    structure, i,
+                    structure_seq_len or structure_score_lookback,
+                )
+                if f"{_side_lbl}|{_sig5}" not in structure_seq_whitelist:
+                    res.n_dropped_seq_whitelist += 1
+                    continue
             # NB86: conflict_policy on submit (mirrors bar engine).
             if not _conflict_policy_pass(
                 open_trades, direction, b_close, i, b_time,
                 conflict_policy, max_same_dir_open,
-                qty_btc, taker_fee_bps, closed_trades, res,
+                qty_oz, taker_fee_bps, closed_trades, res,
                 # NB87: conviction knobs.
                 conviction_alpha=conviction_alpha,
                 conviction_hysteresis_usd=conviction_hysteresis_usd,
@@ -3041,6 +3371,8 @@ def run_vp_sniper_backtest(
                 _zw = po.zone_width
                 _atr_v = (float(atr[i])
                           if (atr is not None and i < len(atr)) else 0.0)
+                # Trail basis: 1m ATR frozen at fill (no look-ahead).
+                _trail_a = float(_atr1m[i]) if i < len(_atr1m) else 0.0
                 # The reachable TP band at this bar, measured ONCE and
                 # shared by the SL and TP shelf searches. Both are
                 # clamped by the same caps a few lines below, so both
@@ -3151,7 +3483,7 @@ def run_vp_sniper_backtest(
                 if not _conflict_policy_pass(
                     open_trades, _d, b_close, i, b_time,
                     conflict_policy, max_same_dir_open,
-                    qty_btc, taker_fee_bps, closed_trades, res,
+                    qty_oz, taker_fee_bps, closed_trades, res,
                     conviction_alpha=conviction_alpha,
                     conviction_hysteresis_usd=conviction_hysteresis_usd,
                     conviction_model=conviction_model_obj,
@@ -3206,6 +3538,11 @@ def run_vp_sniper_backtest(
                     # moves to breakeven.
                     initial_sl_distance_usd=abs(_e - float(sl_price)),
                     initial_tp_distance_usd=abs(float(tp_price) - _e),
+                    # Trailing stop basis: frozen at fill.
+                    peak_price=float(_e),
+                    trail_stop_price=0.0,
+                    trail_active=False,
+                    trail_atr_value=float(_trail_a),
                     struct_verdict=po.struct_verdict,
                     # The SIGNAL bar, not the fill bar. Entry-side
                     # gates are evaluated where the decision is made.
@@ -3272,7 +3609,7 @@ def run_vp_sniper_backtest(
                 _c_short_qty = 0.0
                 _c_short_sum = 0.0
                 for _ct in open_trades:
-                    _cq = _ct.qty if _ct.qty > 0.0 else qty_btc
+                    _cq = _ct.qty if _ct.qty > 0.0 else qty_oz
                     if _ct.direction > 0:
                         _c_long_qty += _cq
                         _c_long_sum += _cq * float(_ct.entry_price)
@@ -3296,7 +3633,7 @@ def run_vp_sniper_backtest(
                 _c_short_qty = 0.0
                 _c_short_sum = 0.0
                 for _ct in open_trades:
-                    _cq = _ct.qty if _ct.qty > 0.0 else qty_btc
+                    _cq = _ct.qty if _ct.qty > 0.0 else qty_oz
                     if _ct.direction > 0:
                         _c_long_qty += _cq
                         _c_long_sum += _cq * float(_ct.entry_price)
@@ -3336,7 +3673,7 @@ def run_vp_sniper_backtest(
                     _c_fees = 0.0
                     _c_legs = 0
                     for _ct in open_trades:
-                        _cq = _ct.qty if _ct.qty > 0.0 else qty_btc
+                        _cq = _ct.qty if _ct.qty > 0.0 else qty_oz
                         if _ct.direction > 0:
                             _c_ratio = _c_long_ratio
                         else:
@@ -3404,7 +3741,7 @@ def run_vp_sniper_backtest(
                             pnl_gross_usd=_c_leg_gross,
                             fee_usd=_c_fee,
                             pnl_net_usd=_c_leg_gross - _c_fee,
-                            qty_btc=_c_netted,
+                            qty_oz=_c_netted,
                             fvg_direction=_ct.fvg_direction,
                             source=_ct.source,
                             sl_mode=_ct.sl_mode, tp_mode=_ct.tp_mode,
@@ -3513,12 +3850,12 @@ def run_vp_sniper_backtest(
                 # live_pnl at the most-recent bar's close, scaled by
                 # THIS position's size (the TP1 remainder leg is half
                 # size, not full).
-                # PERF P3 (2026-10-22): ``ot.qty_of(qty_btc)`` is a
+                # PERF P3 (2026-10-22): ``ot.qty_of(qty_oz)`` is a
                 # METHOD CALL — 197.8M of them on the 1-month slice
                 # cost 37.9s of a 209s profile. Inlined here.
                 ot.live_pnl_usd = float(
                     (b_close - ot.entry_price) * ot.direction
-                ) * (ot.qty if ot.qty > 0.0 else qty_btc)
+                ) * (ot.qty if ot.qty > 0.0 else qty_oz)
         # PERF P4 (2026-10-22): the exit scan builds a fresh
         # ``still_open`` list every bar, which was 197.8M
         # ``list.append`` calls (17.4s of the profile). The list is
@@ -3571,11 +3908,11 @@ def run_vp_sniper_backtest(
                 # Order of precedence: TP1 → TP2 → SL → still open
                 if tp1_hit and not tp2_hit and not sl_hit:
                     # TP1 partial close. Sized off THIS position's own
-                    # quantity, not the run-level ``qty_btc`` — on the
+                    # quantity, not the run-level ``qty_oz`` — on the
                     # remainder leg (already past TP1) tp2_active is
                     # False so this branch cannot re-fire, but sizing
                     # off ot.qty keeps the invariant explicit.
-                    pos_qty = ot.qty if ot.qty > 0.0 else qty_btc
+                    pos_qty = ot.qty if ot.qty > 0.0 else qty_oz
                     exit_price = _resolve_exit_price(
                         level=tp1_price, b_open=b_open, b_low=b_low,
                         b_high=b_high, direction=direction, is_stop=False,
@@ -3605,7 +3942,7 @@ def run_vp_sniper_backtest(
                         exit_reason="tp1",
                         hold_secs=hold_secs,
                         pnl_gross_usd=gross, fee_usd=fee, pnl_net_usd=net,
-                        qty_btc=qty_used,
+                        qty_oz=qty_used,
                         fvg_direction=ot.fvg_direction,
                         source=ot.source,
                         sl_mode=ot.sl_mode, tp_mode=ot.tp_mode,
@@ -3627,8 +3964,8 @@ def run_vp_sniper_backtest(
                     # position's size. Recording it on the new
                     # OpenTrade is what makes the later TP2 / SL / EOD
                     # closes account for half size instead of full.
-                    # PERF P3: ``ot.qty_of(qty_btc)`` inlined.
-                    remaining_qty = (ot.qty if ot.qty > 0.0 else qty_btc) \
+                    # PERF P3: ``ot.qty_of(qty_oz)`` inlined.
+                    remaining_qty = (ot.qty if ot.qty > 0.0 else qty_oz) \
                         * (1.0 - pct)
                     next_trade_id += 1
                     # CONTRA CLOSE: the position was resized by the
@@ -3681,10 +4018,10 @@ def run_vp_sniper_backtest(
                     # TP2 close (remainder) or SL hit before TP1.
                     #
                     # QTY BUG (fixed): this branch closes
-                    # ``qty_btc * (1 - pct)``, i.e. only the REMAINDER,
+                    # ``qty_oz * (1 - pct)``, i.e. only the REMAINDER,
                     # even when it is reached DIRECTLY off the original
                     # position (TP2 hit before TP1 was ever resolved).
-                    # In that case the full ``qty_btc`` was open at
+                    # In that case the full ``qty_oz`` was open at
                     # TP2, so closing only ``(1-pct)`` of it silently
                     # lost the other half of the position. When tp2_hit
                     # is True we have NOT taken the TP1 partial yet,
@@ -3702,9 +4039,9 @@ def run_vp_sniper_backtest(
                     # branch guard above (the tp1 branch requires
                     # `not tp2_hit`), so reaching this branch means the
                     # FULL original size is still open — close all of
-                    # it. The previous ``qty_btc * (1 - pct)`` silently
+                    # it. The previous ``qty_oz * (1 - pct)`` silently
                     # lost the other half.
-                    qty_used = ot.qty if ot.qty > 0.0 else qty_btc
+                    qty_used = ot.qty if ot.qty > 0.0 else qty_oz
                     gross = (exit_price - entry_price) * direction * qty_used
                     fee = abs(exit_price + entry_price) * 0.5 * qty_used * (
                         taker_fee_bps / 10000.0) * 2.0
@@ -3724,7 +4061,7 @@ def run_vp_sniper_backtest(
                         exit_reason="tp2" if tp2_hit else "sl",
                         hold_secs=hold_secs,
                         pnl_gross_usd=gross, fee_usd=fee, pnl_net_usd=net,
-                        qty_btc=qty_used,
+                        qty_oz=qty_used,
                         fvg_direction=ot.fvg_direction,
                         source=ot.source,
                         sl_mode=ot.sl_mode, tp_mode=ot.tp_mode,
@@ -3751,7 +4088,7 @@ def run_vp_sniper_backtest(
                         b_high=b_high, direction=direction, is_stop=True,
                         fill_model=fill_model,
                     )
-                    qty_used = ot.qty if ot.qty > 0.0 else qty_btc
+                    qty_used = ot.qty if ot.qty > 0.0 else qty_oz
                     gross = (exit_price - entry_price) * direction * qty_used
                     fee = abs(exit_price + entry_price) * 0.5 * qty_used * (
                         taker_fee_bps / 10000.0) * 2.0
@@ -3777,7 +4114,7 @@ def run_vp_sniper_backtest(
                         exit_reason=exit_reason,
                         hold_secs=hold_secs,
                         pnl_gross_usd=gross, fee_usd=fee, pnl_net_usd=net,
-                        qty_btc=qty_used,
+                        qty_oz=qty_used,
                         fvg_direction=ot.fvg_direction,
                         source=ot.source,
                         sl_mode=ot.sl_mode, tp_mode=ot.tp_mode,
@@ -3800,6 +4137,46 @@ def run_vp_sniper_backtest(
                     continue
 
             # ── Single-target path ─────────────────────────────────
+            # Trailing stop (canonical exit): update peak, arm, ratchet,
+            # then evaluate the trail cross BEFORE the TP/SL checks so
+            # the trail participates in the same pessimistic
+            # stop-wins precedence. ATR is ONLY the distance
+            # yardstick — the structural SL above never reads it.
+            trail_hit = False
+            if _trail_on and ot.trail_atr_value > 0.0:
+                _t_atr = float(ot.trail_atr_value)
+                if ot.direction > 0:
+                    if b_high > ot.peak_price:
+                        ot.peak_price = float(b_high)
+                    _mfe = float(ot.peak_price) - float(ot.entry_price)
+                else:
+                    if ot.peak_price == 0.0 or b_low < ot.peak_price:
+                        ot.peak_price = float(b_low)
+                    _mfe = float(ot.entry_price) - float(ot.peak_price)
+                if not ot.trail_active:
+                    if _mfe >= float(trail_activation_mult) * _t_atr:
+                        ot.trail_active = True
+                if ot.trail_active:
+                    _lvl = _trail_level_usd(
+                        entry_price=float(ot.entry_price),
+                        peak_price=float(ot.peak_price),
+                        direction=int(ot.direction),
+                        atr_value=_t_atr,
+                        trail_atr_mult=float(trail_atr_mult),
+                        trail_giveback_frac=float(trail_giveback_frac),
+                        trail_mode=str(trail_mode),
+                    )
+                    if _lvl != 0.0:
+                        if ot.direction > 0:
+                            if (not ot.trail_stop_price
+                                    or _lvl > ot.trail_stop_price):
+                                ot.trail_stop_price = float(_lvl)
+                            trail_hit = b_low <= ot.trail_stop_price
+                        else:
+                            if (not ot.trail_stop_price
+                                    or _lvl < ot.trail_stop_price):
+                                ot.trail_stop_price = float(_lvl)
+                            trail_hit = b_high >= ot.trail_stop_price
             if ot.direction > 0:
                 tp_hit = b_high >= ot.target_price
                 sl_hit = b_low <= ot.stop_price
@@ -3811,16 +4188,30 @@ def run_vp_sniper_backtest(
             # touched) resolves to the STOP. The pre-D2 code already
             # did ``tp_hit and sl_hit -> sl`` unconditionally, so the
             # legacy "mid" mode is preserved by the explicit branch.
-            if tp_hit and sl_hit and fill_model != FILL_MODEL_MID:
-                exit_reason = "sl"
-                exit_price = _resolve_exit_price(
-                    level=ot.stop_price, b_open=b_open, b_low=b_low,
-                    b_high=b_high, direction=ot.direction, is_stop=True,
-                    fill_model=fill_model,
-                )
-            elif tp_hit and sl_hit:
-                exit_reason = "sl"
-                exit_price = ot.stop_price
+            # The trail is a stop: it wins over TP the same way.
+            if tp_hit and (sl_hit or trail_hit) and fill_model != FILL_MODEL_MID:
+                if sl_hit:
+                    exit_reason = "sl"
+                    exit_price = _resolve_exit_price(
+                        level=ot.stop_price, b_open=b_open, b_low=b_low,
+                        b_high=b_high, direction=ot.direction, is_stop=True,
+                        fill_model=fill_model,
+                    )
+                else:
+                    exit_reason = "trail_stop"
+                    exit_price = _resolve_exit_price(
+                        level=ot.trail_stop_price, b_open=b_open,
+                        b_low=b_low, b_high=b_high,
+                        direction=ot.direction, is_stop=True,
+                        fill_model=fill_model,
+                    )
+            elif tp_hit and (sl_hit or trail_hit):
+                if sl_hit:
+                    exit_reason = "sl"
+                    exit_price = ot.stop_price
+                else:
+                    exit_reason = "trail_stop"
+                    exit_price = ot.trail_stop_price
             elif tp_hit:
                 exit_reason = "tp"
                 exit_price = _resolve_exit_price(
@@ -3835,14 +4226,21 @@ def run_vp_sniper_backtest(
                     b_high=b_high, direction=ot.direction, is_stop=True,
                     fill_model=fill_model,
                 )
+            elif trail_hit:
+                exit_reason = "trail_stop"
+                exit_price = _resolve_exit_price(
+                    level=ot.trail_stop_price, b_open=b_open, b_low=b_low,
+                    b_high=b_high, direction=ot.direction, is_stop=True,
+                    fill_model=fill_model,
+                )
             else:
                 # Survivor: compact in place (PERF P4).
                 open_trades[_survivor_count] = ot
                 _survivor_count += 1
                 continue
 
-            # PERF P3: ``ot.qty_of(qty_btc)`` inlined.
-            pos_qty = ot.qty if ot.qty > 0.0 else qty_btc
+            # PERF P3: ``ot.qty_of(qty_oz)`` inlined.
+            pos_qty = ot.qty if ot.qty > 0.0 else qty_oz
             gross = (exit_price - ot.entry_price) * ot.direction * pos_qty
             fee = abs(exit_price + ot.entry_price) * 0.5 * pos_qty * (
                 taker_fee_bps / 10000.0) * 2.0
@@ -3864,7 +4262,7 @@ def run_vp_sniper_backtest(
                 exit_reason=exit_reason,
                 hold_secs=hold_secs,
                 pnl_gross_usd=gross, fee_usd=fee, pnl_net_usd=net,
-                qty_btc=pos_qty,
+                qty_oz=pos_qty,
                 fvg_direction=ot.fvg_direction,
                 source=ot.source,
                 sl_mode=ot.sl_mode, tp_mode=ot.tp_mode,
@@ -3977,8 +4375,8 @@ def run_vp_sniper_backtest(
     for ot in open_trades:
         # Scale to THIS position's size: a TP1 remainder leg is
         # (1-pct) of the original, and EOD used to close it at full
-        # run-level qty_btc — inflating every runner's P&L.
-        pos_qty = ot.qty if ot.qty > 0.0 else qty_btc
+        # run-level qty_oz — inflating every runner's P&L.
+        pos_qty = ot.qty if ot.qty > 0.0 else qty_oz
         gross = (last_close - ot.entry_price) * ot.direction * pos_qty
         fee = abs(last_close + ot.entry_price) * 0.5 * pos_qty * (
             taker_fee_bps / 10000.0
@@ -4008,7 +4406,7 @@ def run_vp_sniper_backtest(
             pnl_gross_usd=gross,
             fee_usd=fee,
             pnl_net_usd=net,
-            qty_btc=pos_qty,
+            qty_oz=pos_qty,
             fvg_direction=ot.fvg_direction,
             source=ot.source,
             sl_mode=ot.sl_mode,

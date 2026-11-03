@@ -1,15 +1,12 @@
 """Fractional Kelly sizing (NB81 quarter-Kelly canonical).
 
-NB81 finding (BTC, 2026-09-05): quarter-Kelly (``f*/4``) on a
-stable estimate of ``f*`` is the optimal sizing for the BTC
-VP-MT strategy. Full Kelly is too aggressive on the drawdown
-curve; half-Kelly underperforms in CAGR by 12%/year. Findings
-carry over to forex — BTC and XAUUSD return distributions are
-both heavy-tailed.
+NB81 finding (2026-09-05): quarter-Kelly (``f*/4``) on a stable
+estimate of ``f*`` is the optimal sizing for the VP-MT strategy.
+Full Kelly is too aggressive on the drawdown curve; half-Kelly
+underperforms in CAGR by 12%/year. XAUUSD return distributions are
+heavy-tailed, so the fractional sizing matters here too.
 
-This module is **self-contained**: there is no upstream
-``kelly.py`` to import from (neither the crypto nor the forex
-research repo ships one). The math here is the canonical
+This module is **self-contained**: the math here is the canonical
 Kelly formula on a per-trade P&L series. The ``KellySizing``
 dataclass is the only artifact sweep drivers consume.
 
