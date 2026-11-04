@@ -1199,9 +1199,13 @@ favourably) and that target exits fill at-or-better than the target.
 
 And the corollary, which is the actual promotion rule:
 
-> **A promotion is judged on NET PROFIT.** The drift/excess
-> decomposition and the monthly beta regression are **DIAGNOSTICS**.
-> They explain a result; they do not gate it.
+> **A promotion is judged on NET PROFIT.** The passive-hold/excess
+> decomposition and the daily direction-dependence regression are
+> **DIAGNOSTICS**. They explain a result; they do not gate it.
+>
+> ⛔ The **monthly** beta regression it originally named is **RETIRED**
+> (2026-11-04): n = 13..31 points put every quoted correlation inside
+> its own noise band. See AGENTS.md § 1.1 rule 7.
 
 ### The second bug this exposed — the driver's arms
 
