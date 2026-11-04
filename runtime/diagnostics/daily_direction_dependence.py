@@ -268,6 +268,30 @@ def analyse_book(payload: dict[str, Any], mkt_map: dict[str, float],
     reg = _regress(daily["mkt_ret_pct"].to_numpy(dtype=float),
                    daily["gross"].to_numpy(dtype=float))
 
+    # ── the PER-SIDE daily correlation ──────────────────────────────
+    # This is the number that decides whether a side is a DIVERSIFIER
+    # or a fee sink. The short side's daily correlation with gold is
+    # what offsets the long side's positive exposure.
+    def _side_daily_corr(side_mask: np.ndarray) -> dict[str, Any]:
+        if not side_mask.any():
+            return {"days": 0}
+        sub = df[side_mask]
+        d = sub.groupby("day").agg(
+            gross=("gross", "sum"),
+        ).reset_index()
+        d["mkt_ret_pct"] = d["day"].map(mkt_map)
+        d = d.dropna(subset=["mkt_ret_pct"])
+        m = d["mkt_ret_pct"].to_numpy(dtype=float)
+        g = d["gross"].to_numpy(dtype=float)
+        if m.size < 4 or np.std(m) <= 0 or np.std(g) <= 0:
+            return {"days": int(m.size)}
+        r = float(np.corrcoef(m, g)[0, 1])
+        return {
+            "days": int(m.size),
+            "corr": r,
+            "corr_t": _fisher_t(r, int(m.size)),
+        }
+
     return {
         "n_legs": int(legs.shape[0]),
         "n_days": int(daily.shape[0]),
@@ -281,6 +305,10 @@ def analyse_book(payload: dict[str, Any], mkt_map: dict[str, float],
         },
         "per_leg_long": _leg_block(long_m),
         "per_leg_short": _leg_block(short_m),
+        # The PER-SIDE daily correlation: is this side a diversifier
+        # (negative corr) or a fee sink (gross < fee)?
+        "daily_long": _side_daily_corr(long_m),
+        "daily_short": _side_daily_corr(short_m),
         # The verdict reads the PER-LEG number. The daily regression is
         # the aggregate view of the same question.
         "verdict": (
@@ -346,6 +374,28 @@ def main() -> None:
         print("  with ~900 points instead of 13-31.")
         print()
 
+        # ── the per-side daily correlation ──────────────────────────
+        # The SHORT side's correlation with gold is what offsets the
+        # long side's positive exposure. It is the number that decides
+        # whether a side is a DIVERSIFIER or a fee sink.
+        print("  -- PER-SIDE daily correlation (diversifier vs fee sink) --")
+        print()
+        print(f"  {'book':<22} {'side':<7} {'days':>6} {'corr':>8} {'corr t':>8}")
+        print("  " + "-" * 58)
+        for label, blk in report["books"].items():
+            for key, nm in (("daily_long", "long"), ("daily_short", "short")):
+                sb = blk.get(key) or {}
+                if not sb.get("days"):
+                    continue
+                print(f"  {label:<22} {nm:<7} {sb['days']:>6} "
+                      f"{sb.get('corr', 0.0):>+8.3f} "
+                      f"{sb.get('corr_t', 0.0):>+8.2f}")
+        print()
+        print("  A NEGATIVE side correlation means that side DIVERSIFIES the")
+        print("  book. A side whose gross/fee is below 1.0 is a FEE SINK --")
+        print("  it costs more than it earns. Both facts can hold at once.")
+        print()
+
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2, default=str),
                          encoding="utf-8")
@@ -368,6 +418,14 @@ def main() -> None:
                 "r2": round(blk["daily_regression"].get("r2", 0.0), 4),
                 "excess_per_leg": round(blk["per_leg"]["excess_per_leg"], 6),
                 "excess_t": round(blk["per_leg"]["excess_t"], 4),
+                "daily_long_corr": round(
+                    (blk.get("daily_long") or {}).get("corr", 0.0), 4),
+                "daily_long_corr_t": round(
+                    (blk.get("daily_long") or {}).get("corr_t", 0.0), 4),
+                "daily_short_corr": round(
+                    (blk.get("daily_short") or {}).get("corr", 0.0), 4),
+                "daily_short_corr_t": round(
+                    (blk.get("daily_short") or {}).get("corr_t", 0.0), 4),
                 "verdict": blk["verdict"],
             }
             for label, blk in report["books"].items()

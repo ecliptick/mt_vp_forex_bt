@@ -1,6 +1,6 @@
 {
   "schema": "results-index/1",
-  "updated_utc": "2026-11-03T23:57:08Z",
+  "updated_utc": "2026-11-04T00:06:33Z",
   "runs": [
     {
       "run_id": "sweep_cell-a07a61116b961bd3__d558402__20261102T221448Z",
@@ -15969,6 +15969,373 @@
         "wins_both_gross_per_leg": true
       },
       "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__92d9ee5__20261103T235708Z.json",
+      "parent_fp": "001902a516a351e0"
+    },
+    {
+      "run_id": "daily_direction_dependence-f2f5aec41de15de4__5d7ef87__20261104T000400Z",
+      "kind": "daily_direction_dependence",
+      "config_fp": "f2f5aec41de15de4",
+      "ts_utc": "2026-11-04T00:04:00Z",
+      "commit": "5d7ef8750b9a0152742b4842e21aee2ca1b58a36",
+      "commit_short": "5d7ef87",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": null,
+      "params": {
+        "aggregation": "daily",
+        "window": "2024-01-01..2026-07-16",
+        "books": [
+          "canonical",
+          "trail_short",
+          "trail_off",
+          "seqwlf_unfiltered_H1",
+          "seqwlf_unfiltered_H2",
+          "seqwlf_shipped_H1",
+          "seqwlf_shipped_H2",
+          "seqwlf_longonly_H1",
+          "seqwlf_longonly_H2",
+          "trade_sides_long",
+          "structure_gate_on"
+        ],
+        "regression": "daily gross ~ alpha + beta * daily market return %"
+      },
+      "summary": {
+        "canonical": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "daily_long_corr": 0.4414,
+          "daily_long_corr_t": 10.8606,
+          "daily_short_corr": -0.195,
+          "daily_short_corr_t": -4.0875,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_short": {
+          "n_legs": 7122,
+          "n_days": 577,
+          "corr": 0.3919,
+          "corr_t": 9.9193,
+          "r2": 0.1536,
+          "excess_per_leg": -0.064363,
+          "excess_t": -7.0262,
+          "daily_long_corr": 0.4414,
+          "daily_long_corr_t": 10.8606,
+          "daily_short_corr": -0.195,
+          "daily_short_corr_t": -4.0875,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trail_off": {
+          "n_legs": 7284,
+          "n_days": 577,
+          "corr": 0.2229,
+          "corr_t": 5.4314,
+          "r2": 0.0497,
+          "excess_per_leg": -0.06555,
+          "excess_t": -7.4562,
+          "daily_long_corr": 0.4301,
+          "daily_long_corr_t": 10.5413,
+          "daily_short_corr": -0.2882,
+          "daily_short_corr_t": -6.1361,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H1": {
+          "n_legs": 18640,
+          "n_days": 418,
+          "corr": 0.0401,
+          "corr_t": 0.8178,
+          "r2": 0.0016,
+          "excess_per_leg": -0.057409,
+          "excess_t": -12.1714,
+          "daily_long_corr": 0.482,
+          "daily_long_corr_t": 10.6034,
+          "daily_short_corr": -0.4752,
+          "daily_short_corr_t": -10.3614,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_unfiltered_H2": {
+          "n_legs": 18350,
+          "n_days": 275,
+          "corr": -0.0035,
+          "corr_t": -0.0573,
+          "r2": 0.0,
+          "excess_per_leg": -0.141466,
+          "excess_t": -15.8563,
+          "daily_long_corr": 0.5251,
+          "daily_long_corr_t": 9.5851,
+          "daily_short_corr": -0.5431,
+          "daily_short_corr_t": -9.9259,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H1": {
+          "n_legs": 3329,
+          "n_days": 344,
+          "corr": 0.0472,
+          "corr_t": 0.8729,
+          "r2": 0.0022,
+          "excess_per_leg": -0.044094,
+          "excess_t": -4.8375,
+          "daily_long_corr": 0.2047,
+          "daily_long_corr_t": 3.6324,
+          "daily_short_corr": -0.2383,
+          "daily_short_corr_t": -3.8644,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_shipped_H2": {
+          "n_legs": 3024,
+          "n_days": 214,
+          "corr": 0.1868,
+          "corr_t": 2.7455,
+          "r2": 0.0349,
+          "excess_per_leg": -0.129919,
+          "excess_t": -5.6201,
+          "daily_long_corr": 0.2453,
+          "daily_long_corr_t": 3.4974,
+          "daily_short_corr": 0.003,
+          "daily_short_corr_t": 0.0394,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H1": {
+          "n_legs": 2157,
+          "n_days": 309,
+          "corr": 0.2081,
+          "corr_t": 3.6935,
+          "r2": 0.0433,
+          "excess_per_leg": -0.031505,
+          "excess_t": -2.8681,
+          "daily_long_corr": 0.2081,
+          "daily_long_corr_t": 3.6935,
+          "daily_short_corr": 0.0,
+          "daily_short_corr_t": 0.0,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "seqwlf_longonly_H2": {
+          "n_legs": 1997,
+          "n_days": 198,
+          "corr": 0.2473,
+          "corr_t": 3.5271,
+          "r2": 0.0612,
+          "excess_per_leg": -0.101595,
+          "excess_t": -3.4702,
+          "daily_long_corr": 0.2473,
+          "daily_long_corr_t": 3.5271,
+          "daily_short_corr": 0.0,
+          "daily_short_corr_t": 0.0,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "trade_sides_long": {
+          "n_legs": 4371,
+          "n_days": 528,
+          "corr": 0.4371,
+          "corr_t": 10.737,
+          "r2": 0.191,
+          "excess_per_leg": -0.041822,
+          "excess_t": -3.174,
+          "daily_long_corr": 0.4371,
+          "daily_long_corr_t": 10.737,
+          "daily_short_corr": 0.0,
+          "daily_short_corr_t": 0.0,
+          "verdict": "MARKET-DRIVEN"
+        },
+        "structure_gate_on": {
+          "n_legs": 3731,
+          "n_days": 511,
+          "corr": 0.3054,
+          "corr_t": 7.1098,
+          "r2": 0.0933,
+          "excess_per_leg": -0.055032,
+          "excess_t": -4.2784,
+          "daily_long_corr": 0.3622,
+          "daily_long_corr_t": 8.0578,
+          "daily_short_corr": -0.197,
+          "daily_short_corr_t": -3.2317,
+          "verdict": "MARKET-DRIVEN"
+        }
+      },
+      "path": "results/runs/daily_direction_dependence-f2f5aec41de15de4__5d7ef87__20261104T000400Z.json",
+      "parent_fp": "f2f5aec41de15de4"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-001902a516a351e0__5d7ef87__20261104T000454Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "001902a516a351e0",
+      "ts_utc": "2026-11-04T00:04:54Z",
+      "commit": "5d7ef8750b9a0152742b4842e21aee2ca1b58a36",
+      "commit_short": "5d7ef87",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f47dd77c4338cd2a",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "scope_both_overrides": {
+          "trail_sides": "'both'"
+        },
+        "scope_long_overrides": {
+          "trail_sides": "'long'"
+        },
+        "baseline_overrides": {
+          "trail_mode": "'off'"
+        },
+        "splits": [
+          "2024-07-01",
+          "2024-10-01",
+          "2025-01-01",
+          "2025-04-01",
+          "2025-07-01",
+          "2025-10-01",
+          "2026-01-01"
+        ],
+        "criterion": "net_profit"
+      },
+      "summary": {
+        "criterion": "net_profit",
+        "most_profitable_arm": "scope 'short'",
+        "scope_short_legs": 7122,
+        "scope_short_net": 2298.2009,
+        "scope_short_gross": 5622.7652,
+        "scope_short_gross_per_leg": 0.789492,
+        "scope_short_gross_over_fee": 1.6913,
+        "scope_both_legs": 6663,
+        "scope_both_net": -741.1608,
+        "scope_both_gross": 2583.1827,
+        "scope_long_legs": 7063,
+        "scope_long_net": -584.985,
+        "scope_long_gross": 2739.3381,
+        "delta_net_vs_scope_both": 3039.36,
+        "variant_covers_round_trip": true,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "trail_off_legs": 7284,
+        "trail_off_net": 1593.1562,
+        "trail_off_gross_per_leg": 0.675132,
+        "trail_off_gross_over_fee": 1.4792,
+        "delta_net_vs_trail_off": 705.04,
+        "delta_gross_per_leg_vs_trail_off": 0.11436,
+        "n_split_points": 7,
+        "n_wins_both_vs_scope_both": 4,
+        "n_wins_both_gross_per_leg": 4,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true,
+        "years": [
+          "2024",
+          "2025",
+          "2026"
+        ],
+        "delta_vs_trail_off_by_year": {
+          "2024": -73.9693,
+          "2025": 492.7832,
+          "2026": 286.2308
+        },
+        "delta_vs_scope_both_by_year": {
+          "2024": 461.5702,
+          "2025": 4025.4339,
+          "2026": -1447.6424
+        },
+        "n_years_better_than_trail_off": 2,
+        "n_years_better_than_scope_both": 2
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__5d7ef87__20261104T000454Z.json",
+      "parent_fp": "001902a516a351e0"
+    },
+    {
+      "run_id": "trail_sides_ledger_verdict-001902a516a351e0__5d7ef87__20261104T000459Z",
+      "kind": "trail_sides_ledger_verdict",
+      "config_fp": "001902a516a351e0",
+      "ts_utc": "2026-11-04T00:04:59Z",
+      "commit": "5d7ef8750b9a0152742b4842e21aee2ca1b58a36",
+      "commit_short": "5d7ef87",
+      "dirty": true,
+      "branch": "main",
+      "src_fp": "f47dd77c4338cd2a",
+      "params": {
+        "knob": "trail_sides",
+        "start": "2024-01-01",
+        "end": "2026-07-16",
+        "split_at": "2025-04-01",
+        "variant_overrides": {
+          "trail_sides": "'short'"
+        },
+        "scope_both_overrides": {
+          "trail_sides": "'both'"
+        },
+        "scope_long_overrides": {
+          "trail_sides": "'long'"
+        },
+        "baseline_overrides": {
+          "trail_mode": "'off'"
+        },
+        "splits": [
+          "2024-07-01",
+          "2024-10-01",
+          "2025-01-01",
+          "2025-04-01",
+          "2025-07-01",
+          "2025-10-01",
+          "2026-01-01"
+        ],
+        "criterion": "net_profit"
+      },
+      "summary": {
+        "criterion": "net_profit",
+        "most_profitable_arm": "scope 'short'",
+        "scope_short_legs": 7122,
+        "scope_short_net": 2298.2009,
+        "scope_short_gross": 5622.7652,
+        "scope_short_gross_per_leg": 0.789492,
+        "scope_short_gross_over_fee": 1.6913,
+        "scope_both_legs": 6663,
+        "scope_both_net": -741.1608,
+        "scope_both_gross": 2583.1827,
+        "scope_long_legs": 7063,
+        "scope_long_net": -584.985,
+        "scope_long_gross": 2739.3381,
+        "delta_net_vs_scope_both": 3039.36,
+        "variant_covers_round_trip": true,
+        "paired_n": 6659,
+        "paired_delta_total": 1289.78,
+        "paired_t": 1.6203,
+        "welch_t": 2.8015,
+        "trail_off_legs": 7284,
+        "trail_off_net": 1593.1562,
+        "trail_off_gross_per_leg": 0.675132,
+        "trail_off_gross_over_fee": 1.4792,
+        "delta_net_vs_trail_off": 705.04,
+        "delta_gross_per_leg_vs_trail_off": 0.11436,
+        "n_split_points": 7,
+        "n_wins_both_vs_scope_both": 4,
+        "n_wins_both_gross_per_leg": 4,
+        "wins_both_net": true,
+        "wins_both_gross_per_leg": true,
+        "years": [
+          "2024",
+          "2025",
+          "2026"
+        ],
+        "delta_vs_trail_off_by_year": {
+          "2024": -73.9693,
+          "2025": 492.7832,
+          "2026": 286.2308
+        },
+        "delta_vs_scope_both_by_year": {
+          "2024": 461.5702,
+          "2025": 4025.4339,
+          "2026": -1447.6424
+        },
+        "n_years_better_than_trail_off": 2,
+        "n_years_better_than_scope_both": 2
+      },
+      "path": "results/runs/trail_sides_ledger_verdict-001902a516a351e0__5d7ef87__20261104T000459Z.json",
       "parent_fp": "001902a516a351e0"
     }
   ]

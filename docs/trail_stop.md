@@ -59,8 +59,9 @@
    (§ 8.6): it is the only cell that beats **both** the shipping
    recipe and the trail-OFF baseline, and the first canonical book
    whose gross edge **covers the measured round trip** (1.691× vs the
-   previous 0.777×). The gain is **98% drift** and is
-   **regime-concentrated** — read § 8.6 before quoting it.
+  previous 0.777×). The gain is **98% drift**, and the book's
+  **absolute** level is **regime-dependent** — read § 8.6 before
+  quoting it.
 
 ---
 
@@ -1038,17 +1039,58 @@ Seven cut points, one continuous execution:
 **4 of 7 cut points win both halves** vs the canonical recipe, and
 **4 of 7** vs the trail-OFF baseline.
 
-### ⚠️ THE GAIN IS REGIME-CONCENTRATED
+### ⚠️ WHERE THE GAIN COMES FROM — year × side
 
-| year | gold | `both` | `off` | `short` | Δ vs `both` |
-|---|---|---|---|---|---|
-| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
-| 2025 | +64.5% | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
-| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+> **⚠️ CORRECTED 2026-11-04.** This table previously compared the
+> promoted scope against the **`'both'` scope** and reported the gain
+> as "regime-concentrated" (2026 "loses $1,448"). **That baseline does
+> not ship.** The promotion baseline is **`trail OFF`**, and against it
+> the reading is different — see the second table.
+>
+> The `Δ vs 'both'` column is kept because it is the *mechanism* (how
+> much of the change is the trail being removed from the longs), not
+> the verdict.
 
-**2026 LOSES $1,448 against the shipping recipe.** The scope helps
-when gold trends and hurts when it does not, because the long side
-carries the book. It wins **20 of 31 months**.
+**Year totals:**
+
+| year | gold | `both` | `off` | `short` | Δ vs `both` | **Δ vs `off`** |
+|---|---|---|---|---|---|---|
+| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 | **−$73.97** |
+| 2025 | +64.5% | −$193.01 | +$3,339.64 | +$3,832.42 | +$4,025.43 | **+$492.78** |
+| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | −$1,447.64 | **+$286.23** |
+| **total** | | **−$741.16** | **+$1,593.16** | **+$2,298.20** | **+$3,039.36** | **+$705.04** |
+
+**Against the baseline that a promotion must beat (`trail OFF`), the
+scope wins **2 of 3 years** — 2025 +$493, 2026 +$286, and 2024
+**−$74**. The one loss is small (10% of the total +$705 gain). So the
+promoted scope is **not** regime-concentrated *relative to the
+baseline*; the original "2026 loses $1,448" reading came from a
+baseline that does not ship.
+
+**Year × side, net (Δ vs `trail OFF`):**
+
+| year | long Δ | short Δ | all Δ |
+|---|---|---|---|
+| 2024 | +$172.10 | **−$246.07** | −$73.97 |
+| 2025 | −$15.72 | **+$508.51** | +$492.78 |
+| 2026 | **+$625.76** | −$339.53 | +$286.23 |
+
+**The gain swings BETWEEN THE SIDES, year to year** — 2024 is carried
+by the longs, 2025 by the shorts, 2026 by the longs again. That is
+consistent with § 8.5's mechanism (the trail-closed shorts free
+same-direction slots and admit different later signals): which side
+benefits depends on the *ordering* of signals inside each year, not on
+a stable side-specific edge.
+
+> **⚠️ BUT THE BOOK'S ABSOLUTE LEVEL IS STILL REGIME-DEPENDENT.**
+> In 2026 (gold −6.1%) **both** the baseline (−$1,956) and the
+> promoted book (−$1,670) **lose money**. The scope is *less bad* in a
+> down year; it does not make the strategy profitable in one. That is
+> a property of the strategy, not of this promotion, and it is the
+> honest limit worth carrying forward.
+
+Reproduce with `python -m runtime.diagnostics.trail_sides_ledger_verdict`
+(STEP 5c).
 
 ### The verdict
 
@@ -1063,10 +1105,11 @@ the scope-gate invariant holds (**0 long legs** exit on the trail).
 > (0.777×).
 >
 > **But read the caveats.** The gain is 98% **drift**, not timing;
-> it is **regime-concentrated** (2026 loses $1,448); and the
-> **paired** t-stat is only +1.62. This is a **better place to stand
-> long**, and it must be **re-measured whenever the exit geometry
-> changes**.
+> the **paired** t-stat is only +1.62; and the book's **absolute**
+> level is regime-dependent (2026 loses $1,670 even though it is
+> **+$286 better than the baseline**). This is a **better place to
+> stand long**, and it must be **re-measured whenever the exit
+> geometry changes**.
 
 ---
 

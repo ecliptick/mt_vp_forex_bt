@@ -1040,17 +1040,44 @@ baseline. The two failures vs the canonical recipe are the two
 EXTREME cuts (2024-07-01 and 2026-01-01), where one half is very
 short.
 
-#### ⚠️ THE GAIN IS REGIME-CONCENTRATED
+#### ⚠️ WHERE THE GAIN COMES FROM — year × side
 
-| year | gold | `both` | `off` | `short` | Δ vs `both` |
-|---|---|---|---|---|---|
-| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
-| 2025 | +64.5% | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
-| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+> **⚠️ CORRECTED 2026-11-04.** This table was previously read as
+> "the gain is regime-concentrated (2026 loses $1,448)". That was
+> measured against the **`'both'` scope**, which **does not ship**.
+> The promotion baseline is **`trail OFF`**.
 
-**2026 LOSES $1,448 against the shipping recipe.** The scope helps
-when gold trends and hurts when it does not, because the long side
-carries the book. The variant wins **20 of 31 months**.
+| year | gold | `both` | `off` | `short` | Δ vs `both` | **Δ vs `off`** |
+|---|---|---|---|---|---|---|
+| 2024 | +27.2% | −$325.55 | +$209.99 | +$136.02 | +$461.57 | **−$73.97** |
+| 2025 | +64.5% | −$193.01 | +$3,339.64 | +$3,832.42 | +$4,025.43 | **+$492.78** |
+| 2026 | **−6.1%** | −$222.60 | −$1,956.47 | −$1,670.24 | −$1,447.64 | **+$286.23** |
+| **total** | | **−$741.16** | **+$1,593.16** | **+$2,298.20** | **+$3,039.36** | **+$705.04** |
+
+**Against the baseline a promotion must beat (`trail OFF`), the scope
+wins 2 of 3 years** — 2025 +$493, 2026 +$286, 2024 **−$74** (the one
+loss is 10% of the total +$705 gain). The original "2026 loses $1,448"
+reading came from a baseline that does not ship.
+
+**Year × side, Δ vs `trail OFF`:**
+
+| year | long Δ | short Δ | all Δ |
+|---|---|---|---|
+| 2024 | +$172.10 | **−$246.07** | −$73.97 |
+| 2025 | −$15.72 | **+$508.51** | +$492.78 |
+| 2026 | **+$625.76** | −$339.53 | +$286.23 |
+
+**The gain swings between the sides year to year** — 2024 longs,
+2025 shorts, 2026 longs. Which side benefits depends on the *ordering*
+of signals inside the year, not on a stable side-specific edge.
+
+> **⚠️ BUT THE BOOK'S ABSOLUTE LEVEL IS STILL REGIME-DEPENDENT.**
+> In 2026 (gold −6.1%) **both** the baseline (−$1,956) and the
+> promoted book (−$1,670) **lose money**. The scope is *less bad* in a
+> down year; it does not make the strategy profitable in one.
+
+Reproduce: `python -m runtime.diagnostics.trail_sides_ledger_verdict`
+(STEP 5c).
 
 > **✅ PROMOTED 2026-11-04. `TRAIL_SIDES = 'short'`.**
 > The canonical ledger was rebuilt under the promoted recipe (7,122
@@ -1059,9 +1086,9 @@ carries the book. The variant wins **20 of 31 months**.
 > exit on the trail.
 >
 > **Re-measure it whenever the exit geometry changes**, and treat the
-> regime concentration as a live caveat: this is a **better place to
-> stand long**, and it earns its keep by the NET, not by a timing
-> decomposition.
+> regime dependence of the book's ABSOLUTE level as a live caveat:
+> this is a **better place to stand long**, and it earns its keep by
+> the NET, not by a timing decomposition.
 
 ---
 
@@ -1587,7 +1614,7 @@ none has ever been swept:
 | `sl_atr_mult` | removed from the engine |
 | `poc_buffer_usd` | only read under `sl_mode='fvg_or_poc'` |
 | `structure_gate` | measured and **NOT PROMOTED**; it loses **−$1,215 of net** against the canonical book and its per-leg `excess` stays significantly negative on both sides |
-| `trade_sides="long"` | measured and **NOT PROMOTED**; a long-only book has no hedge in a sell-off, and its daily market correlation is **higher** (+0.437, t = +10.74) than the two-sided recipe's. ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the rejection is a deliberate **risk** choice, not a measured-worse one |
+| `trade_sides="long"` | measured and **NOT PROMOTED**; a long-only book has no hedge in a sell-off. Its daily corr is **higher** (+0.437, t = +10.74) than the two-sided recipe's (+0.392). ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the knob stays OFF as a deliberate **risk** choice: the short side is net-negative (−$377) BUT a real diversifier (daily corr **−0.195**, t = −4.09 vs the long side's **+0.441**) |
 | any HVN/LVN VP knob | the VP profile is **INERT** on this corpus — do not promote on the strength of that finding |
 
 ---
@@ -1733,7 +1760,7 @@ assumed. Details in [`docs/promotions.md`](docs/promotions.md).
 | The coarse **polarity** whitelist (bull/bear/mixed buckets) | **DEAD** — held-out kept trades have aggregate t = −2.15 (significantly loss-making). **A coarse polarity bucket does NOT carry the signal — the specific 5-event shape does.** |
 | The sequence flip | **DEAD** — "does NOT generalise, −$8 on held-out slices" |
 | `structure_gate` | **NOT PROMOTED** — loses **−$1,215 of net** vs the canonical book; its per-leg `excess` stays significantly negative on both sides |
-| `trade_sides = "long"` | **NOT PROMOTED** — a long-only book has no hedge in a sell-off, and its daily market correlation is **higher** (+0.437, t = +10.74) than the two-sided recipe's. ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the rejection is a deliberate **risk** choice, not a measured-worse one |
+| `trade_sides = "long"` | **NOT PROMOTED** — a long-only book has no hedge in a sell-off, and its daily corr is **higher** (+0.437, t = +10.74) than the two-sided recipe's (+0.392). ⚠️ Its net is **higher** (+$2,731 vs +$2,298) — the knob stays OFF as a deliberate **risk** choice: the short side is net-negative (−$377, gross/fee 0.669×) BUT a real diversifier (daily corr **−0.195**, t = −4.09 vs the long side's **+0.441**) |
 | **`trail_sides = "both"`** (the trail on longs) | **SUPERSEDED 2026-11-04** — the trail on the LONG side costs **−$2,178** on the corpus; scoping it to shorts is the only cell that beats the trail-OFF baseline. See § 3.9b |
 | **The trailing stop at ANY setting, unscoped** | **MEASURED, then SCOPED.** The trail's total damage is nearly independent of its tightness (k=2 → −$373; k=4 → −$379; k=8 → −$355) — it is a **geometry** change, not a risk knob, so there was no setting to find. It ships **scoped to shorts only** (`trail_sides='short'`), which is the one scope that beats the trail-OFF baseline. See [`docs/trail_stop.md`](docs/trail_stop.md) |
 | HVN/LVN volume profile | **INERT** — the placebo (shuffled volume) lands INSIDE the real profiles' band. Two blockers stand: the TP is the swing cap (89.0% of legs), and LVN is never read |

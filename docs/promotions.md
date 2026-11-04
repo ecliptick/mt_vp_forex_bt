@@ -653,20 +653,34 @@ recipe, and at 4 of 7 vs the trail-OFF baseline.** It is NOT uniformly
 better — and the failures are not random: they are the two extreme
 cuts, where one half is very short.
 
-> **⚠️ THE HONEST LIMIT #3: THE GAIN IS REGIME-CONCENTRATED.**
+> **⚠️ THE HONEST LIMIT #3: THE BOOK'S ABSOLUTE LEVEL IS
+> REGIME-DEPENDENT.**
 > Splitting by year (gold: 2024 **+27.2%**, 2025 **+64.5%**, 2026
 > **−6.1%**):
 >
-> | year | `both` | `off` | `short` | Δ vs `both` |
-> |---|---|---|---|---|
-> | 2024 | −$325.55 | +$209.99 | +$136.02 | +$461.57 |
-> | 2025 | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** |
-> | 2026 | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** |
+> | year | `both` | `off` | `short` | Δ vs `both` | **Δ vs `off`** |
+> |---|---|---|---|---|---|
+> | 2024 | −$325.55 | +$209.99 | +$136.02 | +$461.57 | **−$73.97** |
+> | 2025 | −$193.01 | +$3,339.64 | **+$3,832.42** | **+$4,025.43** | **+$492.78** |
+> | 2026 | −$222.60 | −$1,956.47 | −$1,670.24 | **−$1,447.64** | **+$286.23** |
 >
-> **2026 LOSES $1,448 against the shipping recipe.** The long book's
-> net in 2026H1 (gold −7.4%) is **−$2,232.88** under the promoted
-> scope. The scope helps when gold trends and hurts when it does not,
-> because the long side carries the book.
+> **⚠️ CORRECTED 2026-11-04: the "Δ vs `both`" column was previously
+> quoted as the verdict ("2026 LOSES $1,448 against the shipping
+> recipe"). `both` does NOT ship — the promotion baseline is `trail
+> OFF`. Against the baseline that matters, the scope wins **2 of 3
+> years** (2025 +$493, 2026 +$286, 2024 −$74 — the one loss is 10% of
+> the total +$705 gain).**
+>
+> What IS true: in 2026 (gold −6.1%) the book's **absolute** level
+> loses money under *both* the baseline (−$1,956) and the promoted
+> scope (−$1,670). The scope is *less bad* in a down year; it does
+> not make the strategy profitable in one.
+>
+> The gain also **swings between the sides year to year** (Δ vs `off`):
+> 2024 long +$172 / short −$246; 2025 long −$16 / short +$509;
+> 2026 long +$626 / short −$340. Which side benefits depends on the
+> *ordering* of signals inside the year, not on a stable
+> side-specific edge.
 >
 > The variant wins **20 of 31 months** against the shipping recipe.
 
@@ -1145,18 +1159,72 @@ book, and the DAILY test measures that decisively:
 > (+1.1250 vs +0.7895) — the short side is net-negative on the current
 > book, so removing it raises the total.
 >
-> The knob therefore stays OFF as a **deliberate risk choice** (a
-> concentrated long-only book with no hedge, and a *higher* daily
-> market correlation than the two-sided recipe), **not** because it
-> measured worse. Its old justification — *"raises market correlation
-> to +0.464"* — is **RETIRED**: that was a MONTHLY regression (n = 13..31,
-> Fisher-z **t = 1.86**, inside its own noise band) and it does not
-> survive the daily test. See AGENTS.md § 1.1 rule 7.
+> Its old justification — *"raises market correlation to +0.464"* — is
+> **RETIRED**: that was a MONTHLY regression (n = 13..31, Fisher-z
+> **t = 1.86**, inside its own noise band) and it does not survive the
+> daily test. See AGENTS.md § 1.1 rule 7.
+>
+> **✅ THE KNOB STAYS OFF — AND THE REASON IS NOW MEASURED, NOT
+> ASSUMED (user decision, 2026-11-04: keep both sides).** The short
+> side is **net-negative** (−$376.94, gross/fee **0.669×**) but it is a
+> **genuine diversifier**: its DAILY correlation with gold is
+> **−0.195 (Fisher-z t = −4.09)**, against the long side's **+0.441
+> (t = +10.86)**. Dropping the short side raises the book's daily
+> correlation from **+0.392 to +0.437** and its r² from 0.154 to
+> 0.191.
+>
+> So the two sides' facts are BOTH true at once:
+>
+> | side | legs | net | gross/fee | daily corr vs gold | corr t |
+> |---|---|---|---|---|---|
+> | long | 4,829 | **+$2,675** | 2.224× | **+0.441** | +10.86 |
+> | short | 2,293 | **−$377** | **0.669×** | **−0.195** | −4.09 |
+>
+> The short side is a **fee sink** (it covers only 0.669× its own round
+> trip) AND a **hedge** (negative correlation). We pay ~$377/yr of net
+> to keep the only offset to a strongly long-correlated book. That is a
+> deliberate **risk** choice: the criterion is net profit, but the
+> book is also expected to survive a gold sell-off, and a long-only
+> account cannot be flat in a downtrend by construction.
 >
 > The negative short alpha is a REAL finding and it is attacked where
 > it is safe to attack it — by gating the short side on market
 > structure sequences, so the side stays alive but only trades its own
 > profitable sequences.
+>
+> **⚠️ A SECOND FINDING — THE WHITELIST DESTROYS THE HEDGE.** The
+> **unfiltered** book's short side is a STRONG diversifier
+> (**−0.475, t = −10.36** on H1; **−0.543, t = −9.93** on H2), but the
+> **shipped 21-key whitelist** reduces it to **−0.238 (t = −3.86)**
+> on H1 and **+0.003 (t = +0.04)** on H2 — i.e. **the hedge is
+> essentially gone** on the more recent half. The long side's
+> correlation moves the same way (+0.482 → +0.205 on H1).
+>
+> | book | side | daily corr | corr t |
+> |---|---|---|---|
+> | unfiltered H1 | long | +0.482 | +10.60 |
+> | unfiltered H1 | **short** | **−0.475** | **−10.36** |
+> | shipped on H1 | long | +0.205 | +3.63 |
+> | shipped on H1 | **short** | **−0.238** | **−3.86** |
+> | shipped on H2 | long | +0.245 | +3.50 |
+> | shipped on H2 | **short** | **+0.003** | **+0.04** |
+>
+> **Why this matters for the `trade_sides` decision.** The reason to
+> keep the short side is that it diversifies. On the SHIPPED book it
+> barely does (−0.195, and nothing at all on H2). The hedge the
+> two-sided recipe is paying ~$377/yr for is **much weaker than the
+> unfiltered book's short side would give**, which is a cost of the
+> whitelist, not of two-sidedness itself.
+>
+> **This is a measured lead, not a recommendation.** A whitelist that
+> keeps a *profitable* short side (gross/fee > 1.0) AND its
+> diversification would be strictly better than either current option.
+> That has **not** been measured and is **not** implied by anything
+> above — the shipped whitelist's 8 short keys are what they are, and
+> their out-of-sample short side was measured to SIGN-FLIP (§ 3.10.0).
+> See also `runtime/diagnostics/rejected_knob_ledgers.py` and the
+> per-side daily correlation in
+> `runtime/diagnostics/daily_direction_dependence.py`.
 
 ### HVN/LVN — the volume profile is INERT in the canonical recipe
 

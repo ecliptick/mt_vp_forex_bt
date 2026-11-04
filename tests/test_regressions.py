@@ -2493,6 +2493,85 @@ def test_engine_level_walkforward_locks_the_shipped_whitelist():
     )
 
 
+def test_short_side_remains_a_measured_diversifier():
+    """The short side's DAILY correlation with gold must stay NEGATIVE.
+
+    WHY THIS GUARD EXISTS
+    ======================
+
+    The short side is net-negative on the current book (-$376.94,
+    gross/fee 0.669x). That alone would argue for deleting it -- and
+    ``trade_sides='long'`` DOES net more (+$2,731 vs +$2,298).
+
+    But the short side is also the book's only offset to a strongly
+    long-correlated market exposure: its DAILY correlation with gold
+    is -0.195 (Fisher-z t = -4.09), against the long side's +0.441
+    (t = +10.86). We therefore keep it, and we pay ~$377/yr of net for
+    it. That decision is only defensible while the hedge is real.
+
+    This test makes the hedge STRUCTURAL: if a future whitelist or
+    knob change flips the short side's daily correlation positive, the
+    suite goes red and the decision has to be re-argued on the new
+    numbers rather than inherited by accident.
+
+    The instrument is the DAILY aggregation (n ~= 431 days). A monthly
+    correlation is NEVER a verdict for this book (AGENTS.md § 1.1
+    rule 7) -- its n = 13..31 puts every quoted r inside its own noise
+    band.
+    """
+    import json
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    path = (repo / "runtime" / "diagnostics" / "_reports"
+            / "daily_direction_dependence.json")
+    assert path.exists(), (
+        "the daily direction-dependence report is missing -- run "
+        "`python -m runtime.diagnostics.daily_direction_dependence`"
+    )
+    d = json.loads(path.read_text(encoding="utf-8"))
+    assert d.get("aggregation") == "daily", (
+        "the daily direction-dependence report is not DAILY -- the "
+        "monthly regression is retired (AGENTS.md § 1.1 rule 7)"
+    )
+
+    canonical = d.get("books", {}).get("canonical")
+    assert canonical is not None, (
+        "the canonical book is missing from the daily direction-"
+        "dependence report"
+    )
+
+    long_blk = canonical.get("daily_long") or {}
+    short_blk = canonical.get("daily_short") or {}
+
+    assert long_blk.get("days", 0) >= 100, (
+        "the long side's daily sample is too small to trust "
+        f"({long_blk.get('days')} days)"
+    )
+    assert short_blk.get("days", 0) >= 100, (
+        "the short side's daily sample is too small to trust "
+        f"({short_blk.get('days')} days)"
+    )
+
+    # The long side is the market-exposed one.
+    assert long_blk.get("corr", 0.0) > 0.0, (
+        "the long side is no longer positively correlated with gold "
+        f"({long_blk.get('corr', 0.0):+.3f}) -- the book's exposure "
+        "structure has changed; re-measure and update AGENTS.md § 6"
+    )
+
+    # The short side is the OFFSET. If it goes positive, the two-sided
+    # book has lost its hedge and the `trade_sides='both'` decision
+    # needs re-arguing.
+    assert short_blk.get("corr", 0.0) < 0.0, (
+        "the short side is no longer NEGATIVELY correlated with gold "
+        f"({short_blk.get('corr', 0.0):+.3f}) -- the book's hedge is "
+        "gone. `trade_sides='long'` may now be the better choice "
+        "(it nets +$2,731 vs +$2,298); re-measure and update "
+        "AGENTS.md § 6 and docs/promotions.md"
+    )
+
+
 def _side_gross_per_leg(report: dict, side: str) -> float | None:
     """The pooled out-of-sample gross/leg for ONE side, if derivable."""
     arms = {a["arm"]: a for a in report.get("arms", [])}
@@ -2628,11 +2707,22 @@ def test_short_side_is_a_measured_drag_but_the_strategy_stays_two_sided():
     assert d["summary"]["both"]["legs"] > 0, "the control arm has no trades"
 
     # The canonical recipe must remain two-sided.
+    #
+    # ⚠️ THE OLD RATIONALE ("corr +0.464") IS RETIRED -- that was a
+    # MONTHLY regression (n = 13..31, Fisher-z t = 1.86, inside its own
+    # noise band). The MEASURED reason to stay two-sided is that the
+    # short side is a real diversifier: its DAILY correlation with gold
+    # is -0.195 (t = -4.09) against the long side's +0.441 (t = +10.86).
+    # The short side is net-negative (-$377, gross/fee 0.669x), so we pay
+    # that to keep the offset. See
+    # ``test_short_side_remains_a_measured_diversifier``, which makes
+    # the hedge structural.
     assert TRADE_SIDES == "both", (
         f"TRADE_SIDES is {TRADE_SIDES!r}. The strategy must stay two-sided "
-        f"-- a long-only account is a directional bet (corr +0.464) with no "
-        f"hedge in a sell-off. Gate the short side with the per-side "
-        f"sequence filter instead."
+        f"-- a long-only account has no hedge in a sell-off, and the short "
+        f"side's DAILY correlation with gold is -0.195 (t = -4.09), the "
+        f"book's only offset to its +0.441 long exposure. Gate the short "
+        f"side with the per-side sequence filter instead."
     )
     assert build_engine_kwargs()["trade_sides"] == "both"
 
@@ -2983,3 +3073,89 @@ def test_the_scope_grid_is_ranked_on_net_profit():
         f"'short' (${short_net:,.2f}) no longer beats the "
         f"trail-OFF baseline (${off_net:,.2f})"
     )
+
+
+def test_the_promotion_baseline_is_trail_off_not_the_shipping_scope():
+    """The comparison baseline for a promotion must be ``trail OFF``.
+
+    A promotion is judged against the best ALTERNATIVE that could
+    ship -- not against the recipe that happens to be in production
+    right now. For ``trail_sides`` that alternative is ``trail OFF``
+    (§ 8.5 of ``docs/trail_stop.md``), not the ``'both'`` scope.
+
+    This is not a cosmetic distinction. Measured on the corpus:
+
+        year    delta vs 'both'   delta vs 'off'
+        2024       +$461.57          -$73.97
+        2025     +$4,025.43         +$492.78
+        2026     -$1,447.64         +$286.23
+
+    Quoting the ``'both'`` column makes 2026 look like a $1,448 loss
+    and produces the "the gain is regime-concentrated" reading. Against
+    the baseline that actually gates the promotion, the scope wins
+    2 of 3 years (the one loss, 2024, is 10% of the total gain). The
+    archive carried the wrong reading until 2026-11-04.
+    """
+    import json
+    import pathlib
+
+    reports = pathlib.Path("runtime") / "diagnostics" / "_reports"
+    arms = {
+        "both": "leg_ledger_trail_both.json",
+        "short": "leg_ledger_trail_short.json",
+        "off": "leg_ledger_trail_off.json",
+    }
+
+    nets: dict[str, dict[str, float]] = {}
+    for label, fname in arms.items():
+        path = reports / fname
+        if not path.exists():
+            pytest.skip(f"{fname} is missing -- run the verdict driver")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        per_year: dict[str, float] = {}
+        times = payload["legs"]["signal_time_ns"]
+        gross = payload["legs"]["gross"]
+        fee = payload["legs"]["fee"]
+        # Derive the year from the epoch-ns timestamps.
+        import datetime as _dt
+        for ts, g, f in zip(times, gross, fee):
+            year = _dt.datetime.fromtimestamp(
+                ts / 1e9, _dt.timezone.utc).strftime("%Y")
+            per_year[year] = per_year.get(year, 0.0) + (g - f)
+        nets[label] = per_year
+
+    years = sorted(set(nets["short"]) & set(nets["off"]))
+    assert years, "no common years across the arms"
+
+    # The 'both' scope must NOT be the promotion baseline: it does not
+    # ship, and the archive's original per-year table was measured
+    # against it.
+    for year in years:
+        d_off = nets["short"][year] - nets["off"][year]
+        d_both = nets["short"][year] - nets["both"][year]
+        # The two comparisons genuinely disagree in sign somewhere --
+        # that is why quoting the wrong one produced a wrong verdict.
+        assert d_off != d_both, (
+            f"{year}: both baselines now agree -- the archive's "
+            "correction note may be stale"
+        )
+
+    # And the CORRECT baseline (trail OFF) says the scope wins 2 of 3
+    # years, and the one it loses it loses by a SMALL amount relative
+    # to the total gain. This is what the docs now claim.
+    n_better = sum(1 for y in years
+                   if nets["short"][y] - nets["off"][y] > 0)
+    assert n_better >= 2, (
+        f"the promoted scope beats the trail-OFF baseline in only "
+        f"{n_better}/{len(years)} years -- docs claim 2 of 3"
+    )
+    total_gain = sum(nets["short"][y] - nets["off"][y] for y in years)
+    for y in years:
+        d_off = nets["short"][y] - nets["off"][y]
+        if d_off >= 0:
+            continue
+        assert abs(d_off) < abs(total_gain) * 0.25, (
+            f"{y}: the losing year (${d_off:,.2f}) is a large fraction "
+            f"of the total gain (${total_gain:,.2f}) -- the scope IS "
+            "regime-concentrated"
+        )

@@ -574,14 +574,21 @@ STRUCTURE_MAX_AGE_BARS = 300
 
 # Which sides may open. "both" = long and short; "long" = long only.
 #
-# NOT PROMOTED, deliberately two-sided. On the current recipe the
-# long-only book measures net +$2,731.05 (4,371 legs, gross/leg
-# +1.1250) against the canonical +$2,298.20 -- i.e. it is BETTER on
-# net, because the short side is net-negative. It stays OFF as a
-# deliberate RISK choice: a long-only gold account has no hedge in a
-# sell-off, and its DAILY market correlation is higher (+0.437,
-# Fisher-z t = +10.74) than the two-sided recipe's (+0.392, t =
-# +9.92). See ``runtime/diagnostics/daily_direction_dependence.py``.
+# NOT PROMOTED, deliberately two-sided (user decision, 2026-11-04).
+#
+# On the current recipe the long-only book measures net +$2,731.05
+# (4,371 legs, gross/leg +1.1250) against the canonical +$2,298.20 --
+# it is BETTER on net, because the short side is net-negative
+# (-$376.94, gross/fee 0.669x). It stays OFF anyway, because the short
+# side is a GENUINE DIVERSIFIER: its DAILY correlation with gold is
+# -0.195 (Fisher-z t = -4.09) against the long side's +0.441
+# (t = +10.86). Dropping it raises the book's daily correlation from
+# +0.392 to +0.437 and its r2 from 0.154 to 0.191.
+#
+# So we deliberately pay ~$377/yr of net to keep the only offset to a
+# strongly long-correlated book -- a long-only gold account cannot be
+# flat in a downtrend by construction. See
+# ``runtime/diagnostics/daily_direction_dependence.py``.
 #
 # The negative short alpha is a REAL finding and it is attacked where
 # it is safe to attack it -- by gating the short side on market

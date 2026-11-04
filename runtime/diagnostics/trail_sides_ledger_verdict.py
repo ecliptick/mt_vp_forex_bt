@@ -474,12 +474,78 @@ def _split_robustness(payloads: dict[str, dict[str, np.ndarray]],
     return out
 
 
+def _year_side_decomposition(payloads: dict[str, dict[str, np.ndarray]],
+                              years: list[str]) -> dict[str, Any]:
+    """Bucket every arm by YEAR x SIDE and report the net.
+
+    WHY THIS EXISTS
+    ---------------
+    The per-year table that was archived in ``docs/trail_stop.md`` § 8.6
+    compared the promoted scope against the ``'both'`` scope. But
+    ``'both'`` DOES NOT SHIP — the promotion baseline is ``trail OFF``
+    (see ``TRAIL_OFF_OVERRIDES``). The "regime-concentrated" reading
+    came from the wrong baseline: it made 2026 look like a $1,448
+    LOSS against a recipe that is not in production, while 2026 is
+    actually **+$286 BETTER** than the baseline the promotion must
+    beat.
+
+    So the decomposition reports BOTH baselines side by side, and the
+    reader cannot mistake one for the other.
+
+    The year is a REPORTING dimension (AGENTS.md § 1.1): one
+    continuous execution is bucketed after the fact, so no boundary is
+    lost and no leg is re-scored.
+
+    MEASURED (2026-11-04): against ``trail OFF`` the scope wins **2 of
+    3 years** (2025 +$492.78, 2026 +$286.23, 2024 -$73.97) — the one
+    loss is 10% of the total +$705.04 gain. The gain also SWINGS
+    BETWEEN THE SIDES year to year: 2024 long +$172.10 / short
+    -$246.07; 2025 long -$15.72 / short +$508.51; 2026 long +$625.76 /
+    short -$339.53.
+    """
+    out: dict[str, Any] = {}
+    for year in years:
+        row: dict[str, Any] = {}
+        for name, arr in payloads.items():
+            ts_year = pd.to_datetime(arr["signal_time_ns"], unit="ns",
+                                     utc=True).strftime("%Y")
+            m = ts_year == year
+            cell: dict[str, Any] = {}
+            for side_name, sign in (("long", 1), ("short", -1)):
+                ms = m & (arr["side"] == sign)
+                n = int(ms.sum())
+                cell[side_name] = {
+                    "n": n,
+                    "net": round(float(arr["gross"][ms].sum()
+                                       - arr["fee"][ms].sum()), 4) if n else 0.0,
+                }
+            cell["all"] = {
+                "n": int(m.sum()),
+                "net": round(float(arr["gross"][m].sum()
+                                   - arr["fee"][m].sum()), 4) if m.any() else 0.0,
+            }
+            row[name] = cell
+        # The two deltas that matter, both explicit.
+        var = row.get("variant", {})
+        for base_label, base_key in (("scope_both", "scope_both"),
+                                     ("trail_off", "trail_off")):
+            base = row.get(base_key, {})
+            d: dict[str, Any] = {}
+            for side_name in ("long", "short", "all"):
+                d[side_name] = round(
+                    var.get(side_name, {}).get("net", 0.0)
+                    - base.get(side_name, {}).get("net", 0.0), 4)
+            row[f"delta_{base_label}"] = d
+        out[year] = row
+    return out
+
+
 def _half_split(payload: dict[str, Any], split_at: str) -> dict[str, Any]:
     """Bucket a ledger's legs into H1 / H2 by SIGNAL time.
 
-    The half is a REPORTING dimension — the run is ONE continuous
-    execution over the whole corpus, so nothing is lost at the
-    boundary (AGENTS.md § 1.1).
+   The half is a REPORTING dimension — the run is ONE continuous
+   execution over the whole corpus, so nothing is lost at the
+   boundary (AGENTS.md § 1.1).
     """
     arr = ledger_arrays(payload)
     ts = arr["signal_time_ns"]
@@ -742,6 +808,37 @@ def main() -> None:
           f"{s['n_wins_both_gross_per_leg']}/{s['n_splits']} cut points")
     print()
 
+    # ── Step 5c: the YEAR x SIDE decomposition ──────────────────
+    print("=" * 78)
+    print("STEP 5c -- YEAR x SIDE  (DIAGNOSTIC -- which regime carries it)")
+    print("=" * 78)
+    print("  The year is a REPORTING dimension (AGENTS.md § 1.1): one")
+    print("  continuous execution, bucketed after the fact.")
+    print()
+    print("  NOTE: TWO BASELINES. 'both' does NOT ship -- the promotion")
+    print("  baseline is trail OFF. The archived table compared against")
+    print("  'both' and therefore made 2026 look like a LOSS when it is")
+    print("  actually a GAIN vs the baseline that matters.")
+    years = ["2024", "2025", "2026"]
+    ysd = _year_side_decomposition(
+        {"scope_both": ba, "variant": va, "trail_off": oa}, years)
+    hdr_y = (f"  {'year':<6} {'side':<7} {'off':>10} {'both':>10} "
+             f"{'short':>10} {'d(both)':>10} {'d(off)':>10}")
+    print(hdr_y)
+    print("  " + "-" * (len(hdr_y) - 2))
+    for year in years:
+        r = ysd[year]
+        for side_name in ("long", "short", "all"):
+            o = r["trail_off"][side_name]
+            b = r["scope_both"][side_name]
+            v = r["variant"][side_name]
+            db = r["delta_scope_both"][side_name]
+            do = r["delta_trail_off"][side_name]
+            print(f"  {year:<6} {side_name:<7} {o['net']:>+10,.2f} "
+                  f"{b['net']:>+10,.2f} {v['net']:>+10,.2f} "
+                  f"{db:>+10,.2f} {do:>+10,.2f}")
+        print()
+
     # ── Step 6: the DAILY direction-dependence test (DIAGNOSTIC) ─
     print("=" * 78)
     print("STEP 6 -- DAILY DIRECTION DEPENDENCE  (DIAGNOSTIC ONLY)")
@@ -831,6 +928,7 @@ def main() -> None:
                           "n_only_canonical", "n_only_variant",
                           "n_unmatched_canonical", "n_unmatched_variant")},
         "halves": {"scope_both": ch, "variant": vh},
+        "year_side": ysd,
         "wins_both": {m: (d1 > 0 and d2 > 0) for m, d1, d2 in wins_both},
         "beta_regression": {"scope_both": cb, "variant": vb},
         "daily_direction_dependence": {"scope_both": cb, "variant": vb},
@@ -900,6 +998,17 @@ def main() -> None:
             "wins_both_net": report["wins_both"].get("net"),
             "wins_both_gross_per_leg": report["wins_both"].get(
                 "gross_per_leg"),
+            # The YEAR x SIDE decomposition. The promotion baseline is
+            # trail OFF; the 'both' scope does NOT ship.
+            "years": list(years),
+            "delta_vs_trail_off_by_year": {
+                y: ysd[y]["delta_trail_off"]["all"] for y in years},
+            "delta_vs_scope_both_by_year": {
+                y: ysd[y]["delta_scope_both"]["all"] for y in years},
+            "n_years_better_than_trail_off": sum(
+                1 for y in years if ysd[y]["delta_trail_off"]["all"] > 0),
+            "n_years_better_than_scope_both": sum(
+                1 for y in years if ysd[y]["delta_scope_both"]["all"] > 0),
         },
         payload=report,
         src_fp=registry.source_fingerprint([
