@@ -1,0 +1,152 @@
+{
+  "schema": "results-run/1",
+  "run_id": "sweep_cell-ac97bc7a4b4df622__nocommit__20261104T114103Z",
+  "kind": "sweep_cell",
+  "config_fp": "ac97bc7a4b4df622",
+  "ts_utc": "2026-11-04T11:41:03Z",
+  "commit": null,
+  "commit_short": null,
+  "dirty": false,
+  "branch": null,
+  "src_fp": "e2745b891fc3b02f",
+  "params": {
+    "knob": "sl_nth_hvn_n",
+    "value": 3,
+    "overrides": {
+      "sl_nth_hvn_n": 3
+    },
+    "scope": "XAUUSD_S1_1y__20240101_20260716",
+    "start": "2024-01-01",
+    "end": "2026-07-16",
+    "data": "C:\\coding\\ict_tier_v2\\data\\XAUUSD_S1_1y.parquet",
+    "notebook": "canonical_run"
+  },
+  "summary": {
+    "n_trades": 7185,
+    "hit_rate": 0.6810020876826722,
+    "gross": 4636.855950156361,
+    "net": 4636.855950156361,
+    "gross_per_leg": 0.645352,
+    "profit_factor": 1.1530527680344622,
+    "trades_per_day": 7.77512701068708,
+    "max_drawdown_usd": 1929.24757027753,
+    "wall_secs": 78.6
+  },
+  "path": "results/runs/sweep_cell-ac97bc7a4b4df622__nocommit__20261104T114103Z.json",
+  "parent_fp": "ac97bc7a4b4df622",
+  "payload": {
+    "ts_utc": "2026-11-04T11:41:02Z",
+    "notebook": "canonical_run",
+    "knob": "sl_nth_hvn_n",
+    "value": 3,
+    "cell_idx": 1,
+    "scope": [
+      "XAUUSD_S1_1y__20240101_20260716"
+    ],
+    "engine": "vp_multi_target",
+    "wall_secs": 78.60027750000881,
+    "cache_hit": true,
+    "n_bars": 41233730,
+    "metrics": {
+      "n_trades": 7185,
+      "n_long": 4893,
+      "n_short": 2292,
+      "n_wins": 4893,
+      "n_losses": 2292,
+      "hit_rate": 0.6810020876826722,
+      "total_pnl_gross_usd": 4636.855950156361,
+      "total_pnl_net_usd": 4636.855950156361,
+      "ev_per_trade_usd": 0.6453522547190482,
+      "profit_factor": 1.1530527680344622,
+      "payoff_ratio": 0.2870814090387588,
+      "max_drawdown_usd": 1929.24757027753,
+      "max_dd_source": "closed_trade_cumsum",
+      "cagr": 0.980827745601289,
+      "sharpe_per_trade_annualised": null,
+      "trades_per_day": 7.77512701068708,
+      "span_days": 924.1006597222222,
+      "median_hold_secs": 4098.0,
+      "mean_hold_secs": 15442.602644398052,
+      "median_sl_distance_usd": 15.0,
+      "median_tp_distance_usd": 14.321500000000015,
+      "exit_reason_breakdown": {
+        "tp": 2413,
+        "sl": 2098,
+        "trail_stop": 1805,
+        "contra_close": 869
+      },
+      "source_breakdown": {
+        "immediate": 6758,
+        "sniper": 427
+      },
+      "n_signals_emitted": 118260,
+      "n_inversions_detected": 3781,
+      "n_immediate_filled": 6244,
+      "n_sniper_filled": 404,
+      "n_dropped_opposite": 0,
+      "n_replaced_opposite": 0,
+      "n_stacked_opposite": 3075,
+      "n_same_dir_blocked": 0,
+      "conflict_policy_used": "stack",
+      "max_same_dir_open_used": 20,
+      "n_orders_placed": 7636,
+      "n_orders_filled": 6648,
+      "n_orders_cancelled": 985,
+      "n_orders_cancelled_zone_death": 985,
+      "order_fill_rate": 0.8706128863279203,
+      "entry_fill_model_used": "touch",
+      "fill_model_used": "pessimistic",
+      "n_contra_close_events": 214,
+      "n_contra_legs_closed": 869,
+      "n_contra_qty_netted": 220.0666666666667,
+      "contra_gross_usd": 2417.3788883154994,
+      "contra_net_usd": 2417.3788883154994,
+      "contra_distance_usd_max": 54.340000000000146,
+      "contra_legs_in_trades": 869
+    },
+    "engine_diag": {
+      "signals_emitted": 118260,
+      "signals_accounted": 132619,
+      "signals_unaccounted": -14359,
+      "gate_breakdown": {
+        "structure": 0,
+        "seq_whitelist": 34363,
+        "vol_state": 90620,
+        "p95_warmup": 0,
+        "p95_warmup_sniper": 0,
+        "conflict_policy": 0,
+        "conflict_policy_at_fill": 0,
+        "orders_placed": 7636,
+        "filled_immediate": 6244,
+        "filled_sniper": 404,
+        "skipped_already_fired": 8010,
+        "skipped_dual_inverted": 0,
+        "zones_bucketized": 140629,
+        "inversions_detected": 3781
+      },
+      "order_lifecycle": {
+        "placed": 7636,
+        "filled": 6648,
+        "cancelled": 985,
+        "cancelled_zone_death": 985,
+        "cancelled_expired": 0,
+        "cancelled_policy_at_fill": 0,
+        "still_resting_at_eod": 3,
+        "unaccounted": 0
+      },
+      "entry_fill_model": "touch",
+      "fill_model": "pessimistic",
+      "structure_gate": {
+        "enabled": false,
+        "max_age_bars": 300,
+        "aligned": 0,
+        "opposed": 0,
+        "no_event": 0
+      }
+    },
+    "overrides_vs_canonical": {
+      "sl_nth_hvn_n": 3
+    },
+    "_json_path": "C:\\coding\\sniper_engine\\runtime\\sweeps\\_results\\sl_nth_hvn_n\\XAUUSD_S1_1y__20240101_20260716__cell_1.json"
+  }
+}
