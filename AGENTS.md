@@ -45,11 +45,11 @@ Data: `C:\coding\ict_tier_v2\data\XAUUSD_S1_1y.parquet` (1s bars).
 | stop | `sl_mode=hvn_lvn`, `sl_nth_hvn_n=1`, `sl_min_usd=0.94`, `sl_max_usd=15.0`, `sl_zone_mult=40` |
 | target | `tp_mode=hvn_single`, `nth_hvn_n=3`, `tp_zone_mult_fallback=200`, `swing_cap_pct=3.0`, rolling p95 cap on, `max_hold_secs=0` (lifespan off; contra-close keeps open trades low) |
 | trail | shorts: `trail_mode=combined`, k=2, activation=1×ATR1m, giveback=0.5 · longs: `trail_long_mode=giveback`, on at $10 profit, gives back 25% · `trail_sides=both` |
-| gates | `vol_state_min_range_norm=1.0`, `vol_state_min_expand_prev_day=1.0`, 21-key `structure_seq_whitelist` |
+| gates | `vol_state_min_range_norm=1.0`, `vol_state_min_expand_prev_day=1.0`, 63-key `structure_seq_whitelist` (refit on causal breaks, full corpus, in-sample) |
 | book | `trade_sides=both`, `conflict_policy=stack`, `max_same_dir_open=20`, `contra_close=True`, `contra_close_distance_usd=5.0` |
 | detector | `fvg_min_zone_usd=0.30`, 60s resample, `structure_pivot_len=9`, `vp_rows=200` |
 
-Baseline, full corpus 2024-01-01 → 2026-07-16: 6,884 trades, EV $1.171, net $8,058.39, max DD $563, Sharpe 3.43 (daily MTM). Open trades at once: p50 0, p90 3, p99 7, max 18.
+Baseline, full corpus 2024-01-01 → 2026-07-16 (look-ahead-free engine, 2026-11-06): 20,546 trades, EV $0.783, net $16,091.98, max DD $984, Sharpe 2.97 (daily MTM). Contra-close legs: 3,013. Open-trade counts not re-measured. Holdout (whitelist fit on 2024 only, scored 2025-01 → 2026-07): net $4,513 vs $4,060 with no whitelist and $9,530 for the in-sample list.
 
 ## Metrics and ranking
 

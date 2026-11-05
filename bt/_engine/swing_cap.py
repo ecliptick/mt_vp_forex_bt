@@ -54,7 +54,7 @@ def build_daily_swing(bars: pd.DataFrame, *, lookback_secs: int=86400, cap_pct: 
         first_t = int(times_ns[0])
         bucket = (times_ns - first_t) // cadence_ns
         df = pd.DataFrame({'bucket': bucket, 'high': high, 'low': low, 't': times_ns})
-        agg = df.groupby('bucket', sort=True).agg(high=('high', 'max'), low=('low', 'min'), t=('t', 'min')).reset_index()
+        agg = df.groupby('bucket', sort=True).agg(high=('high', 'max'), low=('low', 'min'), t=('t', 'max')).reset_index()
         sub_t = agg['t'].to_numpy(dtype=np.int64)
         sub_h = agg['high'].to_numpy(dtype=np.float64)
         sub_l = agg['low'].to_numpy(dtype=np.float64)

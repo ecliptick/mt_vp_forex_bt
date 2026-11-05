@@ -44,9 +44,10 @@ class RollingP95Cap:
             return float('inf')
         if self.p95_ret.size == 0 or self.buffer_t_ns.size == 0:
             return float('inf')
-        idx = int(np.searchsorted(self.buffer_t_ns, t_ns))
-        if idx >= self.p95_ret.size:
-            idx = self.p95_ret.size - 1
+        # buffer_t_ns stamps each bucket at its close; use the last bucket closed by t_ns (no look-ahead).
+        idx = int(np.searchsorted(self.buffer_t_ns, t_ns, side='right')) - 1
+        if idx < 0:
+            return float(self.seed_constant_usd) * float(self.p95_mult) if self.seed_constant_usd > 0.0 else float('inf')
         v = float(self.p95_ret[idx])
         if not np.isfinite(v) or v <= 0.0:
             return float(self.seed_constant_usd) if self.seed_constant_usd > 0.0 else float('inf')
@@ -129,7 +130,7 @@ def _downsample_to_inner(high: np.ndarray, low: np.ndarray, times_ns: np.ndarray
         return (np.zeros(0, dtype=np.int64), np.zeros(0, dtype=np.float64), np.zeros(0, dtype=np.float64))
     bucket_high = np.maximum.reduceat(high, starts)
     bucket_low = np.minimum.reduceat(low, starts)
-    bucket_t_ns = bucket_idx[starts].astype(np.int64) * inner_ns
+    bucket_t_ns = (bucket_idx[starts].astype(np.int64) + 1) * inner_ns  # bucket close time
     return (bucket_t_ns, bucket_high, bucket_low)
 
 def build_rolling_p95_from_bars(bars: pd.DataFrame, *, lookback_secs: int=604800, inner_secs: int=3600, p95_q: float=95.0, p95_mult: float=1.0, seed_path: str='constant', seed_constant_usd: float=0.0, statistic: str=STAT_P2T_WINDOW) -> RollingP95Cap:
@@ -152,7 +153,7 @@ def build_rolling_p95_from_bars(bars: pd.DataFrame, *, lookback_secs: int=604800
     _ = float(p95_q)
     warmup_until_ns = 0
     if sub_t.size > 0:
-        warmup_until_ns = int(sub_t[0]) + int((lookback_secs + inner_secs) * 1000000000)
+        warmup_until_ns = int(sub_t[0]) + int(lookback_secs * 1000000000)  # sub_t is already a bucket close
     return RollingP95Cap(lookback_secs=lookback_secs, inner_secs=inner_secs, p95_q=p95_q, p95_mult=p95_mult, statistic=str(statistic), seed_path=seed_path, seed_constant_usd=seed_constant_usd, warmup_until_ns=warmup_until_ns, skip_trades_during_warmup=True, buffer_t_ns=sub_t, buffer_high=sub_h, buffer_low=sub_l, p95_ret=p95_series)
 
 def make_live_rolling_p95(*, lookback_secs: int=604800, inner_secs: int=3600, p95_q: float=95.0, p95_mult: float=1.0, seed_path: str='constant', seed_constant_usd: float=0.0, max_inner_bars: int=4096, statistic: str=P95_STATISTIC_CANONICAL) -> RollingP95Cap:

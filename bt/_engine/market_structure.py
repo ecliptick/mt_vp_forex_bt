@@ -114,7 +114,7 @@ def detect_market_structure(high: np.ndarray, low: np.ndarray, close: np.ndarray
             cl = close[_last]
             ts_rs = first_ts + _uniq * int(resample_to_n_secs * 1000000000.0)
             state_rs = detect_market_structure(hi, lo, cl, ts_ns=ts_rs, pivot_len=pivot_len, liquidity_len=liquidity_len, detect_order_blocks=detect_order_blocks, detect_liquidity=detect_liquidity, atr_length=atr_length, resample_to_n_secs=0)
-            return _expand_state_to_original(state_rs, nb, resample_to_n_secs, n_orig, high, low, close, atr_length)
+            return _expand_state_to_original(state_rs, _last, n_orig)
     n = close.shape[0]
     trend = np.zeros(n, dtype=np.int8)
     events = np.zeros(n, dtype=np.int8)
@@ -167,38 +167,28 @@ def detect_market_structure(high: np.ndarray, low: np.ndarray, close: np.ndarray
         events[bar] = kind
         last_break_bar[bar:] = bar
         last_break_kind[bar:] = kind
-    pending_break_high: Optional[tuple[int, int, float]] = None
-    pending_break_low: Optional[tuple[int, int, float]] = None
-    swing_iter = iter(swings)
+    # Causal: a swing is known only at bar + pivot_len, and a break is stamped at the bar whose
+    # close crosses an already-known, unbroken swing level.
     cur_swing_idx = 0
     next_swing = swings[cur_swing_idx] if swings else None
     for i in range(n):
         while next_swing is not None and next_swing.bar + pivot_len <= i:
-            sb, sp, ish = (next_swing.bar, next_swing.price, next_swing.is_high)
-            if ish:
-                if last_swing_high_bar >= 0 and last_swing_high_bar not in high_swing_broken:
-                    brk_bar = _first_break(close, last_swing_high_bar + 1, sb, last_swing_high_price, +1)
-                    if brk_bar is not None:
-                        kind = StructureEvent.BOS_BULL if cur_trend == 1 else StructureEvent.CHOCH_BULL
-                        _commit_break(brk_bar, kind, last_swing_high_bar, last_swing_high_price)
-                        high_swing_broken.add(last_swing_high_bar)
-                        if kind == StructureEvent.CHOCH_BULL:
-                            cur_trend = 1
-                last_swing_high_bar = sb
-                last_swing_high_price = sp
+            if next_swing.is_high:
+                last_swing_high_bar, last_swing_high_price = next_swing.bar, next_swing.price
             else:
-                if last_swing_low_bar >= 0 and last_swing_low_bar not in low_swing_broken:
-                    brk_bar = _first_break(close, last_swing_low_bar + 1, sb, last_swing_low_price, -1)
-                    if brk_bar is not None:
-                        kind = StructureEvent.BOS_BEAR if cur_trend == -1 else StructureEvent.CHOCH_BEAR
-                        _commit_break(brk_bar, kind, last_swing_low_bar, last_swing_low_price)
-                        low_swing_broken.add(last_swing_low_bar)
-                        if kind == StructureEvent.CHOCH_BEAR:
-                            cur_trend = -1
-                last_swing_low_bar = sb
-                last_swing_low_price = sp
+                last_swing_low_bar, last_swing_low_price = next_swing.bar, next_swing.price
             cur_swing_idx += 1
             next_swing = swings[cur_swing_idx] if cur_swing_idx < len(swings) else None
+        if last_swing_high_bar >= 0 and last_swing_high_bar not in high_swing_broken and close[i] > last_swing_high_price:
+            kind = StructureEvent.BOS_BULL if cur_trend == 1 else StructureEvent.CHOCH_BULL
+            _commit_break(i, kind, last_swing_high_bar, last_swing_high_price)
+            high_swing_broken.add(last_swing_high_bar)
+            cur_trend = 1
+        if last_swing_low_bar >= 0 and last_swing_low_bar not in low_swing_broken and close[i] < last_swing_low_price:
+            kind = StructureEvent.BOS_BEAR if cur_trend == -1 else StructureEvent.CHOCH_BEAR
+            _commit_break(i, kind, last_swing_low_bar, last_swing_low_price)
+            low_swing_broken.add(last_swing_low_bar)
+            cur_trend = -1
         trend[i] = cur_trend
     if detect_liquidity:
         liq_swings = _pivots_only(high, low, liquidity_len)
@@ -283,62 +273,43 @@ def _first_break(close: np.ndarray, start: int, end: int, level: float, sign: in
         return None
     return int(idxs[0]) + lo
 
-def _expand_state_to_original(state_rs: StructureState, nb: int, n_secs: int, n_orig: int, high_orig: np.ndarray, low_orig: np.ndarray, close_orig: np.ndarray, atr_length: int) -> StructureState:
-    _rs_max = (n_orig - 1) // n_secs + 1
-    _remap_arr = np.minimum(np.arange(_rs_max) * n_secs, n_orig - 1).astype(np.int32)
+def _expand_state_to_original(state_rs: StructureState, last_row: np.ndarray, n_orig: int) -> StructureState:
+    # last_row[k] = last 1s row inside 1m bucket k: the first row at which bucket k's bar is closed.
+    nb = last_row.shape[0]
 
     def _remap_bar(bar: int) -> int:
-        if 0 <= bar < _rs_max:
-            return int(_remap_arr[bar])
-        return n_orig - 1
+        return int(last_row[bar]) if 0 <= bar < nb else -1
     new_breaks = [BreakEvent(bar=_remap_bar(be.bar), kind=be.kind, broken_swing_bar=_remap_bar(be.broken_swing_bar), broken_swing_price=be.broken_swing_price) for be in state_rs.breaks]
     new_swings = [SwingPoint(bar=_remap_bar(sw.bar), price=sw.price, is_high=sw.is_high) for sw in state_rs.swings]
     new_order_blocks = [OrderBlock(bar_start=_remap_bar(ob.bar_start), bar_end=_remap_bar(ob.bar_end), is_bull=ob.is_bull, ob_value=ob.ob_value, ob_top=ob.ob_top, ob_bottom=ob.ob_bottom, caused_break_bar=_remap_bar(ob.caused_break_bar), caused_break_kind=ob.caused_break_kind, mitigated_bar=_remap_bar(ob.mitigated_bar) if ob.mitigated_bar >= 0 else -1, live=ob.live) for ob in state_rs.order_blocks]
     new_sweeps = [LiquiditySweep(bar=_remap_bar(sw.bar), pivot_bar=_remap_bar(sw.pivot_bar), pivot_price=sw.pivot_price, is_bear_sweep=sw.is_bear_sweep) for sw in state_rs.sweeps]
-    trend = np.zeros(n_orig, dtype=np.int8)
+    # k[r] = latest bucket closed at or before row r (-1 before the first close)
+    k = np.searchsorted(last_row, np.arange(n_orig), side='right') - 1
+    known = k >= 0
+    ks = np.maximum(k, 0)
+    remap = np.append(last_row, -1).astype(np.int32)  # index -1 -> -1
+
+    def _bars(a: np.ndarray) -> np.ndarray:
+        out = np.where(a[ks] >= 0, remap[a[ks]], -1).astype(np.int32)
+        out[~known] = -1
+        return out
+
+    def _vals(a: np.ndarray, fill: int = 0) -> np.ndarray:
+        out = a[ks].copy()
+        out[~known] = fill
+        return out
+    trend = _vals(state_rs.trend).astype(np.int8)
     events = np.zeros(n_orig, dtype=np.int8)
-    last_break_bar = np.full(n_orig, -1, dtype=np.int32)
-    last_break_kind = np.zeros(n_orig, dtype=np.int8)
-    last_break_age = np.full(n_orig, -1, dtype=np.int32)
-    last_choch_bar = np.full(n_orig, -1, dtype=np.int32)
-    last_choch_kind = np.zeros(n_orig, dtype=np.int8)
-    last_choch_age = np.full(n_orig, -1, dtype=np.int32)
-    last_chochp_bar = np.full(n_orig, -1, dtype=np.int32)
-    last_chochp_age = np.full(n_orig, -1, dtype=np.int32)
-    for j in range(nb):
-        start = j * n_secs
-        end = min((j + 1) * n_secs, n_orig)
-        if end <= start:
-            continue
-        trend[start:end] = state_rs.trend[j]
-        events[start:end] = state_rs.events[j]
-        if state_rs.last_break_bar[j] >= 0:
-            last_break_bar[start:end] = _remap_bar(int(state_rs.last_break_bar[j]))
-            last_break_kind[start:end] = state_rs.last_break_kind[j]
-        if state_rs.last_choch_bar[j] >= 0:
-            last_choch_bar[start:end] = _remap_bar(int(state_rs.last_choch_bar[j]))
-            last_choch_kind[start:end] = state_rs.last_choch_kind[j]
-        if state_rs.last_choch_plus_bar[j] >= 0:
-            last_chochp_bar[start:end] = _remap_bar(int(state_rs.last_choch_plus_bar[j]))
-    tail_start = nb * n_secs
-    if n_orig > tail_start:
-        trend[tail_start:] = state_rs.trend[nb - 1]
-        events[tail_start:] = state_rs.events[nb - 1]
-        if state_rs.last_break_bar[nb - 1] >= 0:
-            last_break_bar[tail_start:] = _remap_bar(int(state_rs.last_break_bar[nb - 1]))
-            last_break_kind[tail_start:] = state_rs.last_break_kind[nb - 1]
-        if state_rs.last_choch_bar[nb - 1] >= 0:
-            last_choch_bar[tail_start:] = _remap_bar(int(state_rs.last_choch_bar[nb - 1]))
-            last_choch_kind[tail_start:] = state_rs.last_choch_kind[nb - 1]
-        if state_rs.last_choch_plus_bar[nb - 1] >= 0:
-            last_chochp_bar[tail_start:] = _remap_bar(int(state_rs.last_choch_plus_bar[nb - 1]))
-    for i in range(n_orig):
-        if last_break_bar[i] >= 0:
-            last_break_age[i] = i - last_break_bar[i]
-        if last_choch_bar[i] >= 0:
-            last_choch_age[i] = i - last_choch_bar[i]
-        if last_chochp_bar[i] >= 0:
-            last_chochp_age[i] = i - last_chochp_bar[i]
+    events[last_row] = state_rs.events  # one row per event, not repeated across the minute
+    last_break_bar = _bars(state_rs.last_break_bar)
+    last_break_kind = _vals(state_rs.last_break_kind).astype(np.int8)
+    last_choch_bar = _bars(state_rs.last_choch_bar)
+    last_choch_kind = _vals(state_rs.last_choch_kind).astype(np.int8)
+    last_chochp_bar = _bars(state_rs.last_choch_plus_bar)
+    rows = np.arange(n_orig, dtype=np.int32)
+    last_break_age = np.where(last_break_bar >= 0, rows - last_break_bar, -1).astype(np.int32)
+    last_choch_age = np.where(last_choch_bar >= 0, rows - last_choch_bar, -1).astype(np.int32)
+    last_chochp_age = np.where(last_chochp_bar >= 0, rows - last_chochp_bar, -1).astype(np.int32)
     return StructureState(trend=trend, events=events, last_break_bar=last_break_bar, last_break_kind=last_break_kind, last_break_age_bars=last_break_age, last_choch_bar=last_choch_bar, last_choch_kind=last_choch_kind, last_choch_age_bars=last_choch_age, last_choch_plus_bar=last_chochp_bar, last_choch_plus_age_bars=last_chochp_age, swings=new_swings, breaks=new_breaks, order_blocks=new_order_blocks, sweeps=new_sweeps)
 
 def atr_v_safe(atr_arr: np.ndarray, i: int) -> bool:

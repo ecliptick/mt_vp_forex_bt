@@ -194,12 +194,12 @@ def _bucket_by_session(times_ns: np.ndarray, session_secs: int) -> List[Tuple[in
     t_end = int(times_ns[-1])
     if session_secs == 86400:
         sec_per_day = 86400
-        day0 = t0 // 1000000000 - t0 // 1000000000 % sec_per_day
+        day0 = (t0 // 1000000000 - t0 // 1000000000 % sec_per_day) * 1000000000
     elif session_secs == 604800:
         sec_per_week = 604800
-        day0 = t0 // 1000000000 - t0 // 1000000000 % sec_per_week
+        day0 = (t0 // 1000000000 - t0 // 1000000000 % sec_per_week) * 1000000000
     else:
-        day0 = t0 // 1000000000 - t0 // 1000000000 % session_secs
+        day0 = (t0 // 1000000000 - t0 // 1000000000 % session_secs) * 1000000000
     boundaries: List[int] = []
     b = day0
     while b <= t_end + session_secs * 1000000000:
@@ -264,7 +264,7 @@ def build_volume_profiles(bars_1s: pd.DataFrame, *, file_stem: str, vp_session_s
     if verbose:
         print(f"  VP total build: {timings['total_ms']:.0f}ms; naked_pocs={len(naked_pocs)}")
     return VolumeProfileSet(file_stem=file_stem, daily_vp=daily_vp, weekly_vp=weekly_vp, naked_pocs=naked_pocs, build_ms=timings)
-_VP_CACHE_VERSION = 3
+_VP_CACHE_VERSION = 4
 _VP_CACHE_KEYS = ('vp_session_secs', 'vp_rolling_secs', 'vp_rows', 'vp_va_pct', 'vp_hvn_peak_pct', 'vp_hvn_min_prominence_pct', 'vp_hvn_zone_pct', 'vp_lvn_threshold_pct', 'vp_min_zone_usd')
 
 def _vp_fingerprint(raw_path: Path, params: dict) -> dict:
@@ -341,30 +341,23 @@ def get_or_build_vp(raw_path: Path, bars_1s: pd.DataFrame, *, vp_session_secs: i
         json.dump(meta, fh, indent=2, sort_keys=True)
     return vps
 
-def current_daily_vp(vp_set: VolumeProfileSet, t_ns: int) -> Optional[SessionVP]:
-    for svp in vp_set.daily_vp:
-        if svp.session_start_ns <= t_ns < svp.session_end_ns:
+def _last_complete(sessions: List[SessionVP], t_ns: int) -> Optional[SessionVP]:
+    # No look-ahead: only a session that has fully closed by t_ns is known at t_ns.
+    for svp in reversed(sessions):
+        if svp.session_end_ns <= t_ns:
             return svp
-    if vp_set.daily_vp:
-        for svp in reversed(vp_set.daily_vp):
-            if t_ns >= svp.session_start_ns:
-                return svp
     return None
 
+def current_daily_vp(vp_set: VolumeProfileSet, t_ns: int) -> Optional[SessionVP]:
+    return _last_complete(vp_set.daily_vp, t_ns)
+
 def current_weekly_vp(vp_set: VolumeProfileSet, t_ns: int) -> Optional[SessionVP]:
-    for svp in vp_set.weekly_vp:
-        if svp.session_start_ns <= t_ns < svp.session_end_ns:
-            return svp
-    if vp_set.weekly_vp:
-        for svp in reversed(vp_set.weekly_vp):
-            if t_ns >= svp.session_start_ns:
-                return svp
-    return None
+    return _last_complete(vp_set.weekly_vp, t_ns)
 
 def naked_poc_targets(vp_set: VolumeProfileSet, t_ns: int, price: float, direction: int) -> List[Tuple[float, int]]:
     out: List[Tuple[float, int]] = []
     for poc, expire_ns in vp_set.naked_pocs:
-        if expire_ns <= t_ns:
+        if expire_ns > t_ns:  # POC not known until its session closes
             continue
         if direction > 0 and poc > price:
             out.append((poc, expire_ns))
